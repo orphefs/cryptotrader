@@ -154,7 +154,7 @@ while onoff == 1:
             print('sold at {}'.format(cv))
             prof.append(sell[len(sell)-1]-buy[len(buy)-1]-money*cv)
             print()
-            print('bought at {}, sold at {}'.format(buy(len(buy-1))))
+            print('bought at {}, sold at {}'.format(buy(len(buy)-1)))
             print('trade profit is {}, total profit is {}\n'.format(prof[len(prof)]), sum(prof))
             
     if strend == "Downtrend" and shead == "Heading Down":
@@ -168,7 +168,7 @@ while onoff == 1:
             sell.append(cv)
             prof.append(sell[len(sell)-1]-buy[len(buy)-1]-money*cv)
             bought=0
-            print('bought at {}, sold at {}'.format(buy(len(buy-1))))
+            print('bought at {}, sold at {}'.format(buy(len(buy)-1)))
             print('trade profit is {}, total profit is {}\n'.format(prof[len(prof)]), sum(prof))
                 
     if strend == "Downtrend" and shead == "Heading Up":
