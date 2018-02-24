@@ -6,12 +6,36 @@ from backtesting.type_aliases import MilliSeconds
 class Trade(object):
     def __init__(self, id: int, price: float, qty: float, time: MilliSeconds, is_buyer_maker: bool,
                  is_best_match: bool):
-        self.id = id
-        self.price = price
-        self.qty = qty
-        self.time = time
-        self.is_buyer_maker = is_buyer_maker
-        self.is_best_match = is_best_match
+        self._id = id
+        self._price = price
+        self._qty = qty
+        self._time = time
+        self._is_buyer_maker = is_buyer_maker
+        self._is_best_match = is_best_match
+
+    @property
+    def id(self):
+        return self._id
+
+    @property
+    def price(self):
+        return self._price
+
+    @property
+    def qty(self):
+        return self._qty
+
+    @property
+    def time(self):
+        return self._time
+
+    @property
+    def is_buyer_maker(self):
+        return self._is_buyer_maker
+
+    @property
+    def is_best_match(self):
+        return self._is_best_match
 
     @staticmethod
     def from_trade(trade: Dict):
@@ -26,5 +50,3 @@ class Trade(object):
     @staticmethod
     def from_list_of_trades(trades: List[Dict]):
         return [Trade.from_trade(trade) for trade in trades]
-
-

@@ -10,6 +10,22 @@ class Price(object):
         self._low_price = low_price
         self._close_price = close_price
 
+    @property
+    def open_price(self):
+        return self._open_price
+
+    @property
+    def high_price(self):
+        return self._high_price
+
+    @property
+    def low_price(self):
+        return self._low_price
+
+    @property
+    def close_price(self):
+        return self._close_price
+
     def __repr__(self):
         return "Price(open_price={}, high_price={}, low_price={}, close_price={} )".format(self._open_price,
                                                                                            self._high_price,
@@ -37,12 +53,41 @@ class Volume(object):
                                                 self._number_of_trades,
                                                 )
 
+    @property
+    def volume(self):
+        return self._volume
+
+    @property
+    def taker_buy_base_asset_volume(self):
+        return self._taker_buy_base_asset_volume
+
+    @property
+    def taker_buy_quote_asset_volume(self):
+        return self._taker_buy_quote_asset_volume
+
+    @property
+    def quote_asset_volume(self):
+        return self._quote_asset_volume
+
+    @property
+    def number_of_trades(self):
+        return self._number_of_trades
+
 
 class Candle(object):
     def __init__(self, price: Price, volume: Volume, time: Time):
         self._price = price
         self._volume = volume
         self._time = time
+
+    def get_price(self):
+        return self._price
+
+    def get_volume(self):
+        return self._volume
+
+    def get_time(self):
+        self._time
 
     def __repr__(self):
         return "Candle({},\n{},\n{})".format(self._price, self._volume, self._time)

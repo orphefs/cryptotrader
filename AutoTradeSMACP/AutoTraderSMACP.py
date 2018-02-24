@@ -4,6 +4,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import time
 
+from backtesting.containers.candle import Candle
+from backtesting.containers.trade import Trade
+from backtesting.helpers import simple_moving_average
+
 """
 Auto Trade SMA/EMA v0.1
 By Jordan Schlak
@@ -31,65 +35,60 @@ Might throw off indices for graphs and other calculations though
 Add x and y labels to graph
 """
 
-
 """
 Suggested variables to change
 """
 """
-p period    -number of candles you would like to average over
+p period    -number of closing_prices you would like to average over
 d delay     -how long in second you would like the code to sleep between iterations
-mini/maxi   -minimum and maximum candles you would like to plot, from 0-499
+mini/maxi   -minimum and maximum closing_prices you would like to plot, from 0-499
 NEOUSDT      I am trading NEO, feel free to add your own curency
 a           -amount you would like to trade
 """
-
 
 """
 #User Input
 """
 
-pl=60
-ps=10
-d=10
-SMA=[0]*(pl-1)
-EMA=[0]*(pl-1)
-buy=[]
-sell=[]
-prof=[]
-bought=0
-money=0
 
+closing_price_averaging_period = 60
+ps = 10
+d = 10
+SMA = [0] * (closing_price_averaging_period - 1)
+EMA = [0] * (closing_price_averaging_period - 1)
+buy = []
+sell = []
+prof = []
+bought = 0
+money = 0
 
-#Modifiable On/Off text file reading
-txt = open('onoff.txt','r')
+# Modifiable On/Off text file reading
+txt = open('onoff.txt', 'r')
 onoff = int(txt.read(1))
 
-#Binance login
+
+
+# Binance login
 while onoff == 1:
     api_key = "<enter api key>"
     api_secret = "<enter secret key>"
     client = Client(api_key, api_secret)
 
-    #obtain candles
-    candles = client.get_klines(symbol='NEOUSDT', interval=Client.KLINE_INTERVAL_30MINUTE)
-    trades = client.get_recent_trades(symbol='NEOUSDT',limit = 1)
+    # obtain candles
+    candles = Candle.from_list_of_klines(client.get_klines(
+        symbol='NEOUSDT', interval=Client.KLINE_INTERVAL_30MINUTE))
 
-    #extract of closing candle values and current value
-    candles = list(map(float,np.array(candles)[:,4]))
-    cv = float(trades[0]['price'])
+    trade = Trade.from_trade(client.get_recent_trades(
+        symbol='NEOUSDT', limit=1))
 
-    #function computes SMA and EMA based on period fed to it
-    def fSMA(p,candles):
-        for i in range(p-1,len(candles)):
-            M = 2/(p+1)
-            SMA.append((sum(candles[i-p+1:i+1]))/p)
-            EMA.append((candles[i]-(EMA[i-1]))*M+EMA[i-1])
+    # extract of closing candle values and current value
+    closing_prices = [candle.get_price().close_price for candle in candles]
+    current_value = trade.price
 
-    #Running function in order to extract long term SMA and short term EMA 
-    fSMA(pl,candles)
-    SMA60=SMA
-    fSMA(10,candles)
-    EMA10=EMA
+    # Running function in order to extract long term SMA and short term EMA
+    SMA60, _ = simple_moving_average(closing_price_averaging_period, closing_prices)
+    _, EMA10 = simple_moving_average(10, closing_prices)
+
 
     """
     Plotting
@@ -99,12 +98,13 @@ while onoff == 1:
     yellow = EMA(10)
     """
     plt.close()
-    t = list(range(0,500))
+    t = list(range(0, 500))
     mini = 450
     maxi = 500
-    plt.plot(t[mini:maxi],candles[mini:maxi], 'bo', t[mini:maxi], candles[mini:maxi], 'g-', t[mini:maxi],EMA10[mini:maxi], 'y-', t[mini:maxi], SMA60[mini:maxi], 'r-')
+    plt.plot(t[mini:maxi], closing_prices[mini:maxi], 'bo', t[mini:maxi], closing_prices[mini:maxi], 'g-', t[mini:maxi],
+             EMA10[mini:maxi], 'y-', t[mini:maxi], SMA60[mini:maxi], 'r-')
     plt.show(block=False)
-    
+
     """
     Trading Logic
     """
@@ -115,73 +115,71 @@ while onoff == 1:
     Run this code in real time in order to save profit values and eventually
     enable the buy and sell orders
     """
-    trend = SMA60[499]-SMA60[498]
-    head = cv-EMA10[499]
+    trend = SMA60[499] - SMA60[498]
+    head = current_value - EMA10[499]
 
-    money = cv
+    money = current_value
 
-    #Trends
+    # Trends
     if trend > 0:
         strend = "Uptrend"
     else:
         strend = "Downtrend"
-        
-    #Headings
+
+    # Headings
     if head > 0:
         shead = 'Heading Up'
     else:
         shead = 'Heading Down'
-        
-    #Decision Making
-    if strend == "Uptrend" and shead == "Heading Up" and bought==0:
+
+    # Decision Making
+    if strend == "Uptrend" and shead == "Heading Up" and bought == 0:
         if bought == 1:
-            print('Current price is {}'.format(cv))
+            print('Current price is {}'.format(current_value))
             print('Uptrend at {}, Heading Up at {}\n'.format(trend, head))
         elif bought == 0:
             print('Uptrend at {}, Heading Up at {}'.format(trend, head))
-            buy.append(cv)
-            bought=1
-            print('bought at {}]n'.format(cv))
+            buy.append(current_value)
+            bought = 1
+            print('bought at {}]n'.format(current_value))
 
-    if strend == "Uptrend" and shead == "Heading Down" and bought ==1:
+    if strend == "Uptrend" and shead == "Heading Down" and bought == 1:
         if bought == 0:
-            print('Current price is {}'.format(cv))
+            print('Current price is {}'.format(current_value))
             print('Uptrend at {}, Heading Down at {}\n'.format(trend, head))
         elif bought == 1:
-            sell.append(cv)
-            bought=0
+            sell.append(current_value)
+            bought = 0
             print('Uptrend at {}, Heading Down at {}\n'.format(trend, head))
-            print('sold at {}'.format(cv))
-            prof.append(sell[len(sell)-1]-buy[len(buy)-1]-money*cv)
+            print('sold at {}'.format(current_value))
+            prof.append(sell[len(sell) - 1] - buy[len(buy) - 1] - money * current_value)
             print()
-            print('bought at {}, sold at {}'.format(buy(len(buy)-1)))
+            print('bought at {}, sold at {}'.format(buy(len(buy) - 1)))
             print('trade profit is {}, total profit is {}\n'.format(prof[len(prof)]), sum(prof))
-            
+
     if strend == "Downtrend" and shead == "Heading Down":
         if bought == 0:
-            print('Current price is {}'.format(cv))
+            print('Current price is {}'.format(current_value))
             print('Downtrend at {}, Heading Down at {}\n'.format(trend, head))
 
-        elif bought ==1:
+        elif bought == 1:
             print('Downtrend {}, Heading Down {}\n'.format(trend, head))
-            print('new sell at {}'.format(cv))
-            sell.append(cv)
-            prof.append(sell[len(sell)-1]-buy[len(buy)-1]-money*cv)
-            bought=0
-            print('bought at {}, sold at {}'.format(buy(len(buy)-1)))
+            print('new sell at {}'.format(current_value))
+            sell.append(current_value)
+            prof.append(sell[len(sell) - 1] - buy[len(buy) - 1] - money * current_value)
+            bought = 0
+            print('bought at {}, sold at {}'.format(buy(len(buy) - 1)))
             print('trade profit is {}, total profit is {}\n'.format(prof[len(prof)]), sum(prof))
-                
+
     if strend == "Downtrend" and shead == "Heading Up":
         if bought == 1:
-            print('Current price is {}'.format(cv))
+            print('Current price is {}'.format(current_value))
             print('Downtrend at {}, Heading Up at {}\n'.format(trend, head))
 
         elif bought == 0:
-            buy.append(cv)
+            buy.append(current_value)
             print('Downtrend at {}, Heading Up {}\n'.format(trend, head))
-            print('new buy at {}'.format(cv))
-            bought=1
-            
+            print('new buy at {}'.format(current_value))
+            bought = 1
+
     time.sleep(d)
-
-
