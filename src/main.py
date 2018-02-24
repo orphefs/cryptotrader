@@ -4,7 +4,8 @@ import time
 from typing import List
 
 import matplotlib
-matplotlib.use('AGG')   # generate postscript output by default
+
+matplotlib.use('AGG')  # generate postscript output by default
 import matplotlib.pyplot as plt
 
 from binance.client import Client
@@ -18,8 +19,7 @@ from trading_logic import get_heading, get_trend
 logging.basicConfig(filename=os.path.join(definitions.DATA_DIR, '_autotrader.log'), level=logging.DEBUG)
 
 
-
-def _plot(closing_prices: List[float], SMA60: List[float], EMA10: List[float]):
+def _plot(ax: plt.Axes, closing_prices: List[float], SMA60: List[float], EMA10: List[float]):
     """
     Plotting
     """
@@ -31,20 +31,19 @@ def _plot(closing_prices: List[float], SMA60: List[float], EMA10: List[float]):
     t = list(range(0, 500))
     mini = 450
     maxi = 500
-    plt.plot(t[mini:maxi], closing_prices[mini:maxi], 'bo', t[mini:maxi], closing_prices[mini:maxi], 'g-', t[mini:maxi],
-             EMA10[mini:maxi], 'y-', t[mini:maxi], SMA60[mini:maxi], 'r-')
+    ax.clear()
+    ax.plot(t[mini:maxi], closing_prices[mini:maxi], 'bo',
+             t[mini:maxi], closing_prices[mini:maxi], 'g-',
+             t[mini:maxi], EMA10[mini:maxi], 'y-',
+             t[mini:maxi], SMA60[mini:maxi], 'r-')
     with open(os.path.join(definitions.DATA_DIR, '_candles.png'), 'bw') as out_image:
         plt.savefig(out_image)
 
 
 def main():
-    api_key = "<enter api key>"
-    api_secret = "<enter secret key>"
+    api_key = ""
+    api_secret = ""
     client = Client(api_key, api_secret)
-
-    """
-    #User Input
-    """
 
     closing_price_averaging_period = 60
     ps = 10
@@ -59,6 +58,12 @@ def main():
     txt = open(definitions.CONFIG_PATH, 'r')
     is_enabled = bool(int(txt.read(1)))
 
+    SMA = [0] * (closing_price_averaging_period - 1)
+    EMA = [0] * (closing_price_averaging_period - 1)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+
     while is_enabled:
 
         # obtain candles
@@ -68,15 +73,15 @@ def main():
         trade = Trade.from_trade(client.get_recent_trades(
             symbol='NEOUSDT', limit=1)[0])
 
-        # extract of closing candle values and current value
+        # extract closing candle values and current value
         closing_prices = [candle.get_price().close_price for candle in candles]
         current_value = trade.price
 
         # Running function in order to extract long term SMA and short term EMA
-        SMA60, _ = simple_moving_average(closing_price_averaging_period, closing_prices, closing_price_averaging_period)
-        _, EMA10 = simple_moving_average(10, closing_prices, closing_price_averaging_period)
+        SMA60, _ = simple_moving_average(SMA, EMA, closing_price_averaging_period, closing_prices, closing_price_averaging_period)
+        _, EMA10 = simple_moving_average(EMA, EMA, 10, closing_prices, closing_price_averaging_period)
 
-        _plot(closing_prices, EMA10, SMA60)
+        _plot(ax, closing_prices, EMA10, SMA60)
 
         """
         Trading Logic
@@ -145,5 +150,6 @@ def main():
 
         time.sleep(d)
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     main()
