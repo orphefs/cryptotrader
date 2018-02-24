@@ -33,9 +33,9 @@ def _plot(ax: plt.Axes, closing_prices: List[float], SMA60: List[float], EMA10: 
     maxi = 500
     ax.clear()
     ax.plot(t[mini:maxi], closing_prices[mini:maxi], 'bo',
-             t[mini:maxi], closing_prices[mini:maxi], 'g-',
-             t[mini:maxi], EMA10[mini:maxi], 'y-',
-             t[mini:maxi], SMA60[mini:maxi], 'r-')
+            t[mini:maxi], closing_prices[mini:maxi], 'g-',
+            t[mini:maxi], EMA10[mini:maxi], 'y-',
+            t[mini:maxi], SMA60[mini:maxi], 'r-')
     with open(os.path.join(definitions.DATA_DIR, '_candles.png'), 'bw') as out_image:
         plt.savefig(out_image)
 
@@ -78,7 +78,8 @@ def main():
         current_value = trade.price
 
         # Running function in order to extract long term SMA and short term EMA
-        SMA60, _ = simple_moving_average(SMA, EMA, closing_price_averaging_period, closing_prices, closing_price_averaging_period)
+        SMA60, _ = simple_moving_average(SMA, EMA, closing_price_averaging_period, closing_prices,
+                                         closing_price_averaging_period)
         _, EMA10 = simple_moving_average(EMA, EMA, 10, closing_prices, closing_price_averaging_period)
 
         _plot(ax, closing_prices, EMA10, SMA60)
