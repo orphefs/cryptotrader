@@ -2,10 +2,18 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="434c35ab-4872-4e43-bb84-f2a6875aec9d" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/backtesting/helpers.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/AutoTradeSMACP/AutoTraderSMACP.py" afterPath="$PROJECT_DIR$/AutoTradeSMACP/AutoTraderSMACP.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/backtesting/containers/candle.py" afterPath="$PROJECT_DIR$/backtesting/containers/candle.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/backtesting/containers/trade.py" afterPath="$PROJECT_DIR$/backtesting/containers/trade.py" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/backtesting/__init__.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/backtesting/containers/candle.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/backtesting/containers/time.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/backtesting/containers/trade.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/backtesting/helpers.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/backtesting/main.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/backtesting/type_aliases.py" afterPath="" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/AutoTradeSMACP/AutoTraderSMACP.py" afterPath="$PROJECT_DIR$/AutoTradeSMACP/src/AutoTraderSMACP.py" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/AutoTradeSMACP/onoff.txt" afterPath="$PROJECT_DIR$/AutoTradeSMACP/src/config/onoff.txt" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/backtesting/containers/__init__.py" afterPath="$PROJECT_DIR$/AutoTradeSMACP/__init__.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/autotrader.iml" afterPath="$PROJECT_DIR$/.idea/autotrader.iml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -17,7 +25,7 @@
   <component name="CoverageDataManager">
     <SUITE FILE_PATH="coverage/autotrader$containers.coverage" NAME="containers Coverage Results" MODIFIED="1519489235787" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/backtesting" />
     <SUITE FILE_PATH="coverage/autotrader$main.coverage" NAME="main Coverage Results" MODIFIED="1519486912566" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/backtesting" />
-    <SUITE FILE_PATH="coverage/autotrader$AutoTraderSMACP.coverage" NAME="AutoTraderSMACP Coverage Results" MODIFIED="1519483405825" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/AutoTradeSMACP" />
+    <SUITE FILE_PATH="coverage/autotrader$AutoTraderSMACP.coverage" NAME="AutoTraderSMACP Coverage Results" MODIFIED="1519490563050" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/AutoTradeSMACP" />
   </component>
   <component name="DatabaseView">
     <option name="SHOW_INTERMEDIATE" value="true" />
@@ -35,29 +43,29 @@
   <component name="FileEditorManager">
     <leaf>
       <file leaf-file-name="AutoTraderSMACP.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/AutoTradeSMACP/AutoTraderSMACP.py">
+        <entry file="file://$PROJECT_DIR$/AutoTradeSMACP/src/AutoTraderSMACP.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="34">
-              <caret line="86" column="0" lean-forward="true" selection-start-line="86" selection-start-column="0" selection-end-line="86" selection-end-column="0" />
+            <state relative-caret-position="171">
+              <caret line="87" column="54" lean-forward="true" selection-start-line="87" selection-start-column="54" selection-end-line="87" selection-end-column="54" />
               <folding>
-                <element signature="e#0#33#0" expanded="true" />
+                <element signature="e#0#11#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file leaf-file-name="helpers.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/backtesting/helpers.py">
+        <entry file="file://$PROJECT_DIR$/AutoTradeSMACP/src/helpers.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="153">
-              <caret line="9" column="19" lean-forward="true" selection-start-line="9" selection-start-column="19" selection-end-line="9" selection-end-column="19" />
+              <caret line="9" column="19" lean-forward="false" selection-start-line="9" selection-start-column="19" selection-end-line="9" selection-end-column="19" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
       <file leaf-file-name="main.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/backtesting/main.py">
+        <entry file="file://$PROJECT_DIR$/AutoTradeSMACP/src/main.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="187">
               <caret line="11" column="0" lean-forward="false" selection-start-line="11" selection-start-column="0" selection-end-line="13" selection-end-column="17" />
@@ -69,22 +77,22 @@
         </entry>
       </file>
       <file leaf-file-name="candle.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/backtesting/containers/candle.py">
+        <entry file="file://$PROJECT_DIR$/AutoTradeSMACP/src/containers/candle.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="284">
-              <caret line="87" column="0" lean-forward="true" selection-start-line="87" selection-start-column="0" selection-end-line="87" selection-end-column="0" />
+            <state relative-caret-position="408">
+              <caret line="96" column="22" lean-forward="false" selection-start-line="96" selection-start-column="22" selection-end-line="96" selection-end-column="22" />
               <folding>
-                <element signature="e#0#23#0" expanded="true" />
+                <element signature="e#0#28#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file leaf-file-name="trade.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/backtesting/containers/trade.py">
+        <entry file="file://$PROJECT_DIR$/AutoTradeSMACP/src/containers/trade.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="155">
-              <caret line="14" column="0" lean-forward="true" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
+            <state relative-caret-position="52">
+              <caret line="42" column="20" lean-forward="false" selection-start-line="42" selection-start-column="15" selection-end-line="42" selection-end-column="20" />
               <folding>
                 <element signature="e#0#29#0" expanded="true" />
               </folding>
@@ -93,7 +101,7 @@
         </entry>
       </file>
       <file leaf-file-name="time.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/backtesting/containers/time.py">
+        <entry file="file://$PROJECT_DIR$/AutoTradeSMACP/src/containers/time.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="0">
               <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
@@ -103,10 +111,10 @@
         </entry>
       </file>
       <file leaf-file-name="type_aliases.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/backtesting/type_aliases.py">
+        <entry file="file://$PROJECT_DIR$/AutoTradeSMACP/src/type_aliases.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="34">
-              <caret line="2" column="0" lean-forward="false" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
+            <state relative-caret-position="0">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -167,6 +175,10 @@
         <option value="$PROJECT_DIR$/backtesting/containers/trade.py" />
         <option value="$PROJECT_DIR$/backtesting/helpers.py" />
         <option value="$PROJECT_DIR$/AutoTradeSMACP/AutoTraderSMACP.py" />
+        <option value="$PROJECT_DIR$/AutoTradeSMACP/src/containers/candle.py" />
+        <option value="$PROJECT_DIR$/AutoTradeSMACP/src/type_aliases.py" />
+        <option value="$PROJECT_DIR$/AutoTradeSMACP/src/containers/trade.py" />
+        <option value="$PROJECT_DIR$/AutoTradeSMACP/src/AutoTraderSMACP.py" />
       </list>
     </option>
   </component>
@@ -220,25 +232,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="backtesting" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="autotrader" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="autotrader" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="backtesting" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="containers" />
+              <option name="myItemId" value="AutoTradeSMACP" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -255,6 +249,32 @@
               <option name="myItemId" value="AutoTradeSMACP" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="autotrader" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="autotrader" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="AutoTradeSMACP" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="config" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
           </PATH>
         </subPane>
       </pane>
@@ -267,6 +287,9 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/AutoTradeSMACP/src/config" />
+      <recent name="$PROJECT_DIR$/AutoTradeSMACP/src" />
+      <recent name="$PROJECT_DIR$/AutoTradeSMACP" />
       <recent name="$PROJECT_DIR$/backtesting/containers" />
     </key>
   </component>
@@ -282,7 +305,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.containers">
+  <component name="RunManager" selected="Python.AutoTraderSMACP">
     <configuration default="false" name="AutoTraderSMACP" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -296,7 +319,7 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="autotrader" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/AutoTradeSMACP/AutoTraderSMACP.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/AutoTradeSMACP/src/AutoTraderSMACP.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -490,9 +513,9 @@
     </list>
     <recent_temporary>
       <list size="3">
-        <item index="0" class="java.lang.String" itemvalue="Python.containers" />
-        <item index="1" class="java.lang.String" itemvalue="Python.main" />
-        <item index="2" class="java.lang.String" itemvalue="Python.AutoTraderSMACP" />
+        <item index="0" class="java.lang.String" itemvalue="Python.AutoTraderSMACP" />
+        <item index="1" class="java.lang.String" itemvalue="Python.containers" />
+        <item index="2" class="java.lang.String" itemvalue="Python.main" />
       </list>
     </recent_temporary>
   </component>
@@ -524,7 +547,7 @@
     <layout>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32561728" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32561728" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
@@ -532,7 +555,7 @@
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3287037" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.5231481" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.52160496" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
       <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
@@ -553,30 +576,21 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/AutoTradeSMACP/AutoTraderSMACP.py</url>
-          <line>80</line>
+          <url>file://$PROJECT_DIR$/AutoTradeSMACP/src/containers/trade.py</url>
+          <line>41</line>
+          <option name="timeStamp" value="2" />
         </line-breakpoint>
       </breakpoints>
-      <option name="time" value="1" />
+      <option name="time" value="3" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/backtesting/containers/candle.py">
+    <entry file="file://$PROJECT_DIR$/AutoTradeSMACP/src/containers/candle.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/backtesting/main.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="187">
-          <caret line="11" column="0" lean-forward="false" selection-start-line="11" selection-start-column="0" selection-end-line="13" selection-end-column="17" />
-          <folding>
-            <element signature="e#0#11#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -588,39 +602,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/backtesting/type_aliases.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="2" column="0" lean-forward="false" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/backtesting/containers/time.py">
+    <entry file="file://$PROJECT_DIR$/AutoTradeSMACP/src/containers/time.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/backtesting/containers/trade.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="155">
-          <caret line="14" column="0" lean-forward="true" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#29#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/backtesting/containers/candle.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="284">
-          <caret line="87" column="0" lean-forward="true" selection-start-line="87" selection-start-column="0" selection-end-line="87" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#23#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -640,20 +626,58 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/backtesting/helpers.py">
+    <entry file="file://$PROJECT_DIR$/AutoTradeSMACP/src/type_aliases.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="153">
-          <caret line="9" column="19" lean-forward="true" selection-start-line="9" selection-start-column="19" selection-end-line="9" selection-end-column="19" />
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/AutoTradeSMACP/AutoTraderSMACP.py">
+    <entry file="file://$PROJECT_DIR$/AutoTradeSMACP/src/containers/trade.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="86" column="0" lean-forward="true" selection-start-line="86" selection-start-column="0" selection-end-line="86" selection-end-column="0" />
+        <state relative-caret-position="52">
+          <caret line="42" column="20" lean-forward="false" selection-start-line="42" selection-start-column="15" selection-end-line="42" selection-end-column="20" />
           <folding>
-            <element signature="e#0#33#0" expanded="true" />
+            <element signature="e#0#29#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AutoTradeSMACP/src/containers/candle.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="408">
+          <caret line="96" column="22" lean-forward="false" selection-start-line="96" selection-start-column="22" selection-end-line="96" selection-end-column="22" />
+          <folding>
+            <element signature="e#0#28#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AutoTradeSMACP/src/main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="187">
+          <caret line="11" column="0" lean-forward="false" selection-start-line="11" selection-start-column="0" selection-end-line="13" selection-end-column="17" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AutoTradeSMACP/src/helpers.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="153">
+          <caret line="9" column="19" lean-forward="false" selection-start-line="9" selection-start-column="19" selection-end-line="9" selection-end-column="19" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AutoTradeSMACP/src/AutoTraderSMACP.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="171">
+          <caret line="87" column="54" lean-forward="true" selection-start-line="87" selection-start-column="54" selection-end-line="87" selection-end-column="54" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
           </folding>
         </state>
       </provider>

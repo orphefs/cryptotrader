@@ -1,12 +1,11 @@
-from binance.client import Client
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
 import time
 
-from backtesting.containers.candle import Candle
-from backtesting.containers.trade import Trade
-from backtesting.helpers import simple_moving_average
+import matplotlib.pyplot as plt
+from containers.candle import Candle
+from helpers import simple_moving_average
+from binance.client import Client
+
+from containers.trade import Trade
 
 """
 Auto Trade SMA/EMA v0.1
@@ -63,7 +62,7 @@ bought = 0
 money = 0
 
 # Modifiable On/Off text file reading
-txt = open('onoff.txt', 'r')
+txt = open('src/config/onoff.txt', 'r')
 onoff = int(txt.read(1))
 
 
@@ -79,7 +78,7 @@ while onoff == 1:
         symbol='NEOUSDT', interval=Client.KLINE_INTERVAL_30MINUTE))
 
     trade = Trade.from_trade(client.get_recent_trades(
-        symbol='NEOUSDT', limit=1))
+        symbol='NEOUSDT', limit=1)[0])
 
     # extract of closing candle values and current value
     closing_prices = [candle.get_price().close_price for candle in candles]

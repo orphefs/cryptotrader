@@ -1,2 +1,0 @@
-MilliSeconds = int
-Seconds = float
