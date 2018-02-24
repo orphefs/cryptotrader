@@ -1,28 +1,6 @@
-from pprint import pprint
 from typing import List
 
-import datetime
-
-
-class MilliSeconds(object):
-    def __init__(self, time: int):
-        self._time = time
-
-    def as_epoch_time(self) -> int:
-        return self._time
-
-    def as_datetime(self) -> datetime.datetime:
-        return datetime.datetime.fromtimestamp(self._time/1000)
-
-
-class Time(object):
-    def __init__(self, open_time: MilliSeconds, close_time: MilliSeconds):
-        self._open_time = open_time
-        self._close_time = close_time
-
-    def __repr__(self):
-        return "Time(open_time={}, close_time={})".format(self._open_time.as_datetime(),
-                                                          self._close_time.as_datetime())
+from backtesting.containers.time import MilliSeconds, Time
 
 
 class Price(object):
@@ -70,8 +48,9 @@ class Candle(object):
         return "Candle({},\n{},\n{})".format(self._price, self._volume, self._time)
 
     @staticmethod
-    def from_list_of_klines(klines: List[List]):
-        return [Candle(
+    def from_kline(kline: List[int, float, float, float, float,
+                               float, int, float, int, float, float]):
+        return Candle(
             price=Price(
                 open_price=kline[1],
                 high_price=kline[2],
@@ -90,7 +69,11 @@ class Candle(object):
                 close_time=MilliSeconds(kline[6]),
             )
 
-        ) for kline in klines]
+        )
+
+    @staticmethod
+    def from_list_of_klines(klines: List[List]):
+        return [Candle.from_kline(kline) for kline in klines]
 
 
 if __name__ == "__main__":

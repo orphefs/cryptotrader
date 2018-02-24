@@ -2,7 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="434c35ab-4872-4e43-bb84-f2a6875aec9d" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/backtesting/containers.py" afterPath="$PROJECT_DIR$/backtesting/containers.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/backtesting/containers/__init__.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/backtesting/containers/time.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/backtesting/containers/trade.py" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/backtesting/containers.py" afterPath="$PROJECT_DIR$/backtesting/containers/candle.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -34,8 +38,8 @@
       <file leaf-file-name="AutoTraderSMACP.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/AutoTradeSMACP/AutoTraderSMACP.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="972">
-              <caret line="74" column="37" lean-forward="false" selection-start-line="74" selection-start-column="20" selection-end-line="74" selection-end-column="37" />
+            <state relative-caret-position="156">
+              <caret line="74" column="65" lean-forward="true" selection-start-line="74" selection-start-column="65" selection-end-line="74" selection-end-column="65" />
               <folding>
                 <element signature="e#0#33#0" expanded="true" />
               </folding>
@@ -55,14 +59,36 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="containers.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/backtesting/containers.py">
+      <file leaf-file-name="candle.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/backtesting/containers/candle.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="272">
-              <caret line="100" column="48" lean-forward="true" selection-start-line="100" selection-start-column="48" selection-end-line="100" selection-end-column="48" />
+            <state relative-caret-position="-294">
+              <caret line="51" column="31" lean-forward="false" selection-start-line="51" selection-start-column="31" selection-end-line="51" selection-end-column="31" />
               <folding>
-                <element signature="e#0#25#0" expanded="true" />
+                <element signature="e#0#23#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="trade.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/backtesting/containers/trade.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="216">
+              <caret line="23" column="47" lean-forward="true" selection-start-line="23" selection-start-column="47" selection-end-line="23" selection-end-column="47" />
+              <folding>
+                <element signature="e#0#29#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="time.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/backtesting/containers/time.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="0">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -123,6 +149,10 @@
         <option value="$PROJECT_DIR$/backtesting/main.py" />
         <option value="$PROJECT_DIR$/backtesting/type_aliases.py" />
         <option value="$PROJECT_DIR$/backtesting/containers.py" />
+        <option value="$PROJECT_DIR$/backtesting/containers/time.py" />
+        <option value="$PROJECT_DIR$/backtesting/containers/containers.py" />
+        <option value="$PROJECT_DIR$/backtesting/containers/trade.py" />
+        <option value="$PROJECT_DIR$/backtesting/containers/candle.py" />
       </list>
     </option>
   </component>
@@ -190,6 +220,24 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+              <option name="myItemId" value="backtesting" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="containers" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="autotrader" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="autotrader" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
               <option name="myItemId" value="AutoTradeSMACP" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -201,6 +249,12 @@
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="settings.editor.selected.configurable" value="reference.settingsdialog.IDE.editor.colors.Font" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/backtesting/containers/time.py" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/backtesting/containers" />
+    </key>
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -266,7 +320,7 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="autotrader" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/backtesting/containers.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/backtesting/containers/candle.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -512,16 +566,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/AutoTradeSMACP/AutoTraderSMACP.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="972">
-          <caret line="74" column="37" lean-forward="false" selection-start-line="74" selection-start-column="20" selection-end-line="74" selection-end-column="37" />
-          <folding>
-            <element signature="e#0#33#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///opt/anaconda3/lib/python3.6/site-packages/binance/client.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-127">
@@ -538,12 +582,48 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/backtesting/containers.py">
+    <entry file="file://$PROJECT_DIR$/backtesting/containers/time.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="272">
-          <caret line="100" column="48" lean-forward="true" selection-start-line="100" selection-start-column="48" selection-end-line="100" selection-end-column="48" />
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/backtesting/containers/candle.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AutoTradeSMACP/AutoTraderSMACP.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="156">
+          <caret line="74" column="65" lean-forward="true" selection-start-line="74" selection-start-column="65" selection-end-line="74" selection-end-column="65" />
           <folding>
-            <element signature="e#0#25#0" expanded="true" />
+            <element signature="e#0#33#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/backtesting/containers/trade.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="216">
+          <caret line="23" column="47" lean-forward="true" selection-start-line="23" selection-start-column="47" selection-end-line="23" selection-end-column="47" />
+          <folding>
+            <element signature="e#0#29#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/backtesting/containers/candle.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-294">
+          <caret line="51" column="31" lean-forward="false" selection-start-line="51" selection-start-column="31" selection-end-line="51" selection-end-column="31" />
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
           </folding>
         </state>
       </provider>
