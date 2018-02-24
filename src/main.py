@@ -16,7 +16,7 @@ from containers.trade import Trade
 from helpers import simple_moving_average
 from trading_logic import get_heading, get_trend
 
-logging.basicConfig(filename=os.path.join(definitions.DATA_DIR, '_autotrader.log'), level=logging.DEBUG)
+logging.basicConfig(filename=os.path.join(definitions.DATA_DIR, '_autotrader.log'), level=logging.INFO)
 
 
 def _plot(ax: plt.Axes, closing_prices: List[float], SMA60: List[float], EMA10: List[float]):
@@ -51,7 +51,7 @@ def main():
     buy = []
     sell = []
     prof = []
-    bought = 0
+    bought = False
     money = 0
 
     # Modifiable On/Off text file reading
@@ -106,36 +106,36 @@ def main():
             elif not bought:
                 logging.info('Uptrend at {}, Heading Up at {}'.format(trend, head))
                 buy.append(current_value)
-                bought = 1
-                logging.info('bought at {}]n'.format(current_value))
+                bought = True
+                logging.info('Bought at {}'.format(current_value))
 
         if get_trend(trend) == "Uptrend" and get_heading(head) == "Heading Down" and bought:
             if not bought:
                 logging.info('Current price is {}'.format(current_value))
-                logging.info('Uptrend at {}, Heading Down at {}\n'.format(trend, head))
+                logging.info('Uptrend at {}, Heading Down at {}'.format(trend, head))
             elif bought:
                 sell.append(current_value)
-                bought = 0
-                logging.info('Uptrend at {}, Heading Down at {}\n'.format(trend, head))
-                logging.info('sold at {}'.format(current_value))
+                bought = False
+                logging.info('Uptrend at {}, Heading Down at {}'.format(trend, head))
+                logging.info('Sold at {}'.format(current_value))
                 prof.append(sell[len(sell) - 1] - buy[len(buy) - 1] - money * current_value)
                 logging.info()
-                logging.info('bought at {}, sold at {}'.format(buy(len(buy) - 1)))
-                logging.info('trade profit is {}, total profit is {}\n'.format(prof[len(prof)]), sum(prof))
+                logging.info('Bought at {}, Sold at {}'.format(buy(len(buy) - 1)))
+                logging.info('trade profit is {}, total profit is {}'.format(prof[len(prof)]), sum(prof))
 
         if get_trend(trend) == "Downtrend" and get_heading(head) == "Heading Down":
             if not bought:
                 logging.info('Current price is {}'.format(current_value))
-                logging.info('Downtrend at {}, Heading Down at {}\n'.format(trend, head))
+                logging.info('Downtrend at {}, Heading Down at {}'.format(trend, head))
 
             elif bought:
-                logging.info('Downtrend {}, Heading Down {}\n'.format(trend, head))
+                logging.info('Downtrend {}, Heading Down {}'.format(trend, head))
                 logging.info('new sell at {}'.format(current_value))
                 sell.append(current_value)
                 prof.append(sell[len(sell) - 1] - buy[len(buy) - 1] - money * current_value)
-                bought = 0
-                logging.info('bought at {}, sold at {}'.format(buy(len(buy) - 1)))
-                logging.info('trade profit is {}, total profit is {}\n'.format(prof[len(prof)]), sum(prof))
+                bought = False
+                logging.info('Bought at {}, Sold at {}'.format(buy(len(buy) - 1)))
+                logging.info('Trade profit is {}, Total profit is {}'.format(prof[len(prof)]), sum(prof))
 
         if get_trend(trend) == "Downtrend" and get_heading(head) == "Heading Up":
             if bought:
@@ -146,7 +146,7 @@ def main():
                 buy.append(current_value)
                 logging.info('Downtrend at {}, Heading Up {}\n'.format(trend, head))
                 logging.info('new buy at {}'.format(current_value))
-                bought = 1
+                bought = True
 
         time.sleep(d)
 
