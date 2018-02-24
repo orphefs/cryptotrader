@@ -45,7 +45,7 @@ class Trade(object):
             qty=float(trade["qty"]),
             time=MilliSeconds(int(trade["time"])),
             is_buyer_maker=bool(trade["isBuyerMaker"]),
-            is_best_match=bool(trade["isBestMatch"]))  
+            is_best_match=bool(trade["isBestMatch"]))
 
     @staticmethod
     def from_list_of_trades(trades: List[Dict]):
