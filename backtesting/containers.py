@@ -1,6 +1,18 @@
+from pprint import pprint
 from typing import List
 
-from backtesting.type_aliases import MilliSeconds
+import datetime
+
+
+class MilliSeconds(object):
+    def __init__(self, time: int):
+        self._time = time
+
+    def as_epoch_time(self) -> int:
+        return self._time
+
+    def as_datetime(self) -> datetime.datetime:
+        return datetime.datetime.fromtimestamp(self._time/1000)
 
 
 class Time(object):
@@ -9,7 +21,8 @@ class Time(object):
         self._close_time = close_time
 
     def __repr__(self):
-        return "Time(open_time={}, close_time={})".format(self._open_time, self._close_time)
+        return "Time(open_time={}, close_time={})".format(self._open_time.as_datetime(),
+                                                          self._close_time.as_datetime())
 
 
 class Price(object):
@@ -54,10 +67,10 @@ class Candle(object):
         self._time = time
 
     def __repr__(self):
-        return "Candle({},{},{})".format(self.price, self.volume, self.time)
+        return "Candle({},\n{},\n{})".format(self._price, self._volume, self._time)
 
     @staticmethod
-    def from_list_of_klines(klines: List[List]) -> List[Candle]:
+    def from_list_of_klines(klines: List[List]):
         return [Candle(
             price=Price(
                 open_price=kline[1],
@@ -73,8 +86,8 @@ class Candle(object):
                 number_of_trades=kline[8],
             ),
             time=Time(
-                open_time=kline[0],
-                close_time=kline[6],
+                open_time=MilliSeconds(kline[0]),
+                close_time=MilliSeconds(kline[6]),
             )
 
         ) for kline in klines]
@@ -84,5 +97,7 @@ if __name__ == "__main__":
     from binance.client import Client
 
     client = Client("", "")
-    klines = client.get_historical_klines("ETHBTC", Client.KLINE_INTERVAL_30MINUTE, "1 Dec, 2017", "1 Jan, 2018")
-    print(klines)
+    klines = client.get_historical_klines("ETHBTC", Client.KLINE_INTERVAL_30MINUTE, "1 Dec, 2017", "3 Dec, 2017")
+    candles = Candle.from_list_of_klines(klines)
+    print(candles[0])
+    print(len(candles))
