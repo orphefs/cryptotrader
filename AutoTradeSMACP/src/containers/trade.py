@@ -40,12 +40,12 @@ class Trade(object):
     @staticmethod
     def from_trade(trade: Dict):
         return Trade(
-            id=trade["id"],
-            price=trade["price"],
-            qty=trade["qty"],
-            time=trade["time"],
-            is_buyer_maker=trade["isBuyerMaker"],
-            is_best_match=trade["isBestMatch"])
+            id=int(trade["id"]),
+            price=float(trade["price"]),
+            qty=float(trade["qty"]),
+            time=MilliSeconds(int(trade["time"])),
+            is_buyer_maker=bool(trade["isBuyerMaker"]),
+            is_best_match=bool(trade["isBestMatch"]))  
 
     @staticmethod
     def from_list_of_trades(trades: List[Dict]):

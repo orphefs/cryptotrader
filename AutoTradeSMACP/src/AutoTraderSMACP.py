@@ -53,8 +53,6 @@ a           -amount you would like to trade
 closing_price_averaging_period = 60
 ps = 10
 d = 10
-SMA = [0] * (closing_price_averaging_period - 1)
-EMA = [0] * (closing_price_averaging_period - 1)
 buy = []
 sell = []
 prof = []
@@ -85,8 +83,8 @@ while onoff == 1:
     current_value = trade.price
 
     # Running function in order to extract long term SMA and short term EMA
-    SMA60, _ = simple_moving_average(closing_price_averaging_period, closing_prices)
-    _, EMA10 = simple_moving_average(10, closing_prices)
+    SMA60, _ = simple_moving_average(closing_price_averaging_period, closing_prices, closing_price_averaging_period)
+    _, EMA10 = simple_moving_average(10, closing_prices, closing_price_averaging_period)
 
 
     """

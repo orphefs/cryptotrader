@@ -35,8 +35,8 @@ class Price(object):
 
 
 class Volume(object):
-    def __init__(self, volume: int, taker_buy_base_asset_volume: int, taker_buy_quote_asset_volume: int,
-                 quote_asset_volume: int, number_of_trades: int):
+    def __init__(self, volume: float, taker_buy_base_asset_volume: float, taker_buy_quote_asset_volume: float,
+                 quote_asset_volume: float, number_of_trades: int):
         self._volume = volume
         self._taker_buy_base_asset_volume = taker_buy_base_asset_volume
         self._taker_buy_quote_asset_volume = taker_buy_quote_asset_volume
@@ -87,7 +87,7 @@ class Candle(object):
         return self._volume
 
     def get_time(self):
-        self._time
+        return self._time
 
     def __repr__(self):
         return "Candle({},\n{},\n{})".format(self._price, self._volume, self._time)
@@ -96,21 +96,21 @@ class Candle(object):
     def from_kline(kline: List[Any]):
         return Candle(
             price=Price(
-                open_price=kline[1],
-                high_price=kline[2],
-                low_price=kline[3],
-                close_price=kline[4],
+                open_price=float(kline[1]),
+                high_price=float(kline[2]),
+                low_price=float(kline[3]),
+                close_price=float(kline[4]),
             ),
             volume=Volume(
-                volume=kline[5],
-                taker_buy_base_asset_volume=kline[9],
-                taker_buy_quote_asset_volume=kline[10],
-                quote_asset_volume=kline[7],
-                number_of_trades=kline[8],
+                volume=float(kline[5]),
+                taker_buy_base_asset_volume=float(kline[9]),
+                taker_buy_quote_asset_volume=float(kline[10]),
+                quote_asset_volume=float(kline[7]),
+                number_of_trades=int(kline[8]),
             ),
             time=Time(
-                open_time=MilliSeconds(kline[0]),
-                close_time=MilliSeconds(kline[6]),
+                open_time=MilliSeconds(int(kline[0])),
+                close_time=MilliSeconds(int(kline[6])),
             )
 
         )
