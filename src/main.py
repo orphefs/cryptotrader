@@ -121,8 +121,8 @@ def main():
                 logging.info('Sold at {}'.format(current_value))
                 prof.append(sell[len(sell) - 1] - buy[len(buy) - 1] - money * current_value)
                 logging.info()
-                logging.info('Bought at {}, Sold at {}'.format(buy(len(buy) - 1)))
-                logging.info('trade profit is {}, total profit is {}'.format(prof[len(prof)]), sum(prof))
+                logging.info('Bought at {}, Sold at {}'.format(buy[len(buy) - 1], sell[len(sell) - 1]))
+                logging.info('Trade profit is {}, Total profit is {}'.format(prof[len(prof)], sum(prof)))
 
         if get_trend(trend) == "Downtrend" and get_heading(head) == "Heading Down":
             if not bought:
@@ -135,8 +135,8 @@ def main():
                 sell.append(current_value)
                 prof.append(sell[len(sell) - 1] - buy[len(buy) - 1] - money * current_value)
                 bought = False
-                logging.info('Bought at {}, Sold at {}'.format(buy(len(buy) - 1)))
-                logging.info('Trade profit is {}, Total profit is {}'.format(prof[len(prof)]), sum(prof))
+                logging.info('Bought at {}, Sold at {}'.format(buy[len(buy) - 1], sell[len(sell) - 1]))
+                logging.info('Trade profit is {}, Total profit is {}'.format(prof[len(prof)], sum(prof)))
 
         if get_trend(trend) == "Downtrend" and get_heading(head) == "Heading Up":
             if bought:
