@@ -37,9 +37,24 @@ def generate_file_name(time_window: TimeWindow, security: Security) -> str:
             time_window.end_time.as_string().replace(" ", "_") + '_' + security + ".dill").replace(" ", "_")
 
 
+class StockData(object):
+    def __init__(self, candles: List[Candle], security: Security):
+        self._candles = candles
+        self._security = security
+
+    @property
+    def candles(self):
+        return self._candles
+
+    @property
+    def security(self):
+        return self._security
+
+
 if __name__ == '__main__':
     security = "LTCBTC"
     time_window = TimeWindow(start_time=datetime(2017, 10, 1),
                              end_time=datetime(2017, 10, 10))
     candles = download_backtesting_data(time_window, security)
-    save_to_disk(candles, os.path.join(definitions.DATA_DIR, generate_file_name(time_window, security)))
+    stock_data = StockData(candles, security)
+    save_to_disk(stock_data, os.path.join(definitions.DATA_DIR, generate_file_name(time_window, security)))
