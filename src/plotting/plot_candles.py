@@ -5,6 +5,7 @@ from matplotlib.axis import Axis
 from matplotlib.dates import DateFormatter, WeekdayLocator, \
     DayLocator, MONDAY
 from matplotlib.finance import candlestick_ohlc
+from typing import List, Optional
 
 from tools.downloader import load_from_disk, StockData
 
@@ -16,16 +17,27 @@ def plot_close_price(ax: Axis, data: StockData):
     )
 
 
+def plot_returns(ax: Axes, stock_data: StockData, returns: List[float]):
+    ax.scatter(x=[mdate.date2num(candle.get_time().close_time.as_datetime())
+               for candle in stock_data.candles][0:-1],
+            y=returns)
+
+
 def plot_candlesticks(ax: Axes, data: StockData):
-    candlestick_ohlc(ax=ax,
-                     quotes=[
-                         (mdate.date2num(candle.get_time().close_time.as_datetime()),
-                          candle.get_price().open_price,
-                          candle.get_price().high_price,
-                          candle.get_price().low_price,
-                          candle.get_price().close_price)
-                         for candle in data.candles],
-                     width=0.1)
+    lines, patches = candlestick_ohlc(ax=ax,
+                                      quotes=[
+                                          (mdate.date2num(candle.get_time().close_time.as_datetime()),
+                                           candle.get_price().open_price,
+                                           candle.get_price().high_price,
+                                           candle.get_price().low_price,
+                                           candle.get_price().close_price)
+                                          for candle in data.candles],
+                                      width=0.01)
+    for p in patches:
+        ax.add_patch(p)
+    for l in lines:
+        ax.add_line(l)
+
     mondays = WeekdayLocator(MONDAY)  # major ticks on the mondays
     alldays = DayLocator()  # minor ticks on the days
     weekFormatter = DateFormatter('%b %d')  # e.g., Jan 12
