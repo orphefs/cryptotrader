@@ -1,17 +1,12 @@
-import matplotlib
+import matplotlib.dates as mdate
 import matplotlib.pyplot as plt
-
-from typing import List
-
 from matplotlib.axes import Axes
 from matplotlib.axis import Axis
-
-from containers.candle import Candle
-from logic.ground_truth import load_from_disk, StockData
-from matplotlib.finance import quotes_historical_yahoo_ohlc, candlestick_ohlc
-import matplotlib.dates as mdate
 from matplotlib.dates import DateFormatter, WeekdayLocator, \
     DayLocator, MONDAY
+from matplotlib.finance import candlestick_ohlc
+
+from tools.downloader import load_from_disk, StockData
 
 
 def plot_close_price(ax: Axis, data: StockData):
