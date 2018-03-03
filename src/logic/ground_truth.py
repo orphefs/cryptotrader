@@ -25,7 +25,7 @@ def save_to_disk(data: Any, path_to_file: str):
 
 
 def load_from_disk(path_to_file: str) -> Any:
-    with open(path_to_file, 'wr') as outfile:
+    with open(path_to_file, 'rb') as outfile:
         data = dill.load(outfile)
     return data
 
