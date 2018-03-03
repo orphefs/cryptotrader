@@ -1,1 +1,2 @@
 Seconds = float
+Security = str
