@@ -3,6 +3,7 @@ from typing import List, Union
 import pandas as pd
 from datetime import datetime, timedelta
 
+
 Price = float
 
 
@@ -70,18 +71,16 @@ def get_intersection_points(time_series_a: TimeSeries,
                               tolerance=tolerance) for index in intersection_indices]
 
 
-def moving_average(window_size: timedelta, time_series: TimeSeries) -> TimeSeries:
+def simple_moving_average(window_size: timedelta, time_series: TimeSeries) -> TimeSeries:
     window_size_int = window_size // time_series.sampling_rate
     weights = np.repeat(1.0, window_size_int) / window_size_int
     sma = np.convolve(np.array(time_series), weights, 'valid')
     return TimeSeries(x=time_series.index[window_size_int - 1:], y=sma)
 
 
+def exponential_moving_average(window_size: timedelta, time_series: TimeSeries) -> TimeSeries:
+    return None
+
+
 if __name__ == '__main__':
-    time_series_a = TimeSeries(x=[datetime(2017, 1, d) for d in range(1, 30)], y=np.random.normal(5, 1, 29))
-    time_series_b = TimeSeries(x=[datetime(2017, 1, d) for d in range(1, 30)], y=np.random.normal(6, 3, 29))
-    avg_time_series_a = moving_average(timedelta(days=5), time_series_a)
-    avg_time_series_b = moving_average(timedelta(days=5), time_series_b)
-    intersection_points = get_intersection_points(avg_time_series_a, avg_time_series_b, 1)
-    for intersection_point in intersection_points:
-        print(intersection_point)
+    pass

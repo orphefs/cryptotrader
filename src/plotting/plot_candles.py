@@ -7,6 +7,7 @@ from matplotlib.dates import DateFormatter, WeekdayLocator, \
 from matplotlib.finance import candlestick_ohlc
 from typing import List, Optional
 
+from logic.logic import TimeSeries
 from tools.downloader import load_from_disk, StockData
 
 
@@ -19,8 +20,12 @@ def plot_close_price(ax: Axis, data: StockData):
 
 def plot_returns(ax: Axes, stock_data: StockData, returns: List[float]):
     ax.scatter(x=[mdate.date2num(candle.get_time().close_time.as_datetime())
-               for candle in stock_data.candles][0:-1],
-            y=returns)
+                  for candle in stock_data.candles][0:-1],
+               y=returns)
+
+
+def plot_moving_average(ax: Axes, time_series: TimeSeries):
+    time_series.plot(kind='line', ax=ax)
 
 
 def plot_candlesticks(ax: Axes, data: StockData):

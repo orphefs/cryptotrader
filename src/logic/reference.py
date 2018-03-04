@@ -47,14 +47,16 @@ def calculate_optimal_returns(stock_data: StockData):
     close_prices_LTCBTC = [candle.get_price().close_price for candle in stock_data.candles]
 
     for prev_price, next_price in list(zip(close_prices_LTCBTC[0:-1], close_prices_LTCBTC[1:])):
+        amount = 70
         if (next_price - prev_price) > 0:
             ltc_holdings, btc_holdings = buy(which_security=ltc_holdings, with_security=btc_holdings,
                                              at_price=prev_price,
-                                             amount=mult * abs(base_ltc * (next_price - prev_price) / prev_price))
+                                             amount=amount)
+            # mult * abs(base_ltc * (next_price - prev_price) / prev_price)
         elif (next_price - prev_price) < 0:
             ltc_holdings, btc_holdings = sell(which_security=ltc_holdings, for_security=btc_holdings,
                                               at_price=prev_price,
-                                              amount=mult * abs(base_ltc * (next_price - prev_price) / prev_price))
+                                              amount=amount)
         else:
             hold()
         ltc.append(copy(ltc_holdings))
