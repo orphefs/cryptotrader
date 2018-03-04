@@ -7,7 +7,7 @@ from matplotlib.dates import DateFormatter, WeekdayLocator, \
 from matplotlib.finance import candlestick_ohlc
 from typing import List, Optional
 
-from logic.logic import TimeSeries
+from logic.logic import TimeSeries, IntersectionPoint
 from tools.downloader import load_from_disk, StockData
 
 
@@ -26,6 +26,18 @@ def plot_returns(ax: Axes, stock_data: StockData, returns: List[float]):
 
 def plot_moving_average(ax: Axes, time_series: TimeSeries):
     time_series.plot(kind='line', ax=ax)
+
+
+def plot_intersection_point(ax: Axes, intersection_point: IntersectionPoint):
+    ax.scatter(y=intersection_point.data_point.value, x=intersection_point.data_point.index)
+
+
+def plot_intersection_points(ax: Axes, intersection_points: List[IntersectionPoint]):
+
+    ax.scatter(
+        x=[intersection_point.data_point.index for intersection_point in intersection_points],
+        y=[intersection_point.data_point.value for intersection_point in intersection_points]
+               )
 
 
 def plot_candlesticks(ax: Axes, data: StockData):
