@@ -7,7 +7,7 @@ from matplotlib.dates import DateFormatter, WeekdayLocator, \
 from matplotlib.finance import candlestick_ohlc
 from typing import List, Optional
 
-from logic.logic import TimeSeries, IntersectionPoint
+from logic.logic import TimeSeries, IntersectionPoint, TradingSignal
 from tools.downloader import load_from_disk, StockData
 
 
@@ -29,15 +29,26 @@ def plot_moving_average(ax: Axes, time_series: TimeSeries):
 
 
 def plot_intersection_point(ax: Axes, intersection_point: IntersectionPoint):
-    ax.scatter(y=intersection_point.data_point.value, x=intersection_point.data_point.index)
+    ax.scatter(y=intersection_point.data_point.value, x=intersection_point.data_point.date_time)
 
 
-def plot_intersection_points(ax: Axes, intersection_points: List[IntersectionPoint]):
+def plot_trading_signals(ax: Axes, trading_signals: List[TradingSignal]):
+    marker_map = {
+        "Buy": '^',
+        "Sell": 'v',
+        "Hold": "",
+    }
+    markers = [marker_map[trading_signal.type] for trading_signal in trading_signals]
 
-    ax.scatter(
-        x=[intersection_point.data_point.index for intersection_point in intersection_points],
-        y=[intersection_point.data_point.value for intersection_point in intersection_points]
-               )
+    for marker, trading_signal in zip(markers, trading_signals):
+        if marker != "":
+            ax.scatter(
+                x=trading_signal.data_point.date_time,
+                y=trading_signal.data_point.value,
+                marker=marker,
+                color='k',
+                s=40
+            )
 
 
 def plot_candlesticks(ax: Axes, data: StockData):

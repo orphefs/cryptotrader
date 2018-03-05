@@ -3,25 +3,24 @@ from typing import List, Union
 import pandas as pd
 from datetime import datetime, timedelta
 
-
 Price = float
 
 
 class DataPoint(object):
-    def __init__(self, value: Price, index: datetime):
+    def __init__(self, value: Price, date_time: datetime):
         self._value = value
-        self._index = index
+        self._date_time = date_time
 
     @property
     def value(self):
         return self._value
 
     @property
-    def index(self):
-        return self._index
+    def date_time(self):
+        return self._date_time
 
     def __repr__(self):
-        return "DataPoint({},{})".format(self._value, self._index)
+        return "DataPoint({},{})".format(self._value, self._date_time)
 
 
 class TimeSeries(pd.Series):
@@ -35,15 +34,36 @@ class TimeSeries(pd.Series):
 
     @staticmethod
     def from_datapoints(data_points: List[DataPoint]):
-        return TimeSeries(x=[data_point.index for data_point in data_points],
+        return TimeSeries(x=[data_point.date_time for data_point in data_points],
                           y=[data_point.value for data_point in data_points])
 
 
+_signal_types = {1: "Buy",
+                 -1: "Sell",
+                 0: "Hold", }
+
+
+class TradingSignal(object):
+    def __init__(self, signal: int, data_point: DataPoint):
+        self.signal = signal
+        self.type = _signal_types[signal]
+        self.data_point = data_point
+
+    def __repr__(self):
+        return "TradingSignal({} at {})".format(self.type, self.data_point)
+
+
 class IntersectionPoint(object):
-    def __init__(self, data_point: DataPoint, intersecting_time_series: List[TimeSeries], tolerance: float):
+    def __init__(self, trading_signal: TradingSignal, data_point: DataPoint, intersecting_time_series: List[TimeSeries],
+                 tolerance: float):
+        self._trading_signal = trading_signal
         self._data_point = data_point
         self._intersecting_time_series = intersecting_time_series
         self._tolerance = tolerance
+
+    @property
+    def trading_signal(self):
+        return self._trading_signal
 
     @property
     def data_point(self):
@@ -58,17 +78,24 @@ class IntersectionPoint(object):
         return self._intersecting_time_series
 
     def __repr__(self):
-        return "IntersectionPoint(data_point={}, tolerance={})".format(self._data_point, self._tolerance)
+        return "IntersectionPoint(trading_signal={}, data_point={}, tolerance={})".format(self._trading_signal,
+                                                                                          self._data_point,
+                                                                                          self._tolerance)
 
 
-def get_intersection_points(time_series_a: TimeSeries,
-                            time_series_b: TimeSeries, tolerance: float) -> List[IntersectionPoint]:
-    ser = np.abs(time_series_b - time_series_a)
-    intersection_indices = ser[(ser > -tolerance / 2) & (ser < tolerance / 2)].index
+def get_trading_signals(original_time_series: TimeSeries,
+                        time_series_a: TimeSeries,
+                        time_series_b: TimeSeries) -> List[TradingSignal]:
+    intersection_indices = np.where(time_series_a > time_series_b)
+    trading_signals = list(map(int, np.diff(np.where(time_series_a > time_series_b, 1.0, 0.0))))
 
-    return [IntersectionPoint(data_point=DataPoint(time_series_a[index], index),
-                              intersecting_time_series=[time_series_a, time_series_b],
-                              tolerance=tolerance) for index in intersection_indices]
+    return [TradingSignal(trading_signals[i],
+                          DataPoint(value=original_time_series[i], date_time=original_time_series.index[i]))
+            for i, _ in enumerate(trading_signals)]
+
+
+def rolling_mean(window_size: timedelta, time_series: TimeSeries):
+    return pd.rolling_mean(time_series, window_size, min_periods=1)
 
 
 def simple_moving_average(window_size: timedelta, time_series: TimeSeries) -> TimeSeries:
