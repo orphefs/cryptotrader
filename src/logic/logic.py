@@ -1,7 +1,12 @@
+from abc import ABC
+
 import numpy as np
-from typing import List, Union
+from typing import List, Union, Dict
 import pandas as pd
 from datetime import datetime, timedelta
+
+from containers.candle import Candle
+from tools.downloader import StockData
 
 Price = float
 
@@ -83,10 +88,42 @@ class IntersectionPoint(object):
                                                                                           self._tolerance)
 
 
-def get_trading_signals(original_time_series: TimeSeries,
-                        time_series_a: TimeSeries,
-                        time_series_b: TimeSeries) -> List[TradingSignal]:
-    intersection_indices = np.where(time_series_a > time_series_b)
+class BackTestingStrategy(ABC):
+    def generate_trading_signals(self):
+        pass
+
+
+class SMAStrategy(BackTestingStrategy):
+    def __init__(self, stock_data: StockData):
+        self._instrument = None
+        self._candles = stock_data.candles
+        self._security = stock_data.security
+        self._data = Dict
+        self._trading_signals = []
+
+    def prepare_data(self):
+        time_series = TimeSeries(
+            x=[candle.get_time().close_time for candle in self._candles],
+            y=[candle.get_price().close_price for candle in self._candles]
+        self._data = {'time_series': time_series,
+                      'sma_10': rolling_mean(window_size=timedelta(hours=10),
+                                             time_series=time_series),
+                      'sma_2': rolling_mean(window_size=timedelta(hours=2),
+                                            time_series=time_series),
+                      }
+
+    def generate_trading_signals(self):
+        self._trading_signals = _generate_trading_signals_from_sma(
+            self._data['time_series'],
+            self._data['sma_2'],
+            self._data['sma_10'],
+        )
+
+
+def _generate_trading_signals_from_sma(
+        original_time_series: TimeSeries,
+        time_series_a: TimeSeries,
+        time_series_b: TimeSeries) -> List[TradingSignal]:
     trading_signals = list(map(int, np.diff(np.where(time_series_a > time_series_b, 1.0, 0.0))))
 
     return [TradingSignal(trading_signals[i],

@@ -58,5 +58,3 @@ if __name__ == '__main__':
     candles = download_backtesting_data(time_window, security)
     stock_data = StockData(candles, security)
     save_to_disk(stock_data, os.path.join(definitions.DATA_DIR, generate_file_name(time_window, security)))
-
-

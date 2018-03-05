@@ -19,7 +19,7 @@ def main():
                                   x=[candle.get_time().close_time.as_datetime() for candle in stock_data.candles])
     time_series_sma10 = rolling_mean(timedelta(hours=10), time_series_orig)
     time_series_sma2 = rolling_mean(timedelta(hours=2), time_series_orig)
-    trading_signals = get_trading_signals(time_series_orig, time_series_sma10, time_series_sma2)
+    trading_signals = get_trading_signals(time_series_orig, time_series_sma2, time_series_sma10)
     plot_close_price(ax, stock_data)
     plot_moving_average(ax, time_series_sma10)
     plot_moving_average(ax, time_series_sma2)
