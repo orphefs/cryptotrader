@@ -86,9 +86,21 @@ class IntersectionPoint(object):
         return "IntersectionPoint(trading_signal={}, data_point={}, tolerance={})".format(self._trading_signal,
                                                                                           self._data_point,
                                                                                           self._tolerance)
+def _generate_trading_signals_from_sma(
+        original_time_series: TimeSeries,
+        time_series_a: TimeSeries,
+        time_series_b: TimeSeries) -> List[TradingSignal]:
+    trading_signals = list(map(int, np.diff(np.where(time_series_a > time_series_b, 1.0, 0.0))))
+
+    return [TradingSignal(trading_signals[i],
+                          DataPoint(value=original_time_series[i], date_time=original_time_series.index[i]))
+            for i, _ in enumerate(trading_signals)]
 
 
 class BackTestingStrategy(ABC):
+    def prepare_data(self):
+        pass
+
     def generate_trading_signals(self):
         pass
 
@@ -119,16 +131,14 @@ class SMAStrategy(BackTestingStrategy):
             self._data['sma_10'],
         )
 
+class ProfitCalculator(object):
+    def __init__(self, strategy: BackTestingStrategy):
+        self._strategy = strategy
+        
+    def calculate_profits(self):
+        pass
 
-def _generate_trading_signals_from_sma(
-        original_time_series: TimeSeries,
-        time_series_a: TimeSeries,
-        time_series_b: TimeSeries) -> List[TradingSignal]:
-    trading_signals = list(map(int, np.diff(np.where(time_series_a > time_series_b, 1.0, 0.0))))
 
-    return [TradingSignal(trading_signals[i],
-                          DataPoint(value=original_time_series[i], date_time=original_time_series.index[i]))
-            for i, _ in enumerate(trading_signals)]
 
 
 def rolling_mean(window_size: timedelta, time_series: TimeSeries):
