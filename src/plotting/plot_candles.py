@@ -1,3 +1,5 @@
+from typing import List
+
 import matplotlib.dates as mdate
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
@@ -5,7 +7,6 @@ from matplotlib.axis import Axis
 from matplotlib.dates import DateFormatter, WeekdayLocator, \
     DayLocator, MONDAY
 from matplotlib.finance import candlestick_ohlc
-from typing import List, Optional
 
 from logic.logic import TimeSeries, IntersectionPoint, TradingSignal
 from tools.downloader import load_from_disk, StockData
@@ -16,6 +17,13 @@ def plot_close_price(ax: Axis, data: StockData):
         y=[candle.get_price().close_price for candle in data.candles],
         x=[candle.get_time().close_time.as_datetime() for candle in data.candles],
     )
+
+def plot_equity_curve(ax: Axis, data: StockData):
+    ax.scatter(
+        y=[candle.get_price().close_price for candle in data.candles],
+        x=[candle.get_time().close_time.as_datetime() for candle in data.candles],
+    )
+
 
 
 def plot_returns(ax: Axes, stock_data: StockData, returns: List[float]):
