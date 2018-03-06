@@ -19,12 +19,13 @@ def plot_close_price(ax: Axis, data: StockData):
     )
 
 
-def plot_portfolio(ax: Axis, portfolio: Portfolio):
-    portfolio.portfolio['holdings'].plot(ax=ax)
-    portfolio.portfolio['cash'].plot(ax=ax)
-    portfolio.portfolio['total'].plot(ax=ax)
-    portfolio.portfolio['returns'].plot(ax=ax)
-    ax.legend()
+def plot_portfolio(ax: List[Axis], portfolio: Portfolio):
+    portfolio.portfolio['holdings'].plot(ax=ax[0],alpha=0.7)
+    portfolio.portfolio['cash'].plot(ax=ax[1],alpha=0.7)
+    portfolio.portfolio['total'].plot(ax=ax[1],alpha=0.7)
+    portfolio.portfolio['returns'].plot(ax=ax[0],alpha=0.7)
+    ax[0].legend()
+    ax[1].legend()
 
 
 def plot_returns(ax: Axes, stock_data: StockData, returns: List[float]):

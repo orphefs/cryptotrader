@@ -212,7 +212,7 @@ class MarketOnClosePortfolio(Portfolio):
         """Creates a 'positions' DataFrame that simply longs or shorts
         100 of the particular symbol based on the forecast signals of
         {1, 0, -1} from the signals DataFrame."""
-        positions = 1 * self._trading_signals.fillna(0.0)
+        positions = 2 * self._trading_signals.fillna(0.0)
         return positions
 
     def backtest_portfolio(self):
