@@ -8,7 +8,7 @@ from matplotlib.dates import DateFormatter, WeekdayLocator, \
     DayLocator, MONDAY
 from matplotlib.finance import candlestick_ohlc
 
-from logic.logic import TimeSeries, IntersectionPoint, TradingSignal
+from logic.logic import TimeSeries, IntersectionPoint, TradingSignal, Portfolio
 from tools.downloader import load_from_disk, StockData
 
 
@@ -18,12 +18,13 @@ def plot_close_price(ax: Axis, data: StockData):
         x=[candle.get_time().close_time.as_datetime() for candle in data.candles],
     )
 
-def plot_equity_curve(ax: Axis, data: StockData):
-    ax.scatter(
-        y=[candle.get_price().close_price for candle in data.candles],
-        x=[candle.get_time().close_time.as_datetime() for candle in data.candles],
-    )
 
+def plot_portfolio(ax: Axis, portfolio: Portfolio):
+    portfolio.portfolio['holdings'].plot(ax=ax)
+    portfolio.portfolio['cash'].plot(ax=ax)
+    portfolio.portfolio['total'].plot(ax=ax)
+    portfolio.portfolio['returns'].plot(ax=ax)
+    ax.legend()
 
 
 def plot_returns(ax: Axes, stock_data: StockData, returns: List[float]):
@@ -87,10 +88,4 @@ def plot_candlesticks(ax: Axes, data: StockData):
     ax.set_title(data.security)
 
 
-if __name__ == '__main__':
-    stock_data = load_from_disk(
-        '/home/orphefs/Documents/Code/autotrader/autotrader/data/_data_01_Oct,_2017_10_Oct,_2017_LTCBTC.dill')
-    fig, ax = plt.subplots()
 
-    plot_candlesticks(ax, stock_data)
-    plt.show()

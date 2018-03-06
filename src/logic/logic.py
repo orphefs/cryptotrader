@@ -5,25 +5,13 @@ from typing import List, Union, Dict
 import numpy as np
 import pandas as pd
 
-from containers.candle import Candle
 from tools.downloader import StockData
 
+_signal_types = {1: "Buy",
+                 -1: "Sell",
+                 0: "Hold", }
+
 Price = float
-
-
-def rolling_mean(window_size: timedelta, time_series: TimeSeries):
-    return pd.rolling_mean(time_series, window_size, min_periods=1)
-
-
-def simple_moving_average(window_size: timedelta, time_series: TimeSeries) -> TimeSeries:
-    window_size_int = window_size // time_series.sampling_rate
-    weights = np.repeat(1.0, window_size_int) / window_size_int
-    sma = np.convolve(np.array(time_series), weights, 'valid')
-    return TimeSeries(x=time_series.index[window_size_int - 1:], y=sma)
-
-
-def exponential_moving_average(window_size: timedelta, time_series: TimeSeries) -> TimeSeries:
-    return None
 
 
 class DataPoint(object):
@@ -58,9 +46,19 @@ class TimeSeries(pd.Series):
                           y=[data_point.value for data_point in data_points])
 
 
-_signal_types = {1: "Buy",
-                 -1: "Sell",
-                 0: "Hold", }
+def rolling_mean(window_size: timedelta, time_series: TimeSeries):
+    return pd.rolling_mean(time_series, window_size, min_periods=1)
+
+
+def simple_moving_average(window_size: timedelta, time_series: TimeSeries) -> TimeSeries:
+    window_size_int = window_size // time_series.sampling_rate
+    weights = np.repeat(1.0, window_size_int) / window_size_int
+    sma = np.convolve(np.array(time_series), weights, 'valid')
+    return TimeSeries(x=time_series.index[window_size_int - 1:], y=sma)
+
+
+def exponential_moving_average(window_size: timedelta, time_series: TimeSeries) -> TimeSeries:
+    return None
 
 
 class TradingSignal(object):
@@ -174,6 +172,10 @@ class Portfolio(ABC):
         other classes/functions."""
         raise NotImplementedError("Should implement backtest_portfolio()!")
 
+    @property
+    def portfolio(self):
+        pass
+
 
 class MarketOnClosePortfolio(Portfolio):
     """Inherits Portfolio to create a system that purchases 100 units of
@@ -190,21 +192,27 @@ class MarketOnClosePortfolio(Portfolio):
     initial_capital - The amount in cash at the start of the portfolio."""
 
     def __init__(self, stock_data: StockData, trading_signals: List[TradingSignal],
-                 initial_capital: float = 100000.0):
+                 initial_capital: float = 1.0):
         self._symbol = stock_data.security
-        self._candles = pd.DataFrame(data=[candle.get_price().close_price for candle in stock_data.candles],
-                                     index=[candle.get_time().close_time for candle in stock_data.candles])
+        self._candles = pd.DataFrame(data={
+            'Open': [candle.get_price().open_price for candle in stock_data.candles],
+            'High': [candle.get_price().high_price for candle in stock_data.candles],
+            'Low': [candle.get_price().low_price for candle in stock_data.candles],
+            'Close': [candle.get_price().close_price for candle in stock_data.candles]
+        },
+            index=[candle.get_time().close_time.as_datetime() for candle in stock_data.candles])
         self._trading_signals = pd.DataFrame(data=[signal.signal for signal in trading_signals],
                                              index=[signal.data_point.date_time for signal in trading_signals])
         self._initial_capital = initial_capital
         self._positions = self.generate_positions()
+        self._portfolio = {}
         self.backtest_portfolio()
 
     def generate_positions(self):
         """Creates a 'positions' DataFrame that simply longs or shorts
         100 of the particular symbol based on the forecast signals of
         {1, 0, -1} from the signals DataFrame."""
-        positions = 100 * self._trading_signals.fillna(0.0)
+        positions = 1 * self._trading_signals.fillna(0.0)
         return positions
 
     def backtest_portfolio(self):
@@ -221,21 +229,25 @@ class MarketOnClosePortfolio(Portfolio):
         # Construct the portfolio DataFrame to use the same index
         # as 'positions' and with a set of 'trading orders' in the
         # 'pos_diff' object, assuming market open prices.
-        portfolio = self._positions * self._candles
-        pos_diff = self._positions.diff()
+        pos = self._positions[0] * self._candles['Open']
+        pos_diff = pos.diff(periods=1)
+        self._portfolio = pd.DataFrame(columns=['holdings', 'cash', 'returns', 'total'])
 
         # Create the 'holdings' and 'cash' series by running through
         # the trades and adding/subtracting the relevant quantity from
         # each column
-        portfolio['holdings'] = (self._positions * self._candles).sum(axis=1)
-        portfolio['cash'] = self._initial_capital - (pos_diff * self._candles['Open']).sum(axis=1).cumsum()
+        self._portfolio['holdings'] = pos.cumsum(axis=0)
+        self._portfolio['cash'] = self._initial_capital - (pos_diff * self._candles['Open']).cumsum(axis=0)
 
         # Finalise the total and bar-based returns based on the 'cash'
         # and 'holdings' figures for the portfolio
-        portfolio['total'] = portfolio['cash'] + portfolio['holdings']
-        portfolio['returns'] = portfolio['total'].pct_change()
-        return portfolio
+        self._portfolio['total'] = self._portfolio['cash'] + self._portfolio['holdings']
+        self._portfolio['returns'] = self._portfolio['total'].pct_change()
+        return self._portfolio
 
+    @property
+    def portfolio(self):
+        return self._portfolio
 
 if __name__ == '__main__':
     pass
