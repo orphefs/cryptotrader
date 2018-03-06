@@ -198,9 +198,9 @@ class MarketOnClosePortfolio(Portfolio):
             'Open': [candle.get_price().open_price for candle in stock_data.candles],
             'High': [candle.get_price().high_price for candle in stock_data.candles],
             'Low': [candle.get_price().low_price for candle in stock_data.candles],
-            'Close': [candle.get_price().close_price for candle in stock_data.candles]
-        },
+            'Close': [candle.get_price().close_price for candle in stock_data.candles]},
             index=[candle.get_time().close_time.as_datetime() for candle in stock_data.candles])
+        self._fees = 0.01  # percent
         self._trading_signals = pd.DataFrame(data=[signal.signal for signal in trading_signals],
                                              index=[signal.data_point.date_time for signal in trading_signals])
         self._initial_capital = initial_capital
@@ -212,7 +212,7 @@ class MarketOnClosePortfolio(Portfolio):
         """Creates a 'positions' DataFrame that simply longs or shorts
         100 of the particular symbol based on the forecast signals of
         {1, 0, -1} from the signals DataFrame."""
-        positions = 2 * self._trading_signals.fillna(0.0)
+        positions = 1000 * self._trading_signals.fillna(0.0)
         return positions
 
     def backtest_portfolio(self):
@@ -229,13 +229,14 @@ class MarketOnClosePortfolio(Portfolio):
         # Construct the portfolio DataFrame to use the same index
         # as 'positions' and with a set of 'trading orders' in the
         # 'pos_diff' object, assuming market open prices.
-        pos = self._positions[0] * self._candles['Open']
+        pos = self._positions[0] * self._candles['Open'] * (1-self._fees)
         pos_diff = pos.diff(periods=1)
         self._portfolio = pd.DataFrame(columns=['holdings', 'cash', 'returns', 'total'])
 
         # Create the 'holdings' and 'cash' series by running through
         # the trades and adding/subtracting the relevant quantity from
         # each column
+
         self._portfolio['holdings'] = pos.cumsum(axis=0)
         self._portfolio['cash'] = self._initial_capital - (pos_diff * self._candles['Open']).cumsum(axis=0)
 
@@ -248,6 +249,7 @@ class MarketOnClosePortfolio(Portfolio):
     @property
     def portfolio(self):
         return self._portfolio
+
 
 if __name__ == '__main__':
     pass

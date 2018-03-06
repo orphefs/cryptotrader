@@ -12,7 +12,7 @@ import definitions
 def main():
     # time_series_a = TimeSeries(x=[datetime(2017, 1, d) for d in range(1, 30)], y=np.random.normal(5, 1, 29))
     # time_series_b = TimeSeries(x=[datetime(2017, 1, d) for d in range(1, 30)], y=np.random.normal(6, 3, 29))
-    stock_data = load_from_disk(os.path.join(definitions.DATA_DIR,'_data_01_Jan,_2017_10_Oct,_2017_LTCBTC.dill'))
+    stock_data = load_from_disk(os.path.join(definitions.DATA_DIR,'_data_01_Jan,_2017_01_Feb,_2018_XRPBTC.dill'))
     fig, ax = plt.subplots(nrows=3,ncols=1, sharex=True)
     time_series_orig = TimeSeries(y=np.array([candle.get_price().close_price for candle in stock_data.candles]),
                                   x=[candle.get_time().close_time.as_datetime() for candle in stock_data.candles])
