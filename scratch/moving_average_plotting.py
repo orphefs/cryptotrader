@@ -16,8 +16,8 @@ def main():
     fig, ax = plt.subplots(nrows=3,ncols=1, sharex=True)
     time_series_orig = TimeSeries(y=np.array([candle.get_price().close_price for candle in stock_data.candles]),
                                   x=[candle.get_time().close_time.as_datetime() for candle in stock_data.candles])
-    time_series_sma10 = rolling_mean(timedelta(hours=3), time_series_orig)
-    time_series_sma2 = rolling_mean(timedelta(hours=7), time_series_orig)
+    time_series_sma10 = rolling_mean(timedelta(hours=20), time_series_orig)
+    time_series_sma2 = rolling_mean(timedelta(hours=2), time_series_orig)
     trading_signals = _generate_trading_signals_from_sma(time_series_orig, time_series_sma2, time_series_sma10)
     plot_close_price(ax[0], stock_data)
     plot_moving_average(ax[0], time_series_sma10)
