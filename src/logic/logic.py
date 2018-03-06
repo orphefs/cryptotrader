@@ -116,7 +116,7 @@ class SMAStrategy(BackTestingStrategy):
     def prepare_data(self):
         time_series = TimeSeries(
             x=[candle.get_time().close_time for candle in self._candles],
-            y=[candle.get_price().close_price for candle in self._candles]
+            y=[candle.get_price().close_price for candle in self._candles])
         self._data = {'time_series': time_series,
                       'sma_10': rolling_mean(window_size=timedelta(hours=10),
                                              time_series=time_series),
