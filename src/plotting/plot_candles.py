@@ -8,7 +8,9 @@ from matplotlib.dates import DateFormatter, WeekdayLocator, \
     DayLocator, MONDAY
 from matplotlib.finance import candlestick_ohlc
 
-from logic.logic import TimeSeries, IntersectionPoint, TradingSignal, Portfolio
+from logic.logic import IntersectionPoint, TradingSignal
+from containers.time_series import TimeSeries
+from logic.portfolio import Portfolio
 from tools.downloader import load_from_disk, StockData
 
 

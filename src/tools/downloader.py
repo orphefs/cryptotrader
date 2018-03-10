@@ -53,8 +53,8 @@ class StockData(object):
 
 if __name__ == '__main__':
     security = "XRPBTC"
-    time_window = TimeWindow(start_time=datetime(2017, 1, 1),
-                             end_time=datetime(2018, 2, 1))
+    time_window = TimeWindow(start_time=datetime(2018, 2,1),
+                             end_time=datetime(2018, 3, 1))
     candles = download_backtesting_data(time_window, security)
     stock_data = StockData(candles, security)
     save_to_disk(stock_data, os.path.join(definitions.DATA_DIR, generate_file_name(time_window, security)))
