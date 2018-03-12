@@ -1,7 +1,7 @@
 import os
 
 from binance.client import Client
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from typing import List, Any
 import dill
@@ -36,6 +36,10 @@ def download_backtesting_data(time_window: TimeWindow, security: Security):
 def download_live_data(client: Client, security: Security) -> StockData:
     klines = client.get_historical_klines(security, Client.KLINE_INTERVAL_1MINUTE, "1 day ago UTC")
     return StockData(candles=Candle.from_list_of_klines(klines), security=security)
+
+
+def simulate_live_data(data: StockData, i: int) -> StockData:
+    return StockData(data.candles[i - 10:i], data.security)
 
 
 def save_to_disk(data: Any, path_to_file: str):

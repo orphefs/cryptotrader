@@ -25,14 +25,8 @@ class Hold(Signal):
     pass
 
 
-class LiveStrategy(ABC):
-    @abstractmethod
-    def prepare_data(self):
-        pass
-
-    @abstractmethod
-    def generate_trading_signals(self):
-        pass
+class LiveStrategy:
+    pass
 
 
 class Parameters:
@@ -56,6 +50,7 @@ class Portfolio:
         self._trade_amount = trade_amount
         self._capital = []
         self._initial_capital = initial_capital
+        self._portfolio = {}
         self._portfolio['holdings'] = [(datetime.now(), 0.0)]
 
     def _append_to_holdings(self, trade_time, amount):
@@ -79,7 +74,6 @@ class Portfolio:
 
     def update(self, signal: Union[Buy, Sell, Hold]):
         self._place_order(signal, self._trade_amount)
-
 
 
 class SMAStrategy(LiveStrategy):
