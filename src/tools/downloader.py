@@ -19,6 +19,11 @@ def download_backtesting_data(time_window: TimeWindow, security: Security):
     return Candle.from_list_of_klines(klines)
 
 
+def download_1_minute_data(client: Client, security: Security):
+    klines = client.get_historical_klines(security, Client.KLINE_INTERVAL_1MINUTE, "1 day ago UTC")
+    return Candle.from_list_of_klines(klines)
+
+
 def save_to_disk(data: Any, path_to_file: str):
     with open(path_to_file, 'wb') as outfile:
         dill.dump(data, outfile)
@@ -53,7 +58,7 @@ class StockData(object):
 
 if __name__ == '__main__':
     security = "XRPBTC"
-    time_window = TimeWindow(start_time=datetime(2018, 2,1),
+    time_window = TimeWindow(start_time=datetime(2018, 2, 1),
                              end_time=datetime(2018, 3, 1))
     candles = download_backtesting_data(time_window, security)
     stock_data = StockData(candles, security)

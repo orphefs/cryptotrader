@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from containers.time_series import TimeSeries
-from logic.signal_processing import rolling_mean, _generate_trading_signals_from_sma
-from logic.portfolio import MarketOnClosePortfolio
+from backtesting_logic.signal_processing import rolling_mean, _generate_trading_signals_from_sma
+from backtesting_logic.portfolio import MarketOnClosePortfolio
 from src.plotting.plot_candles import plot_moving_average, plot_trading_signals, plot_close_price, plot_portfolio
 from tools.downloader import load_from_disk
 import definitions

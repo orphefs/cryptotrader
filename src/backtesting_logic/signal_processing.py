@@ -4,7 +4,7 @@ from typing import List
 import pandas as pd
 import numpy as np
 
-from logic.logic import TradingSignal
+from backtesting_logic.logic import TradingSignal
 from containers.time_series import TimeSeries
 from containers.data_point import DataPoint
 

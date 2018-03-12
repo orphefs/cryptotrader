@@ -3,7 +3,7 @@ from datetime import timedelta
 from typing import Dict
 
 from containers.time_series import TimeSeries
-from logic.signal_processing import rolling_mean, _generate_trading_signals_from_sma
+from backtesting_logic.signal_processing import rolling_mean, _generate_trading_signals_from_sma
 from tools.downloader import StockData
 
 

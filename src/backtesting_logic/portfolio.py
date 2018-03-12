@@ -3,7 +3,7 @@ from typing import List
 
 import pandas as pd
 
-from logic.logic import TradingSignal
+from backtesting_logic.logic import TradingSignal
 from tools.downloader import StockData
 
 
@@ -14,14 +14,14 @@ class Portfolio(ABC):
 
     @abstractmethod
     def generate_positions(self):
-        """Provides the logic to determine how the portfolio
+        """Provides the backtesting_logic to determine how the portfolio
         positions are allocated on the basis of forecasting
         signals and available cash."""
         raise NotImplementedError("Should implement generate_positions()!")
 
     @abstractmethod
     def backtest_portfolio(self):
-        """Provides the logic to generate the trading orders
+        """Provides the backtesting_logic to generate the trading orders
         and subsequent equity curve (i.e. growth of total equity),
         as a sum of holdings and cash, and the bar-period returns
         associated with this curve based on the 'positions' DataFrame.
