@@ -1,11 +1,28 @@
 from abc import ABC, abstractmethod
-from datetime import timedelta
-from typing import Dict, Callable
+from datetime import timedelta, datetime
+from typing import Dict, Callable, Union
 import pandas as pd
 
+from backtesting_logic.logic import TradingSignal
 from containers.time_series import TimeSeries
 from backtesting_logic.signal_processing import rolling_mean, _generate_trading_signals_from_sma
 from tools.downloader import StockData
+
+
+class Signal:
+    pass
+
+
+class Buy(Signal):
+    pass
+
+
+class Sell(Signal):
+    pass
+
+
+class Hold(Signal):
+    pass
 
 
 class LiveStrategy(ABC):
@@ -26,11 +43,43 @@ class LiveParameters(Parameters):
     def __init__(self, short_sma_period: timedelta,
                  long_sma_period: timedelta,
                  trade_amount: int,
-                 sleep_time: timedelta):
+                 sleep_time: int):
         self.short_sma_period = short_sma_period
         self.long_sma_period = long_sma_period
         self.trade_amount = trade_amount
         self.sleep_time = sleep_time
+
+
+class Portfolio:
+    def __init__(self, initial_capital: float, trade_amount: int):
+        self._fees = 0.01  # percent
+        self._trade_amount = trade_amount
+        self._capital = []
+        self._initial_capital = initial_capital
+        self._portfolio['holdings'] = [(datetime.now(), 0.0)]
+
+    def _append_to_holdings(self, trade_time, amount):
+        cumulative_amount = self._portfolio['holdings'][0][1] + amount
+        self._portfolio['holdings'] += [trade_time, cumulative_amount]
+
+    def _compute_cash(self):
+        pass
+
+    def _compute_total(self):
+        pass
+
+    def _compute_returns(self):
+        pass
+
+    def _place_order(self, signal: Union[Buy, Sell, Hold], quantity: int):
+        if isinstance(signal, Buy):
+            self.append_to_holdings(datetime.now(), quantity)
+        if isinstance(signal, Sell):
+            self.append_to_holdings(datetime.now(), -quantity)
+
+    def update(self, signal: Union[Buy, Sell, Hold]):
+        self._place_order(signal, self._trade_amount)
+
 
 
 class SMAStrategy(LiveStrategy):
@@ -60,16 +109,29 @@ class SMAStrategy(LiveStrategy):
         self._short_sma = rolling_mean(self._parameters.short_sma_period, self._time_series)
         self._long_sma = rolling_mean(self._parameters.long_sma_period, self._time_series)
 
-    def generate_trading_signal(self, order_fcn: Callable):
+    def generate_trading_signal(self) -> Union[Buy, Sell, Hold]:
         if self.is_sma_crossing_up():
             if self._bought:
                 pass
             elif not self._bought:
-                place_order(order_fcn, symbol=self._security, side=Client.SIDE_BUY,
-                            type=Client.ORDER_TYPE_MARKET, quantity=self._parameters.trade_amount)
+
+                self._bought = True
+                return Buy()
+
         elif self.is_sma_crossing_down():
             if self._bought:
-                place_order(order_fcn, symbol=self._security, side=Client.SIDE_SELL,
-                            type=Client.ORDER_TYPE_MARKET, quantity=self._parameters.trade_amount)
+
+                self._bought = False
+                return Sell()
+
             elif not self._bought:
                 pass
+
+# def sell():
+#     self._portfolio.place_order(symbol=self._security, side='sell',
+#                                 type='market', quantity=self._parameters.trade_amount)
+#
+#
+# def buy():
+#     self._portfolio.place_order(symbol=self._security, side='buy',
+#                                 type='market', quantity=self._parameters.trade_amount)

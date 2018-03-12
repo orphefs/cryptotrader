@@ -12,6 +12,20 @@ from containers.time_windows import TimeWindow
 from type_aliases import Security
 
 
+class StockData(object):
+    def __init__(self, candles: List[Candle], security: Security):
+        self._candles = candles
+        self._security = security
+
+    @property
+    def candles(self):
+        return self._candles
+
+    @property
+    def security(self):
+        return self._security
+
+
 def download_backtesting_data(time_window: TimeWindow, security: Security):
     client = Client("", "")
     klines = client.get_historical_klines(security, Client.KLINE_INTERVAL_1HOUR, time_window.start_time.as_string(),
@@ -19,9 +33,9 @@ def download_backtesting_data(time_window: TimeWindow, security: Security):
     return Candle.from_list_of_klines(klines)
 
 
-def download_1_minute_data(client: Client, security: Security):
+def download_live_data(client: Client, security: Security) -> StockData:
     klines = client.get_historical_klines(security, Client.KLINE_INTERVAL_1MINUTE, "1 day ago UTC")
-    return Candle.from_list_of_klines(klines)
+    return StockData(candles=Candle.from_list_of_klines(klines), security=security)
 
 
 def save_to_disk(data: Any, path_to_file: str):
@@ -40,20 +54,6 @@ def load_from_disk(path_to_file: str) -> Any:
 def generate_file_name(time_window: TimeWindow, security: Security) -> str:
     return ('_data_' + time_window.start_time.as_string().replace(" ", "_") + '_' +
             time_window.end_time.as_string().replace(" ", "_") + '_' + security + ".dill").replace(" ", "_")
-
-
-class StockData(object):
-    def __init__(self, candles: List[Candle], security: Security):
-        self._candles = candles
-        self._security = security
-
-    @property
-    def candles(self):
-        return self._candles
-
-    @property
-    def security(self):
-        return self._security
 
 
 if __name__ == '__main__':
