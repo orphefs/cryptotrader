@@ -9,7 +9,7 @@ from containers.data_point import Price, DataPoint
 class TimeSeries(pd.Series):
     def __init__(self, x: List[datetime], y: Union[List[Price], np.ndarray]):
         super().__init__(data=y, index=x)
-        self._sampling_rate = np.median(np.diff([time.as_epoch_time() for time in x]))
+        self._sampling_rate = np.median(np.diff(x))
 
     @property
     def sampling_rate(self):
