@@ -4,13 +4,24 @@ from typing import Dict, Callable, Union
 import pandas as pd
 
 from backtesting_logic.logic import TradingSignal
+from containers.candle import Candle
 from containers.time_series import TimeSeries
 from backtesting_logic.signal_processing import rolling_mean, _generate_trading_signals_from_sma
 from tools.downloader import StockData
 
 
 class Signal:
-    pass
+    def __init__(self, date_time: datetime, candle: Candle):
+        self._date_time = date_time
+        self._candle = candle
+
+    @property
+    def date_time(self):
+        return self._date_time
+
+    @property
+    def candle(self):
+        return self._candle
 
 
 class Buy(Signal):
@@ -55,7 +66,7 @@ class Portfolio:
 
     def _append_to_holdings(self, trade_time, amount):
         cumulative_amount = self.portfolio['holdings'][0][1] + amount
-        self.portfolio['holdings'] += [trade_time, cumulative_amount]
+        self.portfolio['holdings'].append((trade_time, cumulative_amount))
 
     def _compute_cash(self):
         pass
@@ -68,9 +79,9 @@ class Portfolio:
 
     def _place_order(self, signal: Union[Buy, Sell, Hold], quantity: int):
         if isinstance(signal, Buy):
-            self._append_to_holdings(datetime.now(), quantity)
+            self._append_to_holdings(signal.date_time, quantity)
         if isinstance(signal, Sell):
-            self._append_to_holdings(datetime.now(), -quantity)
+            self._append_to_holdings(signal.date_time, -quantity)
 
     def update(self, signal: Union[Buy, Sell, Hold]):
         self._place_order(signal, self._trade_amount)
@@ -79,6 +90,7 @@ class Portfolio:
 class SMAStrategy(LiveStrategy):
     def __init__(self, parameters: LiveParameters):
         self._data = Dict
+        self._stock_data = StockData
         self._trading_signals = []
         self._parameters = parameters
         self._time_series = TimeSeries
@@ -93,6 +105,7 @@ class SMAStrategy(LiveStrategy):
         return (self._short_sma[-2] > self._long_sma[-2]) and (self._short_sma[-1] < self._long_sma[-1])
 
     def extract_time_series_from_stock_data(self, stock_data: StockData):
+        self._stock_data = stock_data
         self._time_series = TimeSeries(
             x=[candle.get_time().close_time.as_datetime() for candle in stock_data.candles],
             y=[candle.get_price().close_price for candle in stock_data.candles])
@@ -108,18 +121,21 @@ class SMAStrategy(LiveStrategy):
             elif not self._bought:
 
                 self._bought = True
-                return Buy()
+                return Buy(date_time=self._stock_data.candles[-1].get_time().close_time.as_datetime(),
+                           candle=self._stock_data.candles[-1])
 
         elif self.is_sma_crossing_down():
             if self._bought:
 
                 self._bought = False
-                return Sell()
+                return Sell(date_time=self._stock_data.candles[-1].get_time().close_time.as_datetime(),
+                           candle=self._stock_data.candles[-1])
 
             elif not self._bought:
                 pass
         else:
-            return Hold()
+            return Hold(date_time=self._stock_data.candles[-1].get_time().close_time.as_datetime(),
+                           candle=self._stock_data.candles[-1])
 
 # def sell():
 #     self._portfolio.place_order(symbol=self._security, side='sell',
