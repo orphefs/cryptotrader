@@ -1,5 +1,5 @@
 from typing import List
-
+import pandas as pd
 import matplotlib.dates as mdate
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
@@ -23,25 +23,26 @@ def plot_close_price(ax: Axis, data: StockData):
 
 def plot_portfolio(ax: List[Axis], portfolio: Portfolio):
     if 'holdings' in portfolio.portfolio:
-        portfolio.portfolio['holdings'].plot(ax=ax[0],alpha=0.7)
-    if 'cash' in portfolio.portfolio:
-        portfolio.portfolio['cash'].plot(ax=ax[1],alpha=0.7)
-    if 'total' in portfolio.portfolio:
-        portfolio.portfolio['total'].plot(ax=ax[1],alpha=0.7)
-    if 'returns' in portfolio.portfolio:
-        portfolio.portfolio['returns'].plot(ax=ax[0],alpha=0.7)
-    ax[0].legend()
-    ax[1].legend()
-
-def plot_portfolio_2(ax: List[Axis], portfolio: Portfolio):
-    if 'holdings' in portfolio.portfolio:
-        ax[0].plot(portfolio.portfolio['holdings'], alpha=0.7)
+        portfolio.portfolio['holdings'].plot(ax=ax[0], alpha=0.7)
     if 'cash' in portfolio.portfolio:
         portfolio.portfolio['cash'].plot(ax=ax[1], alpha=0.7)
     if 'total' in portfolio.portfolio:
         portfolio.portfolio['total'].plot(ax=ax[1], alpha=0.7)
     if 'returns' in portfolio.portfolio:
         portfolio.portfolio['returns'].plot(ax=ax[0], alpha=0.7)
+    ax[0].legend()
+    ax[1].legend()
+
+
+def plot_portfolio_2(ax: List[Axis], portfolio_df: pd.DataFrame):
+    if 'holdings' in portfolio_df:
+          portfolio_df['holdings'].plot(ax=ax[0], alpha=0.7)
+    if 'cash' in portfolio_df:
+        portfolio_df.portfolio['cash'].plot(ax=ax[1], alpha=0.7)
+    if 'total' in portfolio_df:
+        portfolio_df.portfolio['total'].plot(ax=ax[1], alpha=0.7)
+    if 'returns' in portfolio_df:
+        portfolio_df.portfolio['returns'].plot(ax=ax[0], alpha=0.7)
     ax[0].legend()
     ax[1].legend()
 
@@ -105,6 +106,3 @@ def plot_candlesticks(ax: Axes, data: StockData):
     ax.autoscale_view()
     plt.setp(plt.gca().get_xticklabels(), rotation=45, horizontalalignment='right')
     ax.set_title(data.security)
-
-
-

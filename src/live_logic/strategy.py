@@ -62,11 +62,17 @@ class Portfolio:
         self._capital = []
         self._initial_capital = initial_capital
         self.portfolio = {}
-        self.portfolio['holdings'] = [(datetime.now(), 0.0)]
+        self.portfolio['holdings'] = [(None, 0.0)]
+        self._portfolio_df = pd.DataFrame(columns=['holdings', 'cash', 'returns', 'total'])
 
     def _append_to_holdings(self, trade_time, amount):
         cumulative_amount = self.portfolio['holdings'][0][1] + amount
         self.portfolio['holdings'].append((trade_time, cumulative_amount))
+
+    def convert_to_pandas(self):
+        self._portfolio_df = pd.DataFrame(index=[holding[0] for holding in self.portfolio['holdings']])
+        self._portfolio_df['holdings'] = [holding[1] for holding in self.portfolio['holdings']]
+
 
     def _compute_cash(self):
         pass
@@ -129,13 +135,13 @@ class SMAStrategy(LiveStrategy):
 
                 self._bought = False
                 return Sell(date_time=self._stock_data.candles[-1].get_time().close_time.as_datetime(),
-                           candle=self._stock_data.candles[-1])
+                            candle=self._stock_data.candles[-1])
 
             elif not self._bought:
                 pass
         else:
             return Hold(date_time=self._stock_data.candles[-1].get_time().close_time.as_datetime(),
-                           candle=self._stock_data.candles[-1])
+                        candle=self._stock_data.candles[-1])
 
 # def sell():
 #     self._portfolio.place_order(symbol=self._security, side='sell',

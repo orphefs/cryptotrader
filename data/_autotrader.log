@@ -4,3 +4,5 @@ INFO:root:Uptrend at 0.03723333333333301, Heading Up at 0.3057997628321658
 INFO:root:bought at 111.1
 INFO:root:Uptrend at 0.03723333333333301, Heading Up at 0.575799762832176
 INFO:root:Bought at 111.37
+WARNING:matplotlib.legend:No handles with labels found to put in legend.
+WARNING:matplotlib.legend:No handles with labels found to put in legend.
