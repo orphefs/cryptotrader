@@ -6,7 +6,7 @@ from matplotlib.axes import Axes
 from matplotlib.axis import Axis
 from matplotlib.dates import DateFormatter, WeekdayLocator, \
     DayLocator, MONDAY
-from matplotlib.finance import candlestick_ohlc
+from externals.mpl_finance.mpl_finance import candlestick_ohlc
 
 from backtesting_logic.logic import IntersectionPoint, TradingSignal
 from containers.time_series import TimeSeries
