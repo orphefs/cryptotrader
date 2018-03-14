@@ -59,7 +59,7 @@ def main():
         time.sleep(parameters.sleep_time)
 
     fig, ax = plt.subplots(nrows=3, ncols=1)
-    portfolio.convert_to_pandas()
+    portfolio.compute_statistics()
     plot_portfolio_2(ax[1:3], portfolio._portfolio_df)
     plt.show()
     plot_close_price()

@@ -62,16 +62,35 @@ class Portfolio:
         self._capital = []
         self._initial_capital = initial_capital
         self.portfolio = {}
-        self.portfolio['holdings'] = [(None, 0.0)]
+        self.portfolio['positions'] = [(None, 0.0, None)]
         self._portfolio_df = pd.DataFrame(columns=['holdings', 'cash', 'returns', 'total'])
 
-    def _append_to_holdings(self, trade_time, amount):
-        cumulative_amount = self.portfolio['holdings'][0][1] + amount
-        self.portfolio['holdings'].append((trade_time, cumulative_amount))
+    def _append_to_positions(self, trade_time, amount, candle):
+        cumulative_amount = self.portfolio['positions'][0][1] + amount
+        self.portfolio['positions'].append((trade_time, cumulative_amount, candle))
 
-    def convert_to_pandas(self):
-        self._portfolio_df = pd.DataFrame(index=[holding[0] for holding in self.portfolio['holdings']])
-        self._portfolio_df['holdings'] = [holding[1] for holding in self.portfolio['holdings']]
+    def compute_statistics(self):
+        self._portfolio_df = pd.DataFrame(index=[holding[0] for holding in self.portfolio['positions']])
+        self._portfolio_df['positions'] = [holding[1] for holding in self.portfolio['positions']]
+        candles = [item[2] for item in self.portfolio['positions']][1:]
+        candles_df = pd.DataFrame(data=[candle.get_price().close_price for candle in candles],
+                                index=[candle.get_time().close_time.as_datetime() for candle in candles])
+
+        pos = self._portfolio_df['positions'][1:][0] * candles_df[:][0] * (1-self._fees)
+        pos_diff = pos.diff(periods=1)
+
+
+        # Create the 'holdings' and 'cash' series by running through
+        # the trades and adding/subtracting the relevant quantity from
+        # each column
+
+        self._portfolio_df['holdings'] = pos.cumsum(axis=0)
+        self._portfolio_df['cash'] = self._initial_capital - (pos_diff * candles_df[:][0]).cumsum(axis=0)
+
+        # Finalise the total and bar-based returns based on the 'cash'
+        # and 'holdings' figures for the portfolio
+        self._portfolio_df['total'] = self._portfolio_df['cash'] + self._portfolio_df['holdings']
+        self._portfolio_df['returns'] = self._portfolio_df['total'].pct_change()
 
 
     def _compute_cash(self):
@@ -83,14 +102,17 @@ class Portfolio:
     def _compute_returns(self):
         pass
 
-    def _place_order(self, signal: Union[Buy, Sell, Hold], quantity: int):
+    def _place_order(self, signal: Union[Buy, Sell, Hold], quantity: int, candle: Candle):
         if isinstance(signal, Buy):
-            self._append_to_holdings(signal.date_time, quantity)
+            self._append_to_positions(signal.date_time, quantity, candle)
         if isinstance(signal, Sell):
-            self._append_to_holdings(signal.date_time, -quantity)
+            self._append_to_positions(signal.date_time, -quantity, candle)
 
     def update(self, signal: Union[Buy, Sell, Hold]):
-        self._place_order(signal, self._trade_amount)
+        if signal is None:
+            self._place_order(None, self._trade_amount, None)
+        else:
+            self._place_order(signal, self._trade_amount, signal.candle)
 
 
 class SMAStrategy(LiveStrategy):
