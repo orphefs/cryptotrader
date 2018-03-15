@@ -8,7 +8,7 @@ from matplotlib.dates import DateFormatter, WeekdayLocator, \
     DayLocator, MONDAY
 from externals.mpl_finance.mpl_finance import candlestick_ohlc
 
-from backtesting_logic.logic import IntersectionPoint, _TradingSignal
+from backtesting_logic.logic import IntersectionPoint, TradingSignal
 from containers.time_series import TimeSeries
 from backtesting_logic.portfolio import Portfolio
 from tools.downloader import load_from_disk, StockData
@@ -61,7 +61,7 @@ def plot_intersection_point(ax: Axes, intersection_point: IntersectionPoint):
     ax.scatter(y=intersection_point.data_point.value, x=intersection_point.data_point.date_time)
 
 
-def plot_trading_signals(ax: Axes, trading_signals: List[_TradingSignal]):
+def plot_trading_signals(ax: Axes, trading_signals: List[TradingSignal]):
     marker_map = {
         "Buy": '^',
         "Sell": 'v',

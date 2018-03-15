@@ -3,7 +3,7 @@ from datetime import timedelta, datetime
 from typing import Dict, Callable, Union
 import pandas as pd
 
-from backtesting_logic.logic import _TradingSignal, Buy, Hold, Sell
+from backtesting_logic.logic import TradingSignal, Buy, Hold, Sell
 from containers.candle import Candle
 from containers.data_point import DataPoint
 from containers.time_series import TimeSeries
@@ -118,7 +118,10 @@ class SMAStrategy(LiveStrategy):
     def generate_trading_signal(self) -> Union[Buy, Sell, Hold]:
         if self.is_sma_crossing_up():
             if self._bought:
-                pass
+                return Hold(signal=0,
+                        data_point=DataPoint(value=self._stock_data.candles[-1].get_price().close_price,
+                                             date_time=self._stock_data.candles[
+                                                 -1].get_time().close_time.as_datetime()))
             elif not self._bought:
 
                 self._bought = True
@@ -137,7 +140,10 @@ class SMAStrategy(LiveStrategy):
                                                      -1].get_time().close_time.as_datetime()))
 
             elif not self._bought:
-                pass
+                return Hold(signal=0,
+                        data_point=DataPoint(value=self._stock_data.candles[-1].get_price().close_price,
+                                             date_time=self._stock_data.candles[
+                                                 -1].get_time().close_time.as_datetime()))
         else:
             return Hold(signal=0,
                         data_point=DataPoint(value=self._stock_data.candles[-1].get_price().close_price,

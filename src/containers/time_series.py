@@ -1,8 +1,9 @@
 from datetime import datetime
 from typing import List, Union
 
-import pandas as pd
 import numpy as np
+import pandas as pd
+
 from containers.data_point import Price, DataPoint
 
 
@@ -19,3 +20,5 @@ class TimeSeries(pd.Series):
     def from_datapoints(data_points: List[DataPoint]):
         return TimeSeries(x=[data_point.date_time for data_point in data_points],
                           y=[data_point.value for data_point in data_points])
+
+
