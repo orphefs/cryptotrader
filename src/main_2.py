@@ -33,7 +33,7 @@ def main():
     data = load_from_disk(
         "/home/orphefs/Documents/Code/autotrader/autotrader/data/_data_01_Jan,_2017_10_Oct,_2017_LTCBTC.dill")
     logging.info("Sampling rate of backtesting data: {}".format(calculate_sampling_rate_of_stock_data(data)))
-    
+
 
     i = 10
     while enabled:
