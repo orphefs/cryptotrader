@@ -12,8 +12,9 @@ from helpers import extract_time_series_from_stock_data
 from live_logic.strategy import SMAStrategy, Parameters, LiveParameters, Portfolio, Buy, Hold
 from plotting.plot_candles import plot_portfolio, plot_portfolio_2, plot_close_price, plot_trading_signals, \
     plot_candlesticks, plot_moving_average
-from tools.downloader import download_live_data, load_from_disk, simulate_live_data, StockData, \
+from tools.downloader import download_live_data, load_from_disk, simulate_live_data, \
     calculate_sampling_rate_of_stock_data
+from containers.stock_data import StockData
 
 matplotlib.use('AGG')  # generate postscript output by default
 import matplotlib.pyplot as plt

@@ -11,7 +11,8 @@ from externals.mpl_finance.mpl_finance import candlestick_ohlc
 from backtesting_logic.logic import IntersectionPoint, TradingSignal
 from containers.time_series import TimeSeries
 from backtesting_logic.portfolio import Portfolio
-from tools.downloader import load_from_disk, StockData
+from tools.downloader import load_from_disk
+from containers.stock_data import StockData
 
 
 def plot_close_price(ax: Axis, data: StockData):

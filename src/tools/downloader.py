@@ -1,30 +1,14 @@
-import os
-
-from binance.client import Client
-from datetime import datetime, timedelta, time
-
+from datetime import datetime
 from typing import List, Any
-import dill
 
-import definitions
+import dill
+from binance.client import Client
+
 from containers.candle import Candle
+from containers.stock_data import StockData
 from containers.time_series import TimeSeries
 from containers.time_windows import TimeWindow
 from type_aliases import Security
-
-
-class StockData(object):
-    def __init__(self, candles: List[Candle], security: Security):
-        self._candles = candles
-        self._security = security
-
-    @property
-    def candles(self):
-        return self._candles
-
-    @property
-    def security(self):
-        return self._security
 
 
 def calculate_sampling_rate_of_stock_data(stock_data: StockData) -> float:

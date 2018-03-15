@@ -4,7 +4,7 @@ from typing import Dict
 
 from containers.time_series import TimeSeries
 from backtesting_logic.signal_processing import rolling_mean, _generate_trading_signals_from_sma
-from tools.downloader import StockData
+from containers.stock_data import StockData
 
 
 class BackTestingStrategy(ABC):
