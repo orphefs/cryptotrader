@@ -8,7 +8,7 @@ _signal_types = {-1: "Buy",
                  0: "Hold", }
 
 
-class TradingSignal(object):
+class _TradingSignal(object):
     def __init__(self, signal: int, data_point: DataPoint):
         self.signal = signal
         self.type = _signal_types[signal]
@@ -18,8 +18,20 @@ class TradingSignal(object):
         return "TradingSignal({} at {})".format(self.type, self.data_point)
 
 
+class Buy(_TradingSignal):
+    pass
+
+
+class Sell(_TradingSignal):
+    pass
+
+
+class Hold(_TradingSignal):
+    pass
+
+
 class IntersectionPoint(object):
-    def __init__(self, trading_signal: TradingSignal, data_point: DataPoint, intersecting_time_series: List[TimeSeries],
+    def __init__(self, trading_signal: _TradingSignal, data_point: DataPoint, intersecting_time_series: List[TimeSeries],
                  tolerance: float):
         self._trading_signal = trading_signal
         self._data_point = data_point

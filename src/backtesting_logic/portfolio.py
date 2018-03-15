@@ -3,7 +3,7 @@ from typing import List
 
 import pandas as pd
 
-from backtesting_logic.logic import TradingSignal
+from backtesting_logic.logic import _TradingSignal
 from tools.downloader import StockData
 
 
@@ -49,7 +49,7 @@ class MarketOnClosePortfolio(Portfolio):
     signals - A pandas DataFrame of signals (1, 0, -1) for each symbol.
     initial_capital - The amount in cash at the start of the portfolio."""
 
-    def __init__(self, stock_data: StockData, trading_signals: List[TradingSignal],
+    def __init__(self, stock_data: StockData, trading_signals: List[_TradingSignal],
                  initial_capital: float = 1.0):
         self._symbol = stock_data.security
         self._candles = pd.DataFrame(data={
