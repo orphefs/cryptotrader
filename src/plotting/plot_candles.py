@@ -55,7 +55,7 @@ def plot_returns(ax: Axes, stock_data: StockData, returns: List[float]):
 
 
 def plot_moving_average(ax: Axes, time_series: TimeSeries):
-    time_series.plot(kind='line', ax=ax)
+    time_series.plot(kind='line', marker='o',ax=ax)
 
 
 def plot_intersection_point(ax: Axes, intersection_point: IntersectionPoint):

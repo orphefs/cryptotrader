@@ -12,7 +12,7 @@ from helpers import extract_time_series_from_stock_data
 from live_logic.strategy import SMAStrategy, Parameters, LiveParameters, Portfolio, Buy, Hold
 from plotting.plot_candles import plot_portfolio, plot_portfolio_2, plot_close_price, plot_trading_signals, \
     plot_candlesticks, plot_moving_average
-from tools.downloader import download_live_data, load_from_disk, simulate_live_data, \
+from tools.downloader import download_live_data, load_from_disk, serve_windowed_stock_data, \
     calculate_sampling_rate_of_stock_data
 from containers.stock_data import StockData
 
@@ -25,8 +25,8 @@ import definitions
 
 logging.basicConfig(filename=os.path.join(definitions.DATA_DIR, '_autotrader.log'), level=logging.INFO)
 enabled = True
-parameters = LiveParameters(short_sma_period=timedelta(hours=2),
-                            long_sma_period=timedelta(hours=10),
+parameters = LiveParameters(short_sma_period=timedelta(hours=3),
+                            long_sma_period=timedelta(hours=8),
                             trade_amount=100,
                             sleep_time=0)
 
@@ -36,24 +36,19 @@ def main():
     strategy = SMAStrategy(parameters)
     portfolio = Portfolio(initial_capital=1000.0, trade_amount=parameters.trade_amount)
     stock_data = load_from_disk(
-        "/home/orphefs/Documents/Code/autotrader/autotrader/data/_data_01_Jan,_2017_10_Oct,_2017_LTCBTC.dill")
+        "/home/orphefs/Documents/Code/autotrader/autotrader/data/_data_01_Jan,_2017_01_Feb,_2018_XRPBTC.dill")
     logging.info("Sampling rate of backtesting data: {}".format(calculate_sampling_rate_of_stock_data(stock_data)))
     trading_signals = []
+    window_start = 10
+    iteration = 10
 
-    i = 10
     while enabled:
-        try:
-            # stock_data = download_live_data(client, "XRPBTC")
-            stock_data_partial = simulate_live_data(stock_data, i)
-            print(i)
-            i += 1
-            if i == 2106:
-                break
-
-        except Exception:
+        # stock_data = download_live_data(client, "XRPBTC")
+        iteration, stock_data_window = serve_windowed_stock_data(stock_data, iteration, window_start)
+        if iteration == len(stock_data)-2:
             break
 
-        strategy.extract_time_series_from_stock_data(stock_data_partial)
+        strategy.extract_time_series_from_stock_data(stock_data_window)
         strategy.compute_moving_averages()
         signal = strategy.generate_trading_signal()
         trading_signals.append(signal)

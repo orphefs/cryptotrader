@@ -32,7 +32,7 @@ class LiveParameters(Parameters):
 
 class Portfolio:
     def __init__(self, initial_capital: float, trade_amount: int):
-        self._fees = 0.01  # percent
+        self._fees = 0.001  # 0.1% on binance
         self._trade_amount = trade_amount
         self._capital = []
         self._initial_capital = initial_capital
@@ -49,7 +49,7 @@ class Portfolio:
         self._portfolio_df['positions'] = [holding[1] for holding in self.portfolio['positions']]
         data_points = [item[2] for item in self.portfolio['positions']][1:]
         data_points_df = pd.DataFrame(data=[data_point.value for data_point in data_points],
-                                  index=[data_point.date_time for data_point in data_points])
+                                      index=[data_point.date_time for data_point in data_points])
 
         pos = self._portfolio_df['positions'][1:][0] * data_points_df[:][0] * (1 - self._fees)
         pos_diff = pos.diff(periods=1)
@@ -98,12 +98,16 @@ class SMAStrategy(LiveStrategy):
         self._short_sma = pd.Series
         self._long_sma = pd.Series
         self._bought = False
+        self._last_buy_price = 0.0
 
     def is_sma_crossing_up(self):
         return (self._short_sma[-2] < self._long_sma[-2]) and (self._short_sma[-1] > self._long_sma[-1])
 
     def is_sma_crossing_down(self):
         return (self._short_sma[-2] > self._long_sma[-2]) and (self._short_sma[-1] < self._long_sma[-1])
+
+    def is_current_price_higher_than_last_buy(self, current_price: float):
+        return current_price > self._last_buy_price
 
     def extract_time_series_from_stock_data(self, stock_data: StockData):
         self._stock_data = stock_data
@@ -116,45 +120,24 @@ class SMAStrategy(LiveStrategy):
         self._long_sma = rolling_mean(self._parameters.long_sma_period, self._time_series)
 
     def generate_trading_signal(self) -> Union[Buy, Sell, Hold]:
+        current_price = self._stock_data.candles[-1].get_price().close_price
+        current_time = self._stock_data.candles[-1].get_time().close_time.as_datetime()
+
         if self.is_sma_crossing_up():
             if self._bought:
-                return Hold(signal=0,
-                        data_point=DataPoint(value=self._stock_data.candles[-1].get_price().close_price,
-                                             date_time=self._stock_data.candles[
-                                                 -1].get_time().close_time.as_datetime()))
-            elif not self._bought:
+                return Hold(signal=0, data_point=DataPoint(value=current_price, date_time=current_time))
 
+            elif not self._bought:
                 self._bought = True
-                return Buy(signal=-1,
-                           data_point=DataPoint(value=self._stock_data.candles[-1].get_price().close_price,
-                                                date_time=self._stock_data.candles[
-                                                    -1].get_time().close_time.as_datetime()))
+                self._last_buy_price = current_price
+                return Buy(signal=-1, data_point=DataPoint(value=current_price, date_time=current_time))
 
-        elif self.is_sma_crossing_down():
+        elif self.is_sma_crossing_down() and self.is_current_price_higher_than_last_buy(current_price):
             if self._bought:
-
                 self._bought = False
-                return Sell(signal=1,
-                            data_point=DataPoint(value=self._stock_data.candles[-1].get_price().close_price,
-                                                 date_time=self._stock_data.candles[
-                                                     -1].get_time().close_time.as_datetime()))
+                return Sell(signal=1, data_point=DataPoint(value=current_price, date_time=current_time))
 
             elif not self._bought:
-                return Hold(signal=0,
-                        data_point=DataPoint(value=self._stock_data.candles[-1].get_price().close_price,
-                                             date_time=self._stock_data.candles[
-                                                 -1].get_time().close_time.as_datetime()))
+                return Hold(signal=0, data_point=DataPoint(value=current_price, date_time=current_time))
         else:
-            return Hold(signal=0,
-                        data_point=DataPoint(value=self._stock_data.candles[-1].get_price().close_price,
-                                             date_time=self._stock_data.candles[
-                                                 -1].get_time().close_time.as_datetime()))
-
-# def sell():
-#     self._portfolio.place_order(symbol=self._security, side='sell',
-#                                 type='market', quantity=self._parameters.trade_amount)
-#
-#
-# def buy():
-#     self._portfolio.place_order(symbol=self._security, side='buy',
-#                                 type='market', quantity=self._parameters.trade_amount)
+            return Hold(signal=0, data_point=DataPoint(value=current_price, date_time=current_time))

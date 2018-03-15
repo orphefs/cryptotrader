@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Any
+from typing import List, Any, Tuple
 
 import dill
 from binance.client import Client
@@ -28,8 +28,9 @@ def download_live_data(client: Client, security: Security) -> List[Candle]:
     return Candle.from_list_of_klines(klines)
 
 
-def simulate_live_data(data: StockData, i: int) -> StockData:
-    return StockData(data.candles[i - 10:i], data.security)
+def serve_windowed_stock_data(data: StockData, iteration: int, window_start: int) -> Tuple[int, StockData]:
+    iteration += 1
+    return iteration, StockData(data.candles[iteration - window_start:iteration], data.security)
 
 
 def save_to_disk(data: Any, path_to_file: str):
