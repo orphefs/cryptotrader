@@ -34,7 +34,7 @@ parameters = LiveParameters(short_sma_period=timedelta(hours=3),
 def main():
     client = Client("", "")
     strategy = SMAStrategy(parameters)
-    portfolio = Portfolio(initial_capital=1000.0, trade_amount=parameters.trade_amount)
+    portfolio = Portfolio(initial_capital=0.5, trade_amount=parameters.trade_amount)
     stock_data = load_from_disk(
         "/home/orphefs/Documents/Code/autotrader/autotrader/data/_data_01_Jan,_2017_01_Feb,_2018_XRPBTC.dill")
     logging.info("Sampling rate of backtesting data: {}".format(calculate_sampling_rate_of_stock_data(stock_data)))
@@ -52,7 +52,7 @@ def main():
         strategy.compute_moving_averages()
         signal = strategy.generate_trading_signal()
         trading_signals.append(signal)
-        print(signal)
+        # print(signal)
         portfolio.update(signal)
 
         time.sleep(parameters.sleep_time)
@@ -60,16 +60,17 @@ def main():
     fig, ax = plt.subplots(nrows=3, ncols=1, sharex=True)
     portfolio.compute_statistics()
     plot_portfolio_2(ax[1:3], portfolio._portfolio_df)
-    # plot_close_price(ax=ax[0], data=stock_data)
     plot_trading_signals(ax=ax[0], trading_signals=trading_signals[1:])
     plot_moving_average(ax=ax[0], time_series=rolling_mean(parameters.short_sma_period,
                                                            extract_time_series_from_stock_data(stock_data)))
     plot_moving_average(ax=ax[0], time_series=rolling_mean(parameters.long_sma_period,
                                                            extract_time_series_from_stock_data(stock_data)))
 
-    # plot_candlesticks(ax[0], stock_data)
+    print(portfolio._point_stats['base_index_pct_change'])
+    print(portfolio._point_stats['total_pct_change'])
+
     plt.show()
-    plot_close_price()
+
 
 
 if __name__ == "__main__":

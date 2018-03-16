@@ -39,6 +39,7 @@ class Portfolio:
         self.portfolio = {}
         self.portfolio['positions'] = [(None, 0.0, None)]
         self._portfolio_df = pd.DataFrame(columns=['holdings', 'cash', 'returns', 'total'])
+        self._point_stats = {}
 
     def _append_to_positions(self, trade_time, amount, candle):
         cumulative_amount = self.portfolio['positions'][0][1] + amount
@@ -65,6 +66,10 @@ class Portfolio:
         # and 'holdings' figures for the portfolio
         self._portfolio_df['total'] = self._portfolio_df['cash'] + self._portfolio_df['holdings']
         self._portfolio_df['returns'] = self._portfolio_df['total'].pct_change()
+
+        self._point_stats['base_index_pct_change'] = (data_points_df[0][-1] - data_points_df[0][0])/data_points_df[0][0]
+        self._point_stats['total_pct_change'] = (self._portfolio_df['total'][-1] -
+                                                 self._initial_capital)/self._initial_capital
 
     def _compute_cash(self):
         pass
@@ -100,10 +105,10 @@ class SMAStrategy(LiveStrategy):
         self._bought = False
         self._last_buy_price = 0.0
 
-    def is_sma_crossing_up(self):
+    def is_sma_crossing_from_below(self):
         return (self._short_sma[-2] < self._long_sma[-2]) and (self._short_sma[-1] > self._long_sma[-1])
 
-    def is_sma_crossing_down(self):
+    def is_sma_crossing_from_above(self):
         return (self._short_sma[-2] > self._long_sma[-2]) and (self._short_sma[-1] < self._long_sma[-1])
 
     def is_current_price_higher_than_last_buy(self, current_price: float):
@@ -123,7 +128,7 @@ class SMAStrategy(LiveStrategy):
         current_price = self._stock_data.candles[-1].get_price().close_price
         current_time = self._stock_data.candles[-1].get_time().close_time.as_datetime()
 
-        if self.is_sma_crossing_up():
+        if self.is_sma_crossing_from_below():
             if self._bought:
                 return Hold(signal=0, data_point=DataPoint(value=current_price, date_time=current_time))
 
@@ -132,7 +137,7 @@ class SMAStrategy(LiveStrategy):
                 self._last_buy_price = current_price
                 return Buy(signal=-1, data_point=DataPoint(value=current_price, date_time=current_time))
 
-        elif self.is_sma_crossing_down() and self.is_current_price_higher_than_last_buy(current_price):
+        elif self.is_sma_crossing_from_above():
             if self._bought:
                 self._bought = False
                 return Sell(signal=1, data_point=DataPoint(value=current_price, date_time=current_time))
