@@ -52,7 +52,7 @@ class Portfolio:
         data_points_df = pd.DataFrame(data=[data_point.value for data_point in data_points],
                                       index=[data_point.date_time for data_point in data_points])
 
-        pos = self._portfolio_df['positions'][1:][0] * data_points_df[:][0] * (1 - self._fees)
+        pos = self._portfolio_df['positions'][1:] * data_points_df[:][0] * (1 - self._fees)
         pos_diff = pos.diff(periods=1)
 
         # Create the 'holdings' and 'cash' series by running through
@@ -85,6 +85,8 @@ class Portfolio:
             self._append_to_positions(signal.data_point.date_time, quantity, data_point)
         if isinstance(signal, Sell):
             self._append_to_positions(signal.data_point.date_time, -quantity, data_point)
+        if isinstance(signal, Hold):
+            self._append_to_positions(signal.data_point.date_time, 0.0, data_point)
 
     def update(self, signal: Union[Buy, Sell, Hold]):
         if signal is None:
