@@ -49,36 +49,54 @@ class Portfolio:
         self._portfolio_df = pd.DataFrame(index=[holding[0] for holding in self.portfolio['positions']])
         self._portfolio_df['positions'] = [holding[1] for holding in self.portfolio['positions']]
         data_points = [item[2] for item in self.portfolio['positions']][1:]
-        data_points_df = pd.DataFrame(data=[data_point.value for data_point in data_points],
-                                      index=[data_point.date_time for data_point in data_points])
+        prices_df = pd.DataFrame(data=[data_point.value for data_point in data_points],
+                                 index=[data_point.date_time for data_point in data_points])
 
-        pos = self._portfolio_df['positions'][1:] * data_points_df[:][0] * (1 - self._fees)
-        pos_diff = pos.diff(periods=1)
+        pos = self._compute_positions(fees=self._fees,
+                                      positions=self._portfolio_df['positions'][1:],
+                                      prices=prices_df[:][0])
 
-        # Create the 'holdings' and 'cash' series by running through
-        # the trades and adding/subtracting the relevant quantity from
-        # each column
+        pos_diff = self._differentiate_positions(positions=pos)
 
-        self._portfolio_df['holdings'] = pos.cumsum(axis=0)
-        self._portfolio_df['cash'] = self._initial_capital - (pos_diff * data_points_df[:][0]).cumsum(axis=0)
+        self._portfolio_df['holdings'] = self._compute_holdings(positions=pos)
+        self._portfolio_df['cash'] = self._compute_cash(initial_capital=self._initial_capital,
+                                                        positions_diff=pos_diff,
+                                                        prices=prices_df[:][0])
 
-        # Finalise the total and bar-based returns based on the 'cash'
-        # and 'holdings' figures for the portfolio
-        self._portfolio_df['total'] = self._portfolio_df['cash'] + self._portfolio_df['holdings']
-        self._portfolio_df['returns'] = self._portfolio_df['total'].pct_change()
+        self._portfolio_df['total'] = self._compute_total(
+            cash=self._portfolio_df['cash'], holdings=self._portfolio_df['holdings'])
 
-        self._point_stats['base_index_pct_change'] = (data_points_df[0][-1] - data_points_df[0][0])/data_points_df[0][0]
+        self._portfolio_df['returns'] = self._compute_returns(total_earnings=self._portfolio_df['total'])
+
+        self._point_stats['base_index_pct_change'] = (prices_df[0][-1] - prices_df[0][0]) / prices_df[0][
+            0]
         self._point_stats['total_pct_change'] = (self._portfolio_df['total'][-1] -
-                                                 self._initial_capital)/self._initial_capital
+                                                 self._initial_capital) / self._initial_capital
 
-    def _compute_cash(self):
-        pass
+    @staticmethod
+    def _compute_holdings(positions: pd.Series) -> pd.Series:
+        return positions.cumsum(axis=0)
 
-    def _compute_total(self):
-        pass
+    @staticmethod
+    def _differentiate_positions(positions: pd.Series) -> pd.Series:
+        return positions.diff()
 
-    def _compute_returns(self):
-        pass
+    @staticmethod
+    def _compute_positions(fees: float, positions: pd.Series, prices: pd.Series) -> pd.Series:
+        return positions * prices * (1 - fees)
+
+    @staticmethod
+    def _compute_cash(initial_capital: float, positions_diff: pd.Series, prices: pd.Series):
+        return initial_capital - (positions_diff * prices).cumsum(axis=0)
+
+    @staticmethod
+    def _compute_total(cash: pd.Series, holdings: pd.Series) -> pd.Series:
+        return cash + holdings
+
+    @staticmethod
+    def _compute_returns(total_earnings: pd.Series) -> pd.Series:
+        returns = total_earnings.pct_change()
+        return returns
 
     def _place_order(self, signal: Union[Buy, Sell, Hold], quantity: int, data_point: DataPoint):
         if isinstance(signal, Buy):
