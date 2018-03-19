@@ -1,9 +1,11 @@
+import os
 from datetime import datetime
 from typing import List, Any, Tuple
 
 import dill
 from binance.client import Client
 
+import definitions
 from containers.candle import Candle
 from containers.stock_data import StockData
 from containers.time_series import TimeSeries
@@ -16,7 +18,7 @@ def calculate_sampling_rate_of_stock_data(stock_data: StockData) -> float:
                       y=[candle.get_price().close_price for candle in stock_data.candles]).sampling_rate
 
 
-def download_backtesting_data(time_window: TimeWindow, security: Security):
+def download_backtesting_data(time_window: TimeWindow, security: Security) -> List[Candle]:
     client = Client("", "")
     klines = client.get_historical_klines(security, Client.KLINE_INTERVAL_1HOUR, time_window.start_time.as_string(),
                                           time_window.end_time.as_string())
@@ -53,13 +55,14 @@ def generate_file_name(time_window: TimeWindow, security: Security) -> str:
 
 if __name__ == '__main__':
     security = "XRPBTC"
-    time_window = TimeWindow(start_time=datetime(2018, 2, 1),
+    time_window = TimeWindow(start_time=datetime(2017, 10, 1),
                              end_time=datetime(2018, 3, 1))
     start = datetime.now()
-    candles = download_live_data(Client("", ""), security)
+    # candles = download_live_data(Client("", ""), security)
+    candles = download_backtesting_data(time_window, security)
     stop = datetime.now()
     print("Elapsed download time: {}".format(stop - start))
     for candle in candles:
         print("{}\n".format(candle))
-        # stock_data = StockData(candles, security)
-        # save_to_disk(stock_data, os.path.join(definitions.DATA_DIR, generate_file_name(time_window, security)))
+    stock_data = StockData(candles, security)
+    save_to_disk(stock_data, os.path.join(definitions.DATA_DIR, generate_file_name(time_window, security)))
