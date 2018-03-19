@@ -57,7 +57,7 @@ def main():
 
         time.sleep(parameters.sleep_time)
 
-    portfolio.compute_statistics()
+    portfolio.compute_performance()
 
     custom_plot(portfolio, trading_signals, parameters, stock_data)
 

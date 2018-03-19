@@ -3,7 +3,7 @@ from datetime import datetime
 Price = float
 
 
-class DataPoint(object):
+class PricePoint(object):
     def __init__(self, value: Price, date_time: datetime):
         self._value = value
         self._date_time = date_time

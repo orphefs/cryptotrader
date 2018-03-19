@@ -1,6 +1,6 @@
 from typing import List
 
-from containers.data_point import DataPoint
+from containers.data_point import PricePoint
 from containers.time_series import TimeSeries
 
 _signal_types = {-1: "Buy",
@@ -9,10 +9,10 @@ _signal_types = {-1: "Buy",
 
 
 class TradingSignal(object):
-    def __init__(self, signal: int, data_point: DataPoint):
+    def __init__(self, signal: int, price_point: PricePoint):
         self.signal = signal
         self.type = _signal_types[signal]
-        self.data_point = data_point
+        self.data_point = price_point
 
     def __repr__(self):
         return "TradingSignal({} at {})".format(self.type, self.data_point)
@@ -31,10 +31,10 @@ class Hold(TradingSignal):
 
 
 class IntersectionPoint(object):
-    def __init__(self, trading_signal: TradingSignal, data_point: DataPoint, intersecting_time_series: List[TimeSeries],
+    def __init__(self, trading_signal: TradingSignal, price_point: PricePoint, intersecting_time_series: List[TimeSeries],
                  tolerance: float):
         self._trading_signal = trading_signal
-        self._data_point = data_point
+        self._data_point = price_point
         self._intersecting_time_series = intersecting_time_series
         self._tolerance = tolerance
 
@@ -55,7 +55,7 @@ class IntersectionPoint(object):
         return self._intersecting_time_series
 
     def __repr__(self):
-        return "IntersectionPoint(trading_signal={}, data_point={}, tolerance={})".format(self._trading_signal,
+        return "IntersectionPoint(trading_signal={}, price_point={}, tolerance={})".format(self._trading_signal,
                                                                                           self._data_point,
                                                                                           self._tolerance)
 

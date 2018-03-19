@@ -6,7 +6,7 @@ import numpy as np
 
 from backtesting_logic.logic import TradingSignal
 from containers.time_series import TimeSeries
-from containers.data_point import DataPoint
+from containers.data_point import PricePoint
 
 
 def rolling_mean(window_size: timedelta, time_series: TimeSeries):
@@ -31,5 +31,5 @@ def _generate_trading_signals_from_sma(
     trading_signals = list(map(int, np.diff(np.where(time_series_a > time_series_b, 0.0, 1.0))))
 
     return [TradingSignal(trading_signals[i],
-                          DataPoint(value=original_time_series[i], date_time=original_time_series.index[i]))
+                          PricePoint(value=original_time_series[i], date_time=original_time_series.index[i]))
             for i, _ in enumerate(trading_signals)]

@@ -17,7 +17,6 @@ from containers.stock_data import StockData
 from backtesting_logic.signal_processing import rolling_mean
 
 
-
 def plot_close_price(ax: Axis, data: StockData):
     ax.scatter(
         y=[candle.get_price().close_price for candle in data.candles],
@@ -59,6 +58,7 @@ def plot_returns(ax: Axes, stock_data: StockData, returns: List[float]):
 
 def plot_moving_average(ax: Axes, time_series: TimeSeries):
     time_series.plot(kind='line', marker='o', ax=ax)
+    ax.set_ylim(time_series.min(), time_series.max())
 
 
 def plot_intersection_point(ax: Axes, intersection_point: IntersectionPoint):

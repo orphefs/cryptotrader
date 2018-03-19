@@ -4,7 +4,7 @@ from typing import List, Union
 import numpy as np
 import pandas as pd
 
-from containers.data_point import Price, DataPoint
+from containers.data_point import Price, PricePoint
 
 
 class TimeSeries(pd.Series):
@@ -17,7 +17,7 @@ class TimeSeries(pd.Series):
         return self._sampling_rate
 
     @staticmethod
-    def from_datapoints(data_points: List[DataPoint]):
+    def from_datapoints(data_points: List[PricePoint]):
         return TimeSeries(x=[data_point.date_time for data_point in data_points],
                           y=[data_point.value for data_point in data_points])
 

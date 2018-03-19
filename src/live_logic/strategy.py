@@ -5,7 +5,7 @@ import pandas as pd
 
 from backtesting_logic.logic import TradingSignal, Buy, Hold, Sell
 from containers.candle import Candle
-from containers.data_point import DataPoint
+from containers.data_point import PricePoint
 from containers.time_series import TimeSeries
 from backtesting_logic.signal_processing import rolling_mean, _generate_trading_signals_from_sma
 from containers.stock_data import StockData
@@ -36,24 +36,28 @@ class Portfolio:
         self._trade_amount = trade_amount
         self._capital = []
         self._initial_capital = initial_capital
-        self.portfolio = {}
-        self.portfolio['positions'] = [(None, 0.0, None)]
+        self.positions = []
+        self.trade_times = []
+        self.trade_amounts = []
+        self.candles = []
         self._portfolio_df = pd.DataFrame(columns=['holdings', 'cash', 'returns', 'total'])
         self._point_stats = {}
 
     def _append_to_positions(self, trade_time, amount, candle):
-        cumulative_amount = self.portfolio['positions'][0][1] + amount
-        self.portfolio['positions'].append((trade_time, cumulative_amount, candle))
+        self.positions.append((trade_time, amount, candle))
+        self.trade_times.append(trade_time)
+        self.trade_amounts.append(amount)
+        self.candles.append(candle)
 
-    def compute_statistics(self):
-        self._portfolio_df = pd.DataFrame(index=[holding[0] for holding in self.portfolio['positions']])
-        self._portfolio_df['positions'] = [holding[1] for holding in self.portfolio['positions']]
-        data_points = [item[2] for item in self.portfolio['positions']][1:]
-        prices_df = pd.DataFrame(data=[data_point.value for data_point in data_points],
-                                 index=[data_point.date_time for data_point in data_points])
+    def compute_performance(self):
+        self._portfolio_df = pd.DataFrame(index=self.trade_times)
+        self._portfolio_df['positions'] = self.trade_amounts
+
+        prices_df = pd.DataFrame(data=[data_point.value for data_point in self.candles],
+                                 index=[data_point.date_time for data_point in self.candles])
 
         pos = self._compute_positions(fees=self._fees,
-                                      positions=self._portfolio_df['positions'][1:],
+                                      positions=self._portfolio_df['positions'],
                                       prices=prices_df[:][0])
 
         pos_diff = self._differentiate_positions(positions=pos)
@@ -98,7 +102,7 @@ class Portfolio:
         returns = total_earnings.pct_change()
         return returns
 
-    def _place_order(self, signal: Union[Buy, Sell, Hold], quantity: int, data_point: DataPoint):
+    def _place_order(self, signal: Union[Buy, Sell, Hold], quantity: int, data_point: PricePoint):
         if isinstance(signal, Buy):
             self._append_to_positions(signal.data_point.date_time, quantity, data_point)
         if isinstance(signal, Sell):
@@ -150,19 +154,19 @@ class SMAStrategy(LiveStrategy):
 
         if self.is_sma_crossing_from_below():
             if self._bought:
-                return Hold(signal=0, data_point=DataPoint(value=current_price, date_time=current_time))
+                return Hold(signal=0, price_point=PricePoint(value=current_price, date_time=current_time))
 
             elif not self._bought:
                 self._bought = True
                 self._last_buy_price = current_price
-                return Buy(signal=-1, data_point=DataPoint(value=current_price, date_time=current_time))
+                return Buy(signal=-1, price_point=PricePoint(value=current_price, date_time=current_time))
 
         elif self.is_sma_crossing_from_above():
             if self._bought:
                 self._bought = False
-                return Sell(signal=1, data_point=DataPoint(value=current_price, date_time=current_time))
+                return Sell(signal=1, price_point=PricePoint(value=current_price, date_time=current_time))
 
             elif not self._bought:
-                return Hold(signal=0, data_point=DataPoint(value=current_price, date_time=current_time))
+                return Hold(signal=0, price_point=PricePoint(value=current_price, date_time=current_time))
         else:
-            return Hold(signal=0, data_point=DataPoint(value=current_price, date_time=current_time))
+            return Hold(signal=0, price_point=PricePoint(value=current_price, date_time=current_time))
