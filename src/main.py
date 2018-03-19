@@ -11,7 +11,7 @@ from containers.time_series import TimeSeries
 from helpers import extract_time_series_from_stock_data
 from live_logic.strategy import SMAStrategy, Parameters, LiveParameters, Portfolio, Buy, Hold
 from plotting.plot_candles import plot_portfolio, plot_portfolio_2, plot_close_price, plot_trading_signals, \
-    plot_candlesticks, plot_moving_average
+    plot_candlesticks, plot_moving_average, custom_plot
 from tools.downloader import download_live_data, load_from_disk, serve_windowed_stock_data, \
     calculate_sampling_rate_of_stock_data
 from containers.stock_data import StockData
@@ -45,7 +45,7 @@ def main():
     while enabled:
         # stock_data = download_live_data(client, "XRPBTC")
         iteration, stock_data_window = serve_windowed_stock_data(stock_data, iteration, window_start)
-        if iteration == len(stock_data)-2:
+        if iteration == len(stock_data) - 2:
             break
 
         strategy.extract_time_series_from_stock_data(stock_data_window)
@@ -57,20 +57,14 @@ def main():
 
         time.sleep(parameters.sleep_time)
 
-    fig, ax = plt.subplots(nrows=3, ncols=1, sharex=True)
     portfolio.compute_statistics()
-    plot_portfolio_2(ax[1:3], portfolio._portfolio_df)
-    plot_trading_signals(ax=ax[0], trading_signals=trading_signals[1:])
-    plot_moving_average(ax=ax[0], time_series=rolling_mean(parameters.short_sma_period,
-                                                           extract_time_series_from_stock_data(stock_data)))
-    plot_moving_average(ax=ax[0], time_series=rolling_mean(parameters.long_sma_period,
-                                                           extract_time_series_from_stock_data(stock_data)))
+
+    custom_plot(portfolio, trading_signals, parameters, stock_data)
 
     print(portfolio._point_stats['base_index_pct_change'])
     print(portfolio._point_stats['total_pct_change'])
 
     plt.show()
-
 
 
 if __name__ == "__main__":

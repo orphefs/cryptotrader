@@ -11,8 +11,11 @@ from externals.mpl_finance.mpl_finance import candlestick_ohlc
 from backtesting_logic.logic import IntersectionPoint, TradingSignal
 from containers.time_series import TimeSeries
 from backtesting_logic.portfolio import Portfolio
+from helpers import extract_time_series_from_stock_data
 from tools.downloader import load_from_disk
 from containers.stock_data import StockData
+from backtesting_logic.signal_processing import rolling_mean
+
 
 
 def plot_close_price(ax: Axis, data: StockData):
@@ -55,7 +58,7 @@ def plot_returns(ax: Axes, stock_data: StockData, returns: List[float]):
 
 
 def plot_moving_average(ax: Axes, time_series: TimeSeries):
-    time_series.plot(kind='line', marker='o',ax=ax)
+    time_series.plot(kind='line', marker='o', ax=ax)
 
 
 def plot_intersection_point(ax: Axes, intersection_point: IntersectionPoint):
@@ -107,3 +110,13 @@ def plot_candlesticks(ax: Axes, data: StockData):
     ax.autoscale_view()
     plt.setp(plt.gca().get_xticklabels(), rotation=45, horizontalalignment='right')
     ax.set_title(data.security)
+
+
+def custom_plot(portfolio, trading_signals, parameters, stock_data):
+    fig, ax = plt.subplots(nrows=3, ncols=1, sharex=True)
+    plot_portfolio_2(ax[1:3], portfolio._portfolio_df)
+    plot_trading_signals(ax=ax[0], trading_signals=trading_signals[1:])
+    plot_moving_average(ax=ax[0], time_series=rolling_mean(parameters.short_sma_period,
+                                                           extract_time_series_from_stock_data(stock_data)))
+    plot_moving_average(ax=ax[0], time_series=rolling_mean(parameters.long_sma_period,
+                                                           extract_time_series_from_stock_data(stock_data)))
