@@ -76,8 +76,8 @@ def plot_trading_signals(ax: Axes, trading_signals: List[TradingSignal]):
     for marker, trading_signal in zip(markers, trading_signals):
         if marker != "":
             ax.scatter(
-                x=trading_signal.data_point.date_time,
-                y=trading_signal.data_point.value,
+                x=trading_signal.price_point.date_time,
+                y=trading_signal.price_point.value,
                 marker=marker,
                 color='k',
                 s=40

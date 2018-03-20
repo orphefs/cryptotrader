@@ -58,7 +58,7 @@ if __name__ == '__main__':
     time_window = TimeWindow(start_time=datetime(2017, 10, 1),
                              end_time=datetime(2018, 3, 1))
     start = datetime.now()
-    # candles = download_live_data(Client("", ""), security)
+    # price_points = download_live_data(Client("", ""), security)
     candles = download_backtesting_data(time_window, security)
     stop = datetime.now()
     print("Elapsed download time: {}".format(stop - start))

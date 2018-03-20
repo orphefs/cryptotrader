@@ -9,13 +9,13 @@ from containers.stock_data import StockData
 
 class Portfolio(ABC):
     """An abstract base class representing a portfolio of
-    positions (including both instruments and cash), determined
+    _positions (including both instruments and cash), determined
     on the basis of a set of signals provided by a Strategy."""
 
     @abstractmethod
     def generate_positions(self):
         """Provides the backtesting_logic to determine how the portfolio
-        positions are allocated on the basis of forecasting
+        _positions are allocated on the basis of forecasting
         signals and available cash."""
         raise NotImplementedError("Should implement generate_positions()!")
 
@@ -24,7 +24,7 @@ class Portfolio(ABC):
         """Provides the backtesting_logic to generate the trading orders
         and subsequent equity curve (i.e. growth of total equity),
         as a sum of holdings and cash, and the bar-period returns
-        associated with this curve based on the 'positions' DataFrame.
+        associated with this curve based on the '_positions' DataFrame.
 
         Produces a portfolio object that can be examined by
         other classes/functions."""
@@ -60,21 +60,21 @@ class MarketOnClosePortfolio(Portfolio):
             index=[candle.get_time().close_time.as_datetime() for candle in stock_data.candles])
         self._fees = 0.01  # percent
         self._trading_signals = pd.DataFrame(data=[signal.signal for signal in trading_signals],
-                                             index=[signal.data_point.date_time for signal in trading_signals])
+                                             index=[signal.price_point.date_time for signal in trading_signals])
         self._initial_capital = initial_capital
         self._positions = self.generate_positions()
         self._portfolio = {}
         self.backtest_portfolio()
 
     def generate_positions(self):
-        """Creates a 'positions' DataFrame that simply longs or shorts
+        """Creates a '_positions' DataFrame that simply longs or shorts
         100 of the particular symbol based on the forecast signals of
         {1, 0, -1} from the signals DataFrame."""
         positions = 2000 * self._trading_signals.fillna(0.0)
         return positions
 
     def backtest_portfolio(self):
-        """Constructs a portfolio from the positions DataFrame by
+        """Constructs a portfolio from the _positions DataFrame by
         assuming the ability to trade at the precise market close price
         of each bar (an unrealistic assumption?).
 
@@ -85,7 +85,7 @@ class MarketOnClosePortfolio(Portfolio):
         Returns the portfolio object to be used elsewhere."""
 
         # Construct the portfolio DataFrame to use the same index
-        # as 'positions' and with a set of 'trading orders' in the
+        # as '_positions' and with a set of 'trading orders' in the
         # 'pos_diff' object, assuming market open prices.
         pos = self._positions[0] * self._candles['Open'] * (1-self._fees)
         pos_diff = pos.diff(periods=1)

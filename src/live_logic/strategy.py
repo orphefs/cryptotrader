@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from collections import defaultdict
 from datetime import timedelta, datetime
 from typing import Dict, Callable, Union
 import pandas as pd
@@ -36,44 +37,44 @@ class Portfolio:
         self._trade_amount = trade_amount
         self._capital = []
         self._initial_capital = initial_capital
-        self.positions = []
-        self.trade_times = []
-        self.trade_amounts = []
-        self.candles = []
+        self._positions_df = pd.DataFrame(columns=['intended_trade_time',
+                                                   'amount_traded', 'actual_price', 'intended_price'])
+        self._positions = defaultdict(list)
         self._portfolio_df = pd.DataFrame(columns=['holdings', 'cash', 'returns', 'total'])
         self._point_stats = {}
 
-    def _append_to_positions(self, trade_time, amount, candle):
-        self.positions.append((trade_time, amount, candle))
-        self.trade_times.append(trade_time)
-        self.trade_amounts.append(amount)
-        self.candles.append(candle)
+    def _append_to_positions(self, trade_time, amount, price):
+        self._positions['actual_trade_time'].append(trade_time)
+        self._positions['amount_traded'].append(amount)
+        self._positions['actual_price'].append(price)
 
     def compute_performance(self):
-        self._portfolio_df = pd.DataFrame(index=self.trade_times)
-        self._portfolio_df['positions'] = self.trade_amounts
 
-        prices_df = pd.DataFrame(data=[data_point.value for data_point in self.candles],
-                                 index=[data_point.date_time for data_point in self.candles])
+        self._portfolio_df = pd.DataFrame(index=self._positions['actual_trade_time'])
+        self._positions_df = pd.DataFrame(index=self._positions['actual_trade_time'])
+        self._positions_df['amount_traded'] = self._positions['amount_traded']
+        self._positions_df['actual_price'] = self._positions['actual_price']
 
         pos = self._compute_positions(fees=self._fees,
-                                      positions=self._portfolio_df['positions'],
-                                      prices=prices_df[:][0])
+                                      positions=self._positions_df['amount_traded'],
+                                      prices=self._positions_df['actual_price'])
 
         pos_diff = self._differentiate_positions(positions=pos)
 
         self._portfolio_df['holdings'] = self._compute_holdings(positions=pos)
         self._portfolio_df['cash'] = self._compute_cash(initial_capital=self._initial_capital,
                                                         positions_diff=pos_diff,
-                                                        prices=prices_df[:][0])
+                                                        prices=self._positions_df['actual_price'])
 
         self._portfolio_df['total'] = self._compute_total(
-            cash=self._portfolio_df['cash'], holdings=self._portfolio_df['holdings'])
+            cash=self._portfolio_df['cash'],
+            holdings=self._portfolio_df['holdings'])
 
         self._portfolio_df['returns'] = self._compute_returns(total_earnings=self._portfolio_df['total'])
 
-        self._point_stats['base_index_pct_change'] = (prices_df[0][-1] - prices_df[0][0]) / prices_df[0][
-            0]
+        self._point_stats['base_index_pct_change'] = (self._positions_df['actual_price'][-1] -
+                                                      self._positions_df['actual_price'][0]) / \
+                                                     self._positions_df['actual_price'][0]
         self._point_stats['total_pct_change'] = (self._portfolio_df['total'][-1] -
                                                  self._initial_capital) / self._initial_capital
 
@@ -102,19 +103,16 @@ class Portfolio:
         returns = total_earnings.pct_change()
         return returns
 
-    def _place_order(self, signal: Union[Buy, Sell, Hold], quantity: int, data_point: PricePoint):
-        if isinstance(signal, Buy):
-            self._append_to_positions(signal.data_point.date_time, quantity, data_point)
-        if isinstance(signal, Sell):
-            self._append_to_positions(signal.data_point.date_time, -quantity, data_point)
-        if isinstance(signal, Hold):
-            self._append_to_positions(signal.data_point.date_time, 0.0, data_point)
-
     def update(self, signal: Union[Buy, Sell, Hold]):
-        if signal is None:
-            self._place_order(None, self._trade_amount, None)
-        else:
-            self._place_order(signal, self._trade_amount, signal.data_point)
+        self._place_order(signal, self._trade_amount, signal.price_point)
+
+    def _place_order(self, signal: Union[Buy, Sell, Hold], quantity: int, price_point: PricePoint):
+        if isinstance(signal, Buy):
+            self._append_to_positions(signal.price_point.date_time, quantity, price_point.value)
+        if isinstance(signal, Sell):
+            self._append_to_positions(signal.price_point.date_time, -quantity, price_point.value)
+        if isinstance(signal, Hold):
+            self._append_to_positions(signal.price_point.date_time, 0.0, price_point.value)
 
 
 class SMAStrategy(LiveStrategy):

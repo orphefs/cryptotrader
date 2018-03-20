@@ -12,10 +12,10 @@ class TradingSignal(object):
     def __init__(self, signal: int, price_point: PricePoint):
         self.signal = signal
         self.type = _signal_types[signal]
-        self.data_point = price_point
+        self.price_point = price_point
 
     def __repr__(self):
-        return "TradingSignal({} at {})".format(self.type, self.data_point)
+        return "TradingSignal({} at {})".format(self.type, self.price_point)
 
 
 class Buy(TradingSignal):
