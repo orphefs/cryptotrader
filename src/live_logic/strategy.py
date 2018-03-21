@@ -1,15 +1,14 @@
-from abc import ABC, abstractmethod
 from collections import defaultdict
-from datetime import timedelta, datetime
-from typing import Dict, Callable, Union
+from datetime import timedelta
+from typing import Dict, Union
+
 import pandas as pd
 
-from backtesting_logic.logic import TradingSignal, Buy, Hold, Sell
-from containers.candle import Candle
+from backtesting_logic.logic import Buy, Hold, Sell
+from backtesting_logic.signal_processing import rolling_mean
 from containers.data_point import PricePoint
-from containers.time_series import TimeSeries
-from backtesting_logic.signal_processing import rolling_mean, _generate_trading_signals_from_sma
 from containers.stock_data import StockData
+from containers.time_series import TimeSeries
 
 
 class LiveStrategy:
@@ -55,13 +54,12 @@ class Portfolio:
         self._positions_df['amount_traded'] = self._positions['amount_traded']
         self._positions_df['actual_price'] = self._positions['actual_price']
 
-        pos = self._compute_positions(fees=self._fees,
-                                      positions=self._positions_df['amount_traded'],
-                                      prices=self._positions_df['actual_price'])
+        self._portfolio_df['holdings'] = self._compute_holdings(fees=self._fees,
+                                                                  positions=self._positions_df['amount_traded'],
+                                                                  prices=self._positions_df['actual_price'])
 
-        self._portfolio_df['holdings'] = self._compute_holdings(positions=pos)
         self._portfolio_df['cash'] = self._compute_cash(initial_capital=self._initial_capital,
-                                                        positions=pos,
+                                                        positions_diff=self._positions_df['amount_traded'].diff(),
                                                         prices=self._positions_df['actual_price'])
 
         self._portfolio_df['total'] = self._compute_total(
@@ -76,21 +74,19 @@ class Portfolio:
         self._point_stats['total_pct_change'] = (self._portfolio_df['total'][-1] -
                                                  self._initial_capital) / self._initial_capital
 
-    @staticmethod
-    def _compute_holdings(positions: pd.Series) -> pd.Series:
-        return positions.cumsum(axis=0)
+
 
     @staticmethod
     def _differentiate_positions(positions: pd.Series) -> pd.Series:
         return positions.diff()
 
     @staticmethod
-    def _compute_positions(fees: float, positions: pd.Series, prices: pd.Series) -> pd.Series:
-        return positions * prices * (1 - fees)
+    def _compute_holdings(fees: float, positions: pd.Series, prices: pd.Series) -> pd.Series:
+        return (positions * prices * (1 - fees)).cumsum(axis=0)
 
     @staticmethod
-    def _compute_cash(initial_capital: float, positions: pd.Series, prices: pd.Series):
-        return initial_capital - (positions * prices).cumsum(axis=0)
+    def _compute_cash(initial_capital: float, positions_diff: pd.Series, prices):
+        return initial_capital - (positions_diff*prices).cumsum()
 
     @staticmethod
     def _compute_total(cash: pd.Series, holdings: pd.Series) -> pd.Series:
