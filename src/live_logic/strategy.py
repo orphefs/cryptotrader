@@ -59,11 +59,9 @@ class Portfolio:
                                       positions=self._positions_df['amount_traded'],
                                       prices=self._positions_df['actual_price'])
 
-        pos_diff = self._differentiate_positions(positions=pos)
-
         self._portfolio_df['holdings'] = self._compute_holdings(positions=pos)
         self._portfolio_df['cash'] = self._compute_cash(initial_capital=self._initial_capital,
-                                                        positions_diff=pos_diff,
+                                                        positions=pos,
                                                         prices=self._positions_df['actual_price'])
 
         self._portfolio_df['total'] = self._compute_total(
@@ -91,8 +89,8 @@ class Portfolio:
         return positions * prices * (1 - fees)
 
     @staticmethod
-    def _compute_cash(initial_capital: float, positions_diff: pd.Series, prices: pd.Series):
-        return initial_capital - (positions_diff * prices).cumsum(axis=0)
+    def _compute_cash(initial_capital: float, positions: pd.Series, prices: pd.Series):
+        return initial_capital - (positions * prices).cumsum(axis=0)
 
     @staticmethod
     def _compute_total(cash: pd.Series, holdings: pd.Series) -> pd.Series:
