@@ -41,11 +41,11 @@ def plot_portfolio_2(ax: List[Axis], portfolio_df: pd.DataFrame):
     if 'holdings' in portfolio_df:
         portfolio_df['holdings'].plot(ax=ax[0], alpha=0.7)
     if 'cash' in portfolio_df:
-        portfolio_df['cash'].plot(ax=ax[1], alpha=0.7)
+        portfolio_df['cash'].plot(ax=ax[2], alpha=0.7)
     if 'total' in portfolio_df:
-        portfolio_df['total'].plot(ax=ax[1], alpha=0.7)
+        portfolio_df['total'].plot(ax=ax[2], alpha=0.7)
     if 'returns' in portfolio_df:
-        portfolio_df['returns'].plot(ax=ax[0], alpha=0.7)
+        portfolio_df['returns'].plot(ax=ax[1], alpha=0.7)
     ax[0].legend()
     ax[1].legend()
 
@@ -113,8 +113,8 @@ def plot_candlesticks(ax: Axes, data: StockData):
 
 
 def custom_plot(portfolio, trading_signals, parameters, stock_data):
-    fig, ax = plt.subplots(nrows=3, ncols=1, sharex=True)
-    plot_portfolio_2(ax[1:3], portfolio._portfolio_df)
+    fig, ax = plt.subplots(nrows=4, ncols=1, sharex=True)
+    plot_portfolio_2(ax[1:4], portfolio._portfolio_df)
     plot_trading_signals(ax=ax[0], trading_signals=trading_signals[1:])
     plot_moving_average(ax=ax[0], time_series=rolling_mean(parameters.short_sma_period,
                                                            extract_time_series_from_stock_data(stock_data)))
