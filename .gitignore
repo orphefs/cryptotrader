@@ -36,5 +36,5 @@
 ehthumbs.db
 Thumbs.db
 .idea/*
-_*
-src/__pycache__/
+local_*
+__pycache__/
