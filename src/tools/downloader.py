@@ -49,7 +49,7 @@ def load_from_disk(path_to_file: str) -> Any:
 # def replace_spaces_with_underscores(s: str) -> str:
 
 def generate_file_name(time_window: TimeWindow, security: Security) -> str:
-    return ('_data_' + time_window.start_time.as_string().replace(" ", "_") + '_' +
+    return ('local_data_' + time_window.start_time.as_string().replace(" ", "_") + '_' +
             time_window.end_time.as_string().replace(" ", "_") + '_' + security + ".dill").replace(" ", "_")
 
 
