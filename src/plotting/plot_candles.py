@@ -118,5 +118,8 @@ def custom_plot(portfolio, trading_signals, parameters, stock_data):
     plot_trading_signals(ax=ax[0], trading_signals=trading_signals[1:])
     plot_moving_average(ax=ax[0], time_series=rolling_mean(parameters.short_sma_period,
                                                            extract_time_series_from_stock_data(stock_data)))
+
     plot_moving_average(ax=ax[0], time_series=rolling_mean(parameters.long_sma_period,
                                                            extract_time_series_from_stock_data(stock_data)))
+    for x in ax:
+        x.grid()

@@ -2,10 +2,8 @@ import logging
 import os
 import time
 from typing import List
-
 import matplotlib
 from datetime import timedelta
-
 from backtesting_logic.signal_processing import rolling_mean
 from containers.time_series import TimeSeries
 from helpers import extract_time_series_from_stock_data
@@ -18,9 +16,7 @@ from containers.stock_data import StockData
 
 matplotlib.use('AGG')  # generate postscript output by default
 import matplotlib.pyplot as plt
-
 from binance.client import Client
-
 import definitions
 
 logging.basicConfig(filename=os.path.join(definitions.DATA_DIR, 'local_autotrader.log'), level=logging.INFO)
@@ -54,13 +50,10 @@ def main():
         trading_signals.append(signal)
         # print(signal)
         portfolio.update(signal)
-
         time.sleep(parameters.sleep_time)
 
     portfolio.compute_performance()
-
     custom_plot(portfolio, trading_signals, parameters, stock_data)
-
     print(portfolio._point_stats['base_index_pct_change'])
     print(portfolio._point_stats['total_pct_change'])
 
