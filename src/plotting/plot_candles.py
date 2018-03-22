@@ -21,6 +21,7 @@ def plot_close_price(ax: Axis, data: StockData):
     ax.scatter(
         y=[candle.get_price().close_price for candle in data.candles],
         x=[candle.get_time().close_time.as_datetime() for candle in data.candles],
+        c='r', alpha=0.3
     )
 
 
@@ -57,7 +58,7 @@ def plot_returns(ax: Axes, stock_data: StockData, returns: List[float]):
 
 
 def plot_moving_average(ax: Axes, time_series: TimeSeries):
-    time_series.plot(kind='line', marker='o', ax=ax)
+    time_series.plot(kind='line', marker='', ax=ax)
     ax.set_ylim(time_series.min(), time_series.max())
 
 
@@ -121,5 +122,8 @@ def custom_plot(portfolio, trading_signals, parameters, stock_data):
 
     plot_moving_average(ax=ax[0], time_series=rolling_mean(parameters.long_sma_period,
                                                            extract_time_series_from_stock_data(stock_data)))
+
+    plot_close_price(ax=ax[0], data=stock_data)
+
     for x in ax:
         x.grid()

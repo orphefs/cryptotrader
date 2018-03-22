@@ -55,8 +55,8 @@ class Portfolio:
         self._positions_df['actual_price'] = self._positions['actual_price']
 
         self._portfolio_df['holdings'] = self._compute_holdings(fees=self._fees,
-                                                                  positions=self._positions_df['amount_traded'],
-                                                                  prices=self._positions_df['actual_price'])
+                                                                positions=self._positions_df['amount_traded'],
+                                                                prices=self._positions_df['actual_price'])
 
         self._portfolio_df['cash'] = self._compute_cash(initial_capital=self._initial_capital,
                                                         positions_diff=self._positions_df['amount_traded'].diff(),
@@ -74,8 +74,6 @@ class Portfolio:
         self._point_stats['total_pct_change'] = (self._portfolio_df['total'][-1] -
                                                  self._initial_capital) / self._initial_capital
 
-
-
     @staticmethod
     def _differentiate_positions(positions: pd.Series) -> pd.Series:
         return positions.diff()
@@ -86,7 +84,7 @@ class Portfolio:
 
     @staticmethod
     def _compute_cash(initial_capital: float, positions_diff: pd.Series, prices):
-        return initial_capital - (positions_diff*prices).cumsum()
+        return initial_capital - (positions_diff * prices).cumsum()
 
     @staticmethod
     def _compute_total(cash: pd.Series, holdings: pd.Series) -> pd.Series:
@@ -142,6 +140,10 @@ class SMAStrategy(LiveStrategy):
 
     def generate_trading_signal(self) -> Union[Buy, Sell, Hold]:
         current_price = self._stock_data.candles[-1].get_price().close_price
+        # TODO:  Refactor such that it satisfies the following:
+        # Object A can request a service (call a method) of an object
+        # instance B, but object A should not "reach through" object B
+        # to access yet another object, C, to request its services
         current_time = self._stock_data.candles[-1].get_time().close_time.as_datetime()
 
         if self.is_sma_crossing_from_below():
@@ -153,12 +155,20 @@ class SMAStrategy(LiveStrategy):
                 self._last_buy_price = current_price
                 return Buy(signal=-1, price_point=PricePoint(value=current_price, date_time=current_time))
 
+            else:
+                return Hold(signal=0, price_point=PricePoint(value=current_price, date_time=current_time))
+
+
         elif self.is_sma_crossing_from_above():
-            if self._bought:
+            if self._bought:  # and current_price > self._last_buy_price:
                 self._bought = False
                 return Sell(signal=1, price_point=PricePoint(value=current_price, date_time=current_time))
 
             elif not self._bought:
                 return Hold(signal=0, price_point=PricePoint(value=current_price, date_time=current_time))
+
+            else:
+                return Hold(signal=0, price_point=PricePoint(value=current_price, date_time=current_time))
+
         else:
             return Hold(signal=0, price_point=PricePoint(value=current_price, date_time=current_time))
