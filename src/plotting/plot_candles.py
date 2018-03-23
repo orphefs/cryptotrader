@@ -123,7 +123,7 @@ def custom_plot(portfolio, trading_signals, parameters, stock_data):
     plot_moving_average(ax=ax[0], time_series=rolling_mean(parameters.long_sma_period,
                                                            extract_time_series_from_stock_data(stock_data)))
 
-    plot_close_price(ax=ax[0], data=stock_data)
+    # plot_close_price(ax=ax[0], data=stock_data)
 
     for x in ax:
         x.grid()

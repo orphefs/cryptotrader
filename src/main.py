@@ -21,8 +21,8 @@ import definitions
 
 logging.basicConfig(filename=os.path.join(definitions.DATA_DIR, 'local_autotrader.log'), level=logging.INFO)
 enabled = True
-parameters = LiveParameters(short_sma_period=timedelta(hours=3),
-                            long_sma_period=timedelta(hours=30),
+parameters = LiveParameters(short_sma_period=timedelta(hours=2),
+                            long_sma_period=timedelta(hours=20),
                             trade_amount=100,
                             sleep_time=0)
 
@@ -38,6 +38,9 @@ def main():
     window_start = 10
     iteration = 10
 
+    short_smas = []
+    long_smas = []
+
     while enabled:
         # stock_data = download_live_data(client, "XRPBTC")
         iteration, stock_data_window = serve_windowed_stock_data(stock_data, iteration, window_start)
@@ -46,6 +49,11 @@ def main():
 
         strategy.extract_time_series_from_stock_data(stock_data_window)
         strategy.compute_moving_averages()
+
+        # TODO: Compute custom rolling average
+        short_smas.append(strategy._short_sma)
+        long_smas.append(strategy._long_sma)
+
         signal = strategy.generate_trading_signal()
         trading_signals.append(signal)
         # print(signal)
@@ -53,9 +61,12 @@ def main():
         time.sleep(parameters.sleep_time)
 
     portfolio.compute_performance()
-    custom_plot(portfolio, trading_signals, parameters, stock_data)
+    # custom_plot(portfolio, trading_signals, parameters, stock_data)
     print(portfolio._point_stats['base_index_pct_change'])
     print(portfolio._point_stats['total_pct_change'])
+
+    plt.figure()
+    plt.plot(long_smas)
 
     plt.show()
 
