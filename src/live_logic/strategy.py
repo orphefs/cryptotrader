@@ -1,14 +1,17 @@
 from collections import defaultdict
-from datetime import timedelta
+from datetime import timedelta, datetime
 from typing import Dict, Union
 
 import pandas as pd
 
 from backtesting_logic.logic import Buy, Hold, Sell
 from backtesting_logic.signal_processing import rolling_mean
+from containers.candle import Candle
 from containers.data_point import PricePoint
 from containers.stock_data import StockData
 from containers.time_series import TimeSeries
+
+from externals.rolling_statistics.python.rolling_stats import RollingMean
 
 
 class LiveStrategy:
@@ -21,11 +24,12 @@ class Parameters:
 
 class LiveParameters(Parameters):
     def __init__(self, short_sma_period: timedelta,
-                 long_sma_period: timedelta,
+                 long_sma_period: timedelta, update_period: timedelta,
                  trade_amount: int,
                  sleep_time: int):
         self.short_sma_period = short_sma_period
         self.long_sma_period = long_sma_period
+        self.update_period = update_period
         self.trade_amount = trade_amount
         self.sleep_time = sleep_time
 
@@ -107,6 +111,10 @@ class Portfolio:
             self._append_to_positions(signal.price_point.date_time, 0.0, price_point.value)
 
 
+def _convert_sma_period_to_no_of_samples(sma_period: timedelta, update_period: timedelta) -> int:
+    return int(sma_period / update_period)
+
+
 class SMAStrategy(LiveStrategy):
     def __init__(self, parameters: LiveParameters):
         self._data = Dict
@@ -114,8 +122,13 @@ class SMAStrategy(LiveStrategy):
         self._trading_signals = []
         self._parameters = parameters
         self._time_series = TimeSeries
-        self._short_sma = pd.Series
-        self._long_sma = pd.Series
+        self._current_candle = Candle
+        self._short_sma_computer = RollingMean(
+            _convert_sma_period_to_no_of_samples(parameters.short_sma_period, parameters.update_period))
+        self._short_sma = []
+        self._long_sma_computer = RollingMean(
+            _convert_sma_period_to_no_of_samples(parameters.long_sma_period, parameters.update_period))
+        self._long_sma = []
         self._bought = False
         self._last_buy_price = 0.0
 
@@ -134,13 +147,16 @@ class SMAStrategy(LiveStrategy):
             x=[candle.get_close_time_as_datetime() for candle in stock_data.candles],
             y=[candle.get_close_price() for candle in stock_data.candles])
 
-    def compute_moving_averages(self):
-        self._short_sma = rolling_mean(self._parameters.short_sma_period, self._time_series)
-        self._long_sma = rolling_mean(self._parameters.long_sma_period, self._time_series)
+    def update_moving_averages(self, candle):
+        self._current_candle = candle
+        self._short_sma_computer.insert_new_sample(candle.get_close_price())
+        self._short_sma.append(self._short_sma_computer.mean)
+        self._long_sma_computer.insert_new_sample(candle.get_close_price())
+        self._long_sma.append(self._long_sma_computer.mean)
 
     def generate_trading_signal(self) -> Union[Buy, Sell, Hold]:
-        current_price = self._stock_data.candles[-1].get_close_price()
-        current_time = self._stock_data.candles[-1].get_close_time_as_datetime()
+        current_price = self._current_candle.get_close_price()
+        current_time = self._current_candle.get_close_time_as_datetime()
 
         if self.is_sma_crossing_from_below():
             if self._bought:
