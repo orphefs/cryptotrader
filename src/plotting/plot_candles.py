@@ -19,8 +19,8 @@ from backtesting_logic.signal_processing import rolling_mean
 
 def plot_close_price(ax: Axis, data: StockData):
     ax.scatter(
-        y=[candle.get_price().close_price for candle in data.candles],
-        x=[candle.get_time().close_time.as_datetime() for candle in data.candles],
+        y=[candle.get_close_price() for candle in data.candles],
+        x=[candle.get_close_time_as_datetime() for candle in data.candles],
         c='r', alpha=0.3
     )
 
@@ -52,7 +52,7 @@ def plot_portfolio_2(ax: List[Axis], portfolio_df: pd.DataFrame):
 
 
 def plot_returns(ax: Axes, stock_data: StockData, returns: List[float]):
-    ax.scatter(x=[mdate.date2num(candle.get_time().close_time.as_datetime())
+    ax.scatter(x=[mdate.date2num(candle.get_close_time_as_datetime())
                   for candle in stock_data.candles][0:-1],
                y=returns)
 
@@ -88,7 +88,7 @@ def plot_trading_signals(ax: Axes, trading_signals: List[TradingSignal]):
 def plot_candlesticks(ax: Axes, data: StockData):
     lines, patches = candlestick_ohlc(ax=ax,
                                       quotes=[
-                                          (mdate.date2num(candle.get_time().close_time.as_datetime()),
+                                          (mdate.date2num(candle.get_close_time_as_datetime()),
                                            candle.get_price().open_price,
                                            candle.get_price().high_price,
                                            candle.get_price().low_price,

@@ -83,11 +83,17 @@ class Candle(object):
     def get_price(self):
         return self._price
 
+    def get_close_price(self):
+        return self._price.close_price
+
     def get_volume(self):
         return self._volume
 
     def get_time(self):
         return self._time
+
+    def get_close_time_as_datetime(self):
+        return self._time.close_time.as_datetime()
 
     def __repr__(self):
         return "Candle({},\n{},\n{})".format(self._price, self._volume, self._time)

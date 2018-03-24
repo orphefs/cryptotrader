@@ -131,20 +131,16 @@ class SMAStrategy(LiveStrategy):
     def extract_time_series_from_stock_data(self, stock_data: StockData):
         self._stock_data = stock_data
         self._time_series = TimeSeries(
-            x=[candle.get_time().close_time.as_datetime() for candle in stock_data.candles],
-            y=[candle.get_price().close_price for candle in stock_data.candles])
+            x=[candle.get_close_time_as_datetime() for candle in stock_data.candles],
+            y=[candle.get_close_price() for candle in stock_data.candles])
 
     def compute_moving_averages(self):
         self._short_sma = rolling_mean(self._parameters.short_sma_period, self._time_series)
         self._long_sma = rolling_mean(self._parameters.long_sma_period, self._time_series)
 
     def generate_trading_signal(self) -> Union[Buy, Sell, Hold]:
-        current_price = self._stock_data.candles[-1].get_price().close_price
-        # TODO:  Refactor such that it satisfies the following:
-        # Object A can request a service (call a method) of an object
-        # instance B, but object A should not "reach through" object B
-        # to access yet another object, C, to request its services
-        current_time = self._stock_data.candles[-1].get_time().close_time.as_datetime()
+        current_price = self._stock_data.candles[-1].get_close_price()
+        current_time = self._stock_data.candles[-1].get_close_time_as_datetime()
 
         if self.is_sma_crossing_from_below():
             if self._bought:

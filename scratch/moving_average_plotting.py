@@ -16,8 +16,8 @@ def main():
     # time_series_b = TimeSeries(x=[datetime(2017, 1, d) for d in range(1, 30)], y=np.random.normal(6, 3, 29))
     stock_data = load_from_disk(os.path.join(definitions.DATA_DIR,'_data_01_Feb,_2018_01_Mar,_2018_XRPBTC.dill'))
     fig, ax = plt.subplots(nrows=3,ncols=1, sharex=True)
-    time_series_orig = TimeSeries(y=np.array([candle.get_price().close_price for candle in stock_data.candles]),
-                                  x=[candle.get_time().close_time.as_datetime() for candle in stock_data.candles])
+    time_series_orig = TimeSeries(y=np.array([candle.get_close_price() for candle in stock_data.candles]),
+                                  x=[candle.get_close_time_as_datetime() for candle in stock_data.candles])
     time_series_sma10 = rolling_mean(timedelta(hours=20), time_series_orig)
     time_series_sma2 = rolling_mean(timedelta(hours=2), time_series_orig)
     trading_signals = _generate_trading_signals_from_sma(time_series_orig, time_series_sma2, time_series_sma10)

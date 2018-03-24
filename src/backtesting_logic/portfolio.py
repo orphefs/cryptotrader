@@ -57,7 +57,7 @@ class MarketOnClosePortfolio(Portfolio):
             'High': [candle.get_price().high_price for candle in stock_data.candles],
             'Low': [candle.get_price().low_price for candle in stock_data.candles],
             'Close': [candle.get_price().close_price for candle in stock_data.candles]},
-            index=[candle.get_time().close_time.as_datetime() for candle in stock_data.candles])
+            index=[candle.get_close_time_as_datetime() for candle in stock_data.candles])
         self._fees = 0.01  # percent
         self._trading_signals = pd.DataFrame(data=[signal.signal for signal in trading_signals],
                                              index=[signal.price_point.date_time for signal in trading_signals])

@@ -14,8 +14,8 @@ from type_aliases import Security
 
 
 def calculate_sampling_rate_of_stock_data(stock_data: StockData) -> float:
-    return TimeSeries(x=[candle.get_time().close_time.as_datetime() for candle in stock_data.candles],
-                      y=[candle.get_price().close_price for candle in stock_data.candles]).sampling_rate
+    return TimeSeries(x=[candle.get_close_time_as_datetime() for candle in stock_data.candles],
+                      y=[candle.get_close_price() for candle in stock_data.candles]).sampling_rate
 
 
 def download_backtesting_data(time_window: TimeWindow, security: Security) -> List[Candle]:
