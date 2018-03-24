@@ -64,10 +64,6 @@ def main():
     print(portfolio._point_stats['base_index_pct_change'])
     print(portfolio._point_stats['total_pct_change'])
 
-    plt.figure()
-    plt.plot(strategy._short_sma)
-    plt.plot(strategy._long_sma)
-
     plt.show()
 
 
