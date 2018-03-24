@@ -4,3 +4,6 @@
 [submodule "externals/rolling-statistics"]
 	path = externals/rolling-statistics
 	url = git@bitbucket.org:orphefs/rolling-statistics.git
+[submodule "externals/rolling_statistics"]
+	path = externals/rolling_statistics
+	url = git@bitbucket.org:orphefs/rolling_statistics.git
