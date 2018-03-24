@@ -66,7 +66,8 @@ def main():
     print(portfolio._point_stats['total_pct_change'])
 
     plt.figure()
-    plt.plot(long_smas)
+    plt.plot(short_smas[0:10])
+    print(len(short_smas), len(long_smas))
 
     plt.show()
 
