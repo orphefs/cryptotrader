@@ -60,7 +60,7 @@ def main():
         i += 1
 
     portfolio.compute_performance()
-    # custom_plot(portfolio, trading_signals, parameters, stock_data)
+    custom_plot(portfolio, strategy, trading_signals, parameters, stock_data)
     print(portfolio._point_stats['base_index_pct_change'])
     print(portfolio._point_stats['total_pct_change'])
 

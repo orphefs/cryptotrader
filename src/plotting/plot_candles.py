@@ -113,15 +113,13 @@ def plot_candlesticks(ax: Axes, data: StockData):
     ax.set_title(data.security)
 
 
-def custom_plot(portfolio, trading_signals, parameters, stock_data):
+def custom_plot(portfolio, strategy, trading_signals, parameters, stock_data):
     fig, ax = plt.subplots(nrows=4, ncols=1, sharex=True)
     plot_portfolio_2(ax[1:4], portfolio._portfolio_df)
     plot_trading_signals(ax=ax[0], trading_signals=trading_signals[1:])
-    plot_moving_average(ax=ax[0], time_series=rolling_mean(parameters.short_sma_period,
-                                                           extract_time_series_from_stock_data(stock_data)))
+    plot_moving_average(ax=ax[0], time_series=strategy._short_sma)
 
-    plot_moving_average(ax=ax[0], time_series=rolling_mean(parameters.long_sma_period,
-                                                           extract_time_series_from_stock_data(stock_data)))
+    plot_moving_average(ax=ax[0], time_series=strategy._long_sma)
 
     # plot_close_price(ax=ax[0], data=stock_data)
 

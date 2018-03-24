@@ -3,6 +3,7 @@ from datetime import timedelta, datetime
 from typing import Dict, Union
 
 import pandas as pd
+import numpy as np
 
 from backtesting_logic.logic import Buy, Hold, Sell
 from backtesting_logic.signal_processing import rolling_mean
@@ -125,10 +126,10 @@ class SMAStrategy(LiveStrategy):
         self._current_candle = Candle
         self._short_sma_computer = RollingMean(
             _convert_sma_period_to_no_of_samples(parameters.short_sma_period, parameters.update_period))
-        self._short_sma = []
+        self._short_sma = TimeSeries()
         self._long_sma_computer = RollingMean(
             _convert_sma_period_to_no_of_samples(parameters.long_sma_period, parameters.update_period))
-        self._long_sma = []
+        self._long_sma = TimeSeries()
         self._bought = False
         self._last_buy_price = 0.0
 
@@ -149,10 +150,13 @@ class SMAStrategy(LiveStrategy):
 
     def update_moving_averages(self, candle):
         self._current_candle = candle
+
         self._short_sma_computer.insert_new_sample(candle.get_close_price())
-        self._short_sma.append(self._short_sma_computer.mean)
         self._long_sma_computer.insert_new_sample(candle.get_close_price())
-        self._long_sma.append(self._long_sma_computer.mean)
+        s1 = TimeSeries(y=[self._short_sma_computer.mean], x=[candle.get_close_time_as_datetime()])
+        s2 = TimeSeries(y=[self._long_sma_computer.mean], x=[candle.get_close_time_as_datetime()])
+        self._short_sma=self._short_sma.append(s1)
+        self._long_sma=self._long_sma.append(s2)
 
     def generate_trading_signal(self) -> Union[Buy, Sell, Hold]:
         current_price = self._current_candle.get_close_price()
