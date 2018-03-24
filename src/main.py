@@ -21,19 +21,22 @@ import definitions
 
 logging.basicConfig(filename=os.path.join(definitions.DATA_DIR, 'local_autotrader.log'), level=logging.INFO)
 enabled = True
-parameters = LiveParameters(short_sma_period=timedelta(hours=2),
-                            long_sma_period=timedelta(hours=20),
-                            update_period=timedelta(hours=1),
-                            trade_amount=100,
-                            sleep_time=0)
+parameters = LiveParameters(
+    short_sma_period=timedelta(hours=2),
+    long_sma_period=timedelta(hours=20),
+    update_period=timedelta(hours=1),
+    trade_amount=100,
+    sleep_time=0
+)
 
 
 def main():
     client = Client("", "")
     strategy = SMAStrategy(parameters)
-    portfolio = Portfolio(initial_capital=0.5, trade_amount=parameters.trade_amount)
+    portfolio = Portfolio(initial_capital=0.5,
+                          trade_amount=parameters.trade_amount)
     stock_data = load_from_disk(
-        os.path.join(definitions.DATA_DIR, "local_data_15_Jan,_2018_01_Mar,_2018_XRPBTC.dill"))
+        os.path.join(definitions.DATA_DIR, "local_data_15_Jul,_2017_01_Mar,_2018_XRPBTC.dill"))
     logging.info("Sampling rate of backtesting data: {}".format(calculate_sampling_rate_of_stock_data(stock_data)))
     trading_signals = []
 
@@ -48,8 +51,8 @@ def main():
 
         if i > 1:
             signal = strategy.generate_trading_signal()
+
             trading_signals.append(signal)
-            # print(signal)
             portfolio.update(signal)
         time.sleep(parameters.sleep_time)
         i += 1
