@@ -1,3 +1,6 @@
 [submodule "externals/mpl_finance"]
 	path = externals/mpl_finance
 	url = git@github.com:matplotlib/mpl_finance.git
+[submodule "externals/rolling-statistics"]
+	path = externals/rolling-statistics
+	url = git@bitbucket.org:orphefs/rolling-statistics.git
