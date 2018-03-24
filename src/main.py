@@ -14,7 +14,7 @@ from tools.downloader import download_live_data, load_from_disk, serve_windowed_
     calculate_sampling_rate_of_stock_data
 from containers.stock_data import StockData
 
-matplotlib.use('AGG')  # generate postscript output by default
+# matplotlib.use('AGG')  # generate postscript output by default
 import matplotlib.pyplot as plt
 from binance.client import Client
 import definitions
@@ -37,8 +37,6 @@ def main():
     logging.info("Sampling rate of backtesting data: {}".format(calculate_sampling_rate_of_stock_data(stock_data)))
     trading_signals = []
 
-    short_smas = []
-    long_smas = []
     i = 0
 
     while enabled:
@@ -48,9 +46,6 @@ def main():
 
         strategy.update_moving_averages(candle)
 
-        # TODO: Compute custom rolling average
-        short_smas.append(strategy._short_sma)
-        long_smas.append(strategy._long_sma)
         if i > 1:
             signal = strategy.generate_trading_signal()
             trading_signals.append(signal)
