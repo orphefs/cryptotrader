@@ -16,7 +16,8 @@ class TimeSeries(pd.Series):
     def __init__(self, x: Optional[List[datetime]] = None,
                  y: Optional[Union[List[Price], np.ndarray]] = None):
         super().__init__(data=y, index=x)
-        self._sampling_rate = _compute_sampling_rate(x)
+        # TODO: Fix sampling rate implementation with new pandas version
+        # self._sampling_rate = _compute_sampling_rate(x)
 
     @property
     def sampling_rate(self):

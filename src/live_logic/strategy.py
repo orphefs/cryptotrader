@@ -39,6 +39,7 @@ class Portfolio:
     def __init__(self, initial_capital: float, trade_amount: int):
         self._fees = 0.001  # 0.1% on binance
         self._trade_amount = trade_amount
+        self._signals = []
         self._capital = []
         self._initial_capital = initial_capital
         self._positions_df = pd.DataFrame(columns=['intended_trade_time',
@@ -102,6 +103,7 @@ class Portfolio:
 
     def update(self, signal: Union[Buy, Sell, Hold]):
         self._place_order(signal, self._trade_amount, signal.price_point)
+        self._signals.append(signal)
 
     def _place_order(self, signal: Union[Buy, Sell, Hold], quantity: int, price_point: PricePoint):
         if isinstance(signal, Buy):
@@ -155,8 +157,8 @@ class SMAStrategy(LiveStrategy):
         self._long_sma_computer.insert_new_sample(candle.get_close_price())
         s1 = TimeSeries(y=[self._short_sma_computer.mean], x=[candle.get_close_time_as_datetime()])
         s2 = TimeSeries(y=[self._long_sma_computer.mean], x=[candle.get_close_time_as_datetime()])
-        self._short_sma=self._short_sma.append(s1)
-        self._long_sma=self._long_sma.append(s2)
+        self._short_sma = self._short_sma.append(s1)
+        self._long_sma = self._long_sma.append(s2)
 
     def generate_trading_signal(self) -> Union[Buy, Sell, Hold]:
         current_price = self._current_candle.get_close_price()
