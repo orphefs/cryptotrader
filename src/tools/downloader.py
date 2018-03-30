@@ -35,12 +35,12 @@ def serve_windowed_stock_data(data: StockData, iteration: int, window_start: int
     return iteration, StockData(data.candles[iteration - window_start:iteration], data.security)
 
 
-def save_to_disk(data: Any, path_to_file: str):
+def save_to_disk(data: StockData, path_to_file: str):
     with open(path_to_file, 'wb') as outfile:
         dill.dump(data, outfile)
 
 
-def load_from_disk(path_to_file: str) -> Any:
+def load_from_disk(path_to_file: str) -> StockData:
     with open(path_to_file, 'rb') as outfile:
         data = dill.load(outfile)
     return data
