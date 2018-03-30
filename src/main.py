@@ -41,6 +41,8 @@ def main():
 
         if i > 1:
             signal = strategy.generate_trading_signal()
+            # TODO: add market maker
+            # order = market_maker.update(signal)
             portfolio.update(signal)
         time.sleep(parameters.sleep_time)
         i += 1
