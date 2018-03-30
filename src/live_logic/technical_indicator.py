@@ -40,7 +40,7 @@ class MovingAverageTechnicalIndicator(TechnicalIndicator):
 
     @property
     def result(self):
-        return self._result
+        return self._compute_callback.mean
 
     def update(self, candle: Candle):
         self._compute_callback.insert_new_sample(candle.get_close_price())
@@ -80,9 +80,12 @@ class AutoCorrelationTechnicalIndicator(TechnicalIndicator):
 
 
 if __name__ == "__main__":
-   stock_data = load_from_disk(
+    stock_data = load_from_disk(
         os.path.join(definitions.DATA_DIR, "local_data_15_Jan,_2018_01_Mar,_2018_XRPBTC.dill"))
-   acorr = AutoCorrelationTechnicalIndicator(4)
-   for candle in stock_data.candles:
-       acorr.update(candle)
-       print(acorr.result)
+    acorr = AutoCorrelationTechnicalIndicator(10)
+    maverage = MovingAverageTechnicalIndicator(10)
+    for candle in stock_data.candles:
+        acorr.update(candle)
+        maverage.update(candle)
+        print(maverage.result)
+        print(acorr.result)
