@@ -7,7 +7,9 @@ from datetime import timedelta
 import matplotlib.pyplot as plt
 
 import definitions
-from live_logic.strategy import SMAStrategy, LiveParameters, Portfolio
+from live_logic.strategy import SMAStrategy
+from live_logic.parameters import LiveParameters
+from live_logic.portfolio import Portfolio
 from plotting.plot_candles import custom_plot
 from tools.downloader import load_from_disk, calculate_sampling_rate_of_stock_data
 
@@ -37,12 +39,13 @@ def main():
         if i == len(stock_data.candles) - 1:
             break
 
-        strategy.update_moving_averages(candle)
+        strategy.insert_new_data(candle)
 
         if i > 1:
             signal = strategy.generate_trading_signal()
             # TODO: add market maker
-            # order = market_maker.update(signal)
+            # order = classifier.update(signal)
+
             portfolio.update(signal)
         time.sleep(parameters.sleep_time)
         i += 1

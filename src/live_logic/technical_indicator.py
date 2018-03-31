@@ -79,6 +79,26 @@ class AutoCorrelationTechnicalIndicator(TechnicalIndicator):
         self._result = self._compute_callback(np.array(list(self._candles.queue)))
 
 
+class OnBalanceVolumeTechnicalIndicator(TechnicalIndicator):
+    def __init__(self, lags: int):
+        super().__init__(lags)
+        self._compute_callback = _area_of_normalized_autocorrelation
+        self._result = None
+
+    @property
+    def result(self):
+        return self._result
+
+    def update(self, candle: Candle):
+        self._candles.put(candle.get_close_price(), block=False)
+        if self._candles.full():
+            self._compute()
+            self._candles.get(block=False)
+
+    def _compute(self):
+        self._result = self._compute_callback(np.array(list(self._candles.queue)))
+
+
 if __name__ == "__main__":
     stock_data = load_from_disk(
         os.path.join(definitions.DATA_DIR, "local_data_15_Jan,_2018_01_Mar,_2018_XRPBTC.dill"))
