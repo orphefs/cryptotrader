@@ -1,6 +1,6 @@
 import os
 from collections import defaultdict
-from typing import List
+from typing import List, Type
 
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
@@ -49,7 +49,7 @@ class TradingClassifier:
     def __init__(self,
                  stock_data: StockData,
                  list_of_technical_indicators: List[TechnicalIndicator],
-                 sklearn_classifier: RandomForestClassifier,
+                 sklearn_classifier: Type[RandomForestClassifier],
                  training_ratio: float):
         self._stock_data = stock_data
         self._list_of_technical_indicators = list_of_technical_indicators
@@ -76,6 +76,8 @@ def main():
 
     list_of_technical_indicators = [AutoCorrelationTechnicalIndicator('close_price', 5),
                                     MovingAverageTechnicalIndicator('close_price', 5)]
+    sklearn_classifier = RandomForestClassifier
+    training_ratio = 0.3
 
     my_classifier = TradingClassifier(stock_data, list_of_technical_indicators, sklearn_classifier,
                                       training_ratio)

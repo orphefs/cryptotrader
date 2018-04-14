@@ -13,10 +13,11 @@ from tools.downloader import load_from_disk
 
 class TechnicalIndicator(ABC):
     @abstractmethod
-    def __init__(self, lags: int):
+    def __init__(self, feature_getter_callback: Callable, lags: int):
         self._lags = lags
         self._candles = Queue(lags)
         self._compute_callback = Callable
+        self._feature_getter_callback = feature_getter_callback
         self._result = float
 
     @property
@@ -33,9 +34,10 @@ class TechnicalIndicator(ABC):
 
 
 class MovingAverageTechnicalIndicator(TechnicalIndicator):
-    def __init__(self, lags: int):
-        super().__init__(lags)
+    def __init__(self, feature_getter_callback: Callable, lags: int):
+        super().__init__(feature_getter_callback, lags)
         self._compute_callback = RollingMean(self._lags)
+        self._feature_getter_callback = feature_getter_callback
         self._result = self._compute_callback.mean
 
     @property
@@ -43,7 +45,7 @@ class MovingAverageTechnicalIndicator(TechnicalIndicator):
         return self._compute_callback.mean
 
     def update(self, candle: Candle):
-        self._compute_callback.insert_new_sample(candle.get_close_price())
+        self._compute_callback.insert_new_sample(self._feature_getter_callback())
 
     def _compute(self):
         raise NotImplementedError
@@ -60,9 +62,10 @@ def _area_of_normalized_autocorrelation(arr: np.ndarray) -> float:
 
 
 class AutoCorrelationTechnicalIndicator(TechnicalIndicator):
-    def __init__(self, lags: int):
-        super().__init__(lags)
+    def __init__(self, feature_getter_callback: Callable, lags: int):
+        super().__init__(feature_getter_callback, lags)
         self._compute_callback = _area_of_normalized_autocorrelation
+        self._feature_getter_callback = feature_getter_callback
         self._result = None
 
     @property
@@ -70,7 +73,7 @@ class AutoCorrelationTechnicalIndicator(TechnicalIndicator):
         return self._result
 
     def update(self, candle: Candle):
-        self._candles.put(candle.get_close_price(), block=False)
+        self._candles.put(self._feature_getter_callback(), block=False)
         if self._candles.full():
             self._compute()
             self._candles.get(block=False)
@@ -79,31 +82,31 @@ class AutoCorrelationTechnicalIndicator(TechnicalIndicator):
         self._result = self._compute_callback(np.array(list(self._candles.queue)))
 
 
-class OnBalanceVolumeTechnicalIndicator(TechnicalIndicator):
-    def __init__(self, lags: int):
-        super().__init__(lags)
-        self._compute_callback = _area_of_normalized_autocorrelation
-        self._result = None
-
-    @property
-    def result(self):
-        return self._result
-
-    def update(self, candle: Candle):
-        self._candles.put(candle.get_close_price(), block=False)
-        if self._candles.full():
-            self._compute()
-            self._candles.get(block=False)
-
-    def _compute(self):
-        self._result = self._compute_callback(np.array(list(self._candles.queue)))
+# class OnBalanceVolumeTechnicalIndicator(TechnicalIndicator):
+#     def __init__(self, lags: int):
+#         super().__init__(lags)
+#         self._compute_callback = _area_of_normalized_autocorrelation
+#         self._result = None
+#
+#     @property
+#     def result(self):
+#         return self._result
+#
+#     def update(self, candle: Candle):
+#         self._candles.put(candle.get_close_price(), block=False)
+#         if self._candles.full():
+#             self._compute()
+#             self._candles.get(block=False)
+#
+#     def _compute(self):
+#         self._result = self._compute_callback(np.array(list(self._candles.queue)))
 
 
 if __name__ == "__main__":
     stock_data = load_from_disk(
         os.path.join(definitions.DATA_DIR, "local_data_15_Jan,_2018_01_Mar,_2018_XRPBTC.dill"))
-    acorr = AutoCorrelationTechnicalIndicator(10)
-    maverage = MovingAverageTechnicalIndicator(10)
+    acorr = AutoCorrelationTechnicalIndicator(Candle.get_close_price, 10)
+    maverage = MovingAverageTechnicalIndicator(Candle.get_close_price, 10)
     for candle in stock_data.candles:
         acorr.update(candle)
         maverage.update(candle)
