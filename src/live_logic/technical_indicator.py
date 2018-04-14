@@ -45,7 +45,7 @@ class MovingAverageTechnicalIndicator(TechnicalIndicator):
         return self._compute_callback.mean
 
     def update(self, candle: Candle):
-        self._compute_callback.insert_new_sample(self._feature_getter_callback())
+        self._compute_callback.insert_new_sample(self._feature_getter_callback(candle))
 
     def _compute(self):
         raise NotImplementedError
@@ -73,7 +73,7 @@ class AutoCorrelationTechnicalIndicator(TechnicalIndicator):
         return self._result
 
     def update(self, candle: Candle):
-        self._candles.put(self._feature_getter_callback(), block=False)
+        self._candles.put(self._feature_getter_callback(candle), block=False)
         if self._candles.full():
             self._compute()
             self._candles.get(block=False)
