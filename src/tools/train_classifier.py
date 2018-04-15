@@ -39,10 +39,10 @@ def _get_training_labels(stock_data: StockData):
 
 def _convert_to_numpy_array(training_data: defaultdict(list), training_labels: list):
     import pandas as pd
-    training_data['labels'] = [trading_signal.signal for
-                               trading_signal in training_labels.insert(0,None)]
+    lst = [np.nan] + [trading_signal.signal for trading_signal in training_labels]
+    training_data['labels'] = lst
     df = pd.DataFrame(training_data).dropna()
-    return df[~df.labels], df[df.labels]
+    return df[[col for col in df.columns if col != 'labels']], df['labels']
 
 
 class TradingClassifier:
@@ -53,7 +53,7 @@ class TradingClassifier:
                  training_ratio: float):
         self._stock_data = stock_data
         self._list_of_technical_indicators = list_of_technical_indicators
-        self._sklearn_classifier = sklearn_classifier
+        self._sklearn_classifier = sklearn_classifier()
         self._training_ratio = training_ratio
         self._predictors = np.ndarray
         self._labels = np.ndarray
@@ -64,10 +64,12 @@ class TradingClassifier:
                                                                    _get_training_labels(self._stock_data))
 
     def train(self):
-        self._sklearn_classifier.fit(self._sklearn_classifier, X=self._predictors, y=self._labels)
+        self._sklearn_classifier.fit(
+                                     X=self._predictors.as_matrix(),
+                                     y=self._labels.as_matrix())
 
     def predict(self):
-        pass
+        self._sklearn_classifier.predict()
 
 
 def main():
