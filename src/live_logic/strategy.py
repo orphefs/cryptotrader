@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from datetime import timedelta
 from typing import Dict, Union
 
@@ -12,12 +13,24 @@ from externals.rolling_statistics.python.rolling_stats import RollingMean
 from live_logic.parameters import LiveParameters, ClassifierParameters
 
 
-class LiveStrategy:
-    pass
-
-
 def _convert_sma_period_to_no_of_samples(sma_period: timedelta, update_period: timedelta) -> int:
     return int(sma_period / update_period)
+
+
+def load_from_file(path_to_file: str) -> ClassifierParameters:
+    with open(path_to_file, 'rb') as infile:
+        parameters = dill.load(infile)
+    return parameters
+
+
+class LiveStrategy(ABC):
+    @abstractmethod
+    def insert_new_data(self, candle: Candle):
+        raise NotImplementedError
+
+    @abstractmethod
+    def generate_trading_signal(self) -> Union[Buy, Sell, Hold]:
+        raise NotImplementedError
 
 
 class SMAStrategy(LiveStrategy):
@@ -98,12 +111,6 @@ class SMAStrategy(LiveStrategy):
         self._long_sma = self._long_sma.append(s2)
 
 
-def load_from_file(path_to_file: str) -> ClassifierParameters:
-    with open(path_to_file, 'rb') as infile:
-        parameters = dill.load(infile)
-    return parameters
-
-
 class ClassifierStrategy(LiveStrategy):
     def __init__(self, parameters: ClassifierParameters):
         self._parameters = parameters
@@ -113,7 +120,7 @@ class ClassifierStrategy(LiveStrategy):
         self._current_candle = candle
         self._update_classifier()
 
-    def generate_trading_signal(self):
+    def generate_trading_signal(self) -> Union[Buy, Sell, Hold]:
         # classifier predict and output Signal
         pass
 

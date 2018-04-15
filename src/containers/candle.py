@@ -86,6 +86,9 @@ class Candle(object):
     def get_close_price(self):
         return self._price.close_price
 
+    def get_number_of_trades(self):
+        return self._volume.number_of_trades
+
     def get_volume(self):
         return self._volume
 
