@@ -59,11 +59,11 @@ class TradingClassifier:
     def __init__(self,
                  stock_data: StockData,
                  list_of_technical_indicators: List[TechnicalIndicator],
-                 sklearn_classifier: Type[RandomForestClassifier],
+                 sklearn_classifier: RandomForestClassifier,
                  training_ratio: float):
         self._stock_data = stock_data
         self._list_of_technical_indicators = list_of_technical_indicators
-        self._sklearn_classifier = sklearn_classifier()
+        self._sklearn_classifier = sklearn_classifier
         self._training_ratio = training_ratio
         self._predictors = np.ndarray
         self._labels = np.ndarray
@@ -103,8 +103,8 @@ def main():
 
     list_of_technical_indicators = [AutoCorrelationTechnicalIndicator(Candle.get_close_price, 5),
                                     MovingAverageTechnicalIndicator(Candle.get_close_price, 5)]
-    sklearn_classifier = RandomForestClassifier
-    training_ratio = 0.3
+    sklearn_classifier = RandomForestClassifier(n_estimators=1000)
+    training_ratio = 0.99
 
     my_classifier = TradingClassifier(stock_data_training_set, list_of_technical_indicators, sklearn_classifier,
                                       training_ratio)
