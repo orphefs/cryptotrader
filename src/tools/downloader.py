@@ -55,8 +55,11 @@ def generate_file_name(time_window: TimeWindow, security: Security) -> str:
 
 if __name__ == '__main__':
     security = "XRPBTC"
-    time_window = TimeWindow(start_time=datetime(2017, 7, 15),
-                             end_time=datetime(2018, 3, 1))
+    # time_window = TimeWindow(start_time=datetime(2017, 7, 15),
+    #                          end_time=datetime(2018, 3, 1))
+    #
+    time_window = TimeWindow(start_time=datetime(2018, 3, 2),
+                             end_time=datetime(2018, 4, 10))
     start = datetime.now()
     # price_points = download_live_data(Client("", ""), security)
     candles = download_backtesting_data(time_window, security)
