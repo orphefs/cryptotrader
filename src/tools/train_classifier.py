@@ -1,6 +1,9 @@
 import os
 from collections import defaultdict
+from datetime import timedelta
 from typing import List, Type
+
+import matplotlib.pyplot as plt
 
 import numpy as np
 import pandas as pd
@@ -11,8 +14,12 @@ from backtesting_logic.logic import Buy, Sell
 from containers.candle import Candle
 from containers.data_point import PricePoint
 from containers.stock_data import StockData
+from containers.trade_helper import generate_trading_signals_from_array
+from live_logic.parameters import LiveParameters
+from live_logic.portfolio import Portfolio
 from live_logic.technical_indicator import AutoCorrelationTechnicalIndicator, MovingAverageTechnicalIndicator, \
     TechnicalIndicator
+from plotting.plot_candles import custom_plot
 from tools.downloader import load_from_disk
 
 
@@ -77,12 +84,22 @@ class TradingClassifier:
         return self._sklearn_classifier.predict(predictors)
 
 
+def calculate_gains(predictions, stock_data_testing_set):
+    print(len(predictions))
+    print(len(stock_data_testing_set.candles))
+
+    amount = 1000
+    close_prices = [candle.get_close_price() for candle in stock_data_testing_set.candles]
+    sum(predictions * amount * close_prices)
+
+    pass
+
+
 def main():
     stock_data_training_set = load_from_disk(
         os.path.join(definitions.DATA_DIR, "local_data_01_Oct,_2017_01_Mar,_2018_XRPBTC.dill"))
     stock_data_testing_set = load_from_disk(
         os.path.join(definitions.DATA_DIR, "local_data_02_Mar,_2018_10_Apr,_2018_XRPBTC.dill"))
-
 
     list_of_technical_indicators = [AutoCorrelationTechnicalIndicator(Candle.get_close_price, 5),
                                     MovingAverageTechnicalIndicator(Candle.get_close_price, 5)]
@@ -96,8 +113,21 @@ def main():
 
     predictions = my_classifier.predict(stock_data_testing_set, list_of_technical_indicators)
 
+    parameters = LiveParameters(
+        short_sma_period=timedelta(hours=2),
+        long_sma_period=timedelta(hours=20),
+        update_period=timedelta(hours=1),
+        trade_amount=100,
+        sleep_time=0
+    )
+    portfolio = Portfolio(initial_capital=0.5,
+                          trade_amount=parameters.trade_amount)
+    for signal in generate_trading_signals_from_array(predictions, stock_data_testing_set):
+        portfolio.update(signal)
 
-
+    portfolio.compute_performance()
+    custom_plot(portfolio=portfolio, strategy=None, parameters=parameters, stock_data=stock_data_testing_set)
+    plt.show()
 
 if __name__ == "__main__":
     main()

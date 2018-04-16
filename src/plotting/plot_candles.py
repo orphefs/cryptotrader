@@ -8,7 +8,7 @@ from matplotlib.dates import DateFormatter, WeekdayLocator, \
     DayLocator, MONDAY
 from externals.mpl_finance.mpl_finance import candlestick_ohlc
 
-from backtesting_logic.logic import IntersectionPoint, TradingSignal
+from backtesting_logic.logic import IntersectionPoint, _TradingSignal
 from containers.time_series import TimeSeries
 from backtesting_logic.portfolio import Portfolio
 from helpers import extract_time_series_from_stock_data
@@ -66,13 +66,13 @@ def plot_intersection_point(ax: Axes, intersection_point: IntersectionPoint):
     ax.scatter(y=intersection_point.data_point.value, x=intersection_point.data_point.date_time)
 
 
-def plot_trading_signals(ax: Axes, trading_signals: List[TradingSignal]):
+def plot_trading_signals(ax: Axes, trading_signals: List[_TradingSignal]):
     marker_map = {
         "Buy": '^',
         "Sell": 'v',
         "Hold": "",
     }
-    markers = [marker_map[trading_signal.type] for trading_signal in trading_signals]
+    markers = [marker_map[trading_signal.type.__name__] for trading_signal in trading_signals]
 
     for marker, trading_signal in zip(markers, trading_signals):
         if marker != "":
@@ -117,8 +117,9 @@ def custom_plot(portfolio, strategy, parameters, stock_data):
     fig, ax = plt.subplots(nrows=4, ncols=1, sharex=True)
     plot_portfolio_2(ax[1:4], portfolio._portfolio_df)
     plot_trading_signals(ax=ax[0], trading_signals=portfolio._signals[1:])
-    plot_moving_average(ax=ax[0], time_series=strategy._short_sma)
-    plot_moving_average(ax=ax[0], time_series=strategy._long_sma)
+    if strategy is not None:
+        plot_moving_average(ax=ax[0], time_series=strategy._short_sma)
+        plot_moving_average(ax=ax[0], time_series=strategy._long_sma)
     # plot_candlesticks(ax=ax, data=stock_data)
     # plot_close_price(ax=ax[0], data=stock_data)
     #

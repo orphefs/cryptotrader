@@ -8,6 +8,7 @@ from containers.data_point import PricePoint
 
 
 class Portfolio:
+
     def __init__(self, initial_capital: float, trade_amount: int):
         self._fees = 0.001  # 0.1% on binance
         self._trade_amount = trade_amount
@@ -20,10 +21,9 @@ class Portfolio:
         self._portfolio_df = pd.DataFrame(columns=['holdings', 'cash', 'returns', 'total'])
         self._point_stats = {}
 
-    def _append_to_positions(self, trade_time, amount, price):
-        self._positions['actual_trade_time'].append(trade_time)
-        self._positions['amount_traded'].append(amount)
-        self._positions['actual_price'].append(price)
+    def update(self, signal: Union[Buy, Sell, Hold]):
+        self._place_order(signal, self._trade_amount, signal.price_point)
+        self._signals.append(signal)
 
     def compute_performance(self):
 
@@ -52,6 +52,11 @@ class Portfolio:
         self._point_stats['total_pct_change'] = (self._portfolio_df['total'][-1] -
                                                  self._initial_capital) / self._initial_capital
 
+    def _append_to_positions(self, trade_time, amount, price):
+        self._positions['actual_trade_time'].append(trade_time)
+        self._positions['amount_traded'].append(amount)
+        self._positions['actual_price'].append(price)
+
     @staticmethod
     def _differentiate_positions(positions: pd.Series) -> pd.Series:
         return positions.diff()
@@ -72,10 +77,6 @@ class Portfolio:
     def _compute_returns(total_earnings: pd.Series) -> pd.Series:
         returns = total_earnings.pct_change()
         return returns
-
-    def update(self, signal: Union[Buy, Sell, Hold]):
-        self._place_order(signal, self._trade_amount, signal.price_point)
-        self._signals.append(signal)
 
     def _place_order(self, signal: Union[Buy, Sell, Hold], quantity: int, price_point: PricePoint):
         if isinstance(signal, Buy):

@@ -29,7 +29,7 @@ def main():
     portfolio = Portfolio(initial_capital=0.5,
                           trade_amount=parameters.trade_amount)
     stock_data = load_from_disk(
-        os.path.join(definitions.DATA_DIR, "local_data_15_Jan,_2018_01_Mar,_2018_XRPBTC.dill"))
+        os.path.join(definitions.DATA_DIR, "local_data_01_Oct,_2017_01_Mar,_2018_XRPBTC.dill"))
     # logging.info("Sampling rate of backtesting data: {}".format(calculate_sampling_rate_of_stock_data(stock_data)))
 
     i = 0
