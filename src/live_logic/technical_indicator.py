@@ -32,6 +32,11 @@ class TechnicalIndicator(ABC):
     def _compute(self):
         raise NotImplementedError
 
+    def __str__(self):
+        return "{}_{}_{}".format(type(self).__name__,
+                                 self._feature_getter_callback.__name__,
+                                 self._lags)
+
 
 class MovingAverageTechnicalIndicator(TechnicalIndicator):
     def __init__(self, feature_getter_callback: Callable, lags: int):

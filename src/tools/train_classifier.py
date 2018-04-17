@@ -28,7 +28,8 @@ def _extract_indicators_from_stock_data(stock_data, list_of_technical_indicators
     for candle in stock_data.candles:
         for indicator in list_of_technical_indicators:
             indicator.update(candle)
-            training_data[type(indicator).__name__ + ].append(indicator.result)
+            indicator_key = str(indicator)
+            training_data[indicator_key].append(indicator.result)
     return training_data
 
 
