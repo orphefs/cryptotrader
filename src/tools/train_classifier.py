@@ -1,4 +1,4 @@
-import os
+from collections import defaultdict
 from collections import defaultdict
 from datetime import timedelta, datetime
 from typing import List
@@ -8,7 +8,6 @@ import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 
-import definitions
 from backtesting_logic.logic import Buy, Sell
 from containers.candle import Candle
 from containers.data_point import PricePoint
@@ -20,7 +19,7 @@ from live_logic.portfolio import Portfolio
 from live_logic.technical_indicator import AutoCorrelationTechnicalIndicator, MovingAverageTechnicalIndicator, \
     TechnicalIndicator
 from plotting.plot_candles import custom_plot
-from tools.downloader import load_from_disk, download_save_load
+from tools.downloader import download_save_load
 
 
 def _extract_indicators_from_stock_data(stock_data, list_of_technical_indicators):
@@ -58,21 +57,25 @@ def _convert_to_pandas(predictors: defaultdict(list), labels: list = None):
 
 class TradingClassifier:
     def __init__(self,
-                 stock_data: StockData,
+                 stock_data_training: StockData,
                  list_of_technical_indicators: List[TechnicalIndicator],
                  sklearn_classifier: RandomForestClassifier,
                  training_ratio: float):
-        self._stock_data = stock_data
+        self._stock_data_training = stock_data_training
+        self._stock_data_live = StockData(candles=[], security=stock_data_training.security)
         self._list_of_technical_indicators = list_of_technical_indicators
+        self._maximum_lag = max([ti.lags for ti in list_of_technical_indicators])
+        self._is_candles_requirement_satisfied = False
         self._sklearn_classifier = sklearn_classifier
         self._training_ratio = training_ratio
         self._predictors = np.ndarray
         self._labels = np.ndarray
 
     def precondition(self):
-        training_data = _extract_indicators_from_stock_data(self._stock_data, self._list_of_technical_indicators)
+        training_data = _extract_indicators_from_stock_data(self._stock_data_training,
+                                                            self._list_of_technical_indicators)
         self._predictors, self._labels = _convert_to_pandas(predictors=training_data,
-                                                            labels=_get_training_labels(self._stock_data))
+                                                            labels=_get_training_labels(self._stock_data_training))
 
     def train(self):
         self._sklearn_classifier.fit(
@@ -80,9 +83,27 @@ class TradingClassifier:
             y=self._labels.as_matrix())
 
     def predict(self, stock_data: StockData, list_of_technical_indicators: List[TechnicalIndicator]):
+        '''Return Buy/Sell/Hold prediction for a stock dataset.
+        stock_data.candles must be of length at least self._maximum_lag'''
         testing_data = _extract_indicators_from_stock_data(stock_data, list_of_technical_indicators)
         predictors, _ = _convert_to_pandas(predictors=testing_data, labels=None)
         return self._sklearn_classifier.predict(predictors)
+
+    def predict_one(self):
+        if self._is_candles_requirement_satisfied:
+            testing_data = _extract_indicators_from_stock_data(self._stock_data_live[-1],
+                                                               self._list_of_technical_indicators)
+            predictors, _ = _convert_to_pandas(predictors=testing_data, labels=None)
+            return self._sklearn_classifier.predict(predictors)
+
+    @property
+    def sklearn_classifier(self):
+        return self._sklearn_classifier
+
+    def append_new_candle(self, candle: Candle):
+        self._stock_data_live.append_new_candle(candle)
+        if len(self._stock_data_live.candles) > self._maximum_lag:
+            self._is_candles_requirement_satisfied = True
 
 
 def calculate_gains(predictions, stock_data_testing_set):
@@ -99,22 +120,21 @@ def calculate_gains(predictions, stock_data_testing_set):
 def main():
     security = "ETHBTC"
     training_time_window = TimeWindow(start_time=datetime(2017, 1, 1),
-                             end_time=datetime(2018, 3, 10))
+                                      end_time=datetime(2018, 3, 10))
 
     stock_data_training_set = download_save_load(training_time_window, security)
     testing_time_window = TimeWindow(start_time=datetime(2018, 3, 11),
-                                      end_time=datetime(2018, 4, 10))
+                                     end_time=datetime(2018, 4, 10))
 
     stock_data_testing_set = download_save_load(testing_time_window, security)
 
-
-
-
     list_of_technical_indicators = [
-        AutoCorrelationTechnicalIndicator(Candle.get_number_of_trades, 5),
+        # AutoCorrelationTechnicalIndicator(Candle.get_number_of_trades, 2),
+        # AutoCorrelationTechnicalIndicator(Candle.get_number_of_trades, 5),
         AutoCorrelationTechnicalIndicator(Candle.get_close_price, 5),
         MovingAverageTechnicalIndicator(Candle.get_close_price, 5)
     ]
+    # sklearn_classifier = RandomForestClassifier(n_estimators=1000)
     sklearn_classifier = RandomForestClassifier(n_estimators=1000)
     training_ratio = 0.3
 
@@ -123,7 +143,7 @@ def main():
     my_classifier.precondition()
     my_classifier.train()
 
-    predictions = my_classifier.predict(stock_data_testing_set, list_of_technical_indicators)
+    # predictions = my_classifier.predict(stock_data_testing_set, list_of_technical_indicators)
 
     parameters = LiveParameters(
         short_sma_period=timedelta(hours=2),
@@ -132,8 +152,13 @@ def main():
         trade_amount=0.5,
         sleep_time=0
     )
-    portfolio = Portfolio(initial_capital=0.5,
+    portfolio = Portfolio(initial_capital=5,
                           trade_amount=parameters.trade_amount)
+
+    for candle in stock_data_testing_set:
+        my_classifier.append_new_candle(candle)
+        my_classifier.predict_one(list_of_technical_indicators)
+
     for signal in generate_trading_signals_from_array(predictions, stock_data_testing_set):
         portfolio.update(signal)
 
@@ -143,6 +168,7 @@ def main():
 
     portfolio.compute_performance()
     custom_plot(portfolio=portfolio, strategy=None, parameters=parameters, stock_data=stock_data_testing_set)
+    print(my_classifier.sklearn_classifier.feature_importances_)
     plt.show()
 
 

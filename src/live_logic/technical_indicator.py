@@ -21,6 +21,10 @@ class TechnicalIndicator(ABC):
         self._result = float
 
     @property
+    def lags(self):
+        return self._lags
+
+    @property
     def result(self):
         return self._result
 

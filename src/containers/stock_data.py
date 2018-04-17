@@ -13,6 +13,9 @@ class StockData(object):
     def candles(self):
         return self._candles
 
+    def append_new_candle(self, candle: Candle):
+        self._candles.append(candle)
+
     @property
     def security(self):
         return self._security
