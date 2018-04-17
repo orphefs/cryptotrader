@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from typing import List, Any, Tuple
+from typing import List, Tuple
 
 import dill
 from binance.client import Client
@@ -53,19 +53,24 @@ def generate_file_name(time_window: TimeWindow, security: Security) -> str:
             time_window.end_time.as_string().replace(" ", "_") + '_' + security + ".dill").replace(" ", "_")
 
 
+def download_save_load(time_window: TimeWindow, security: str):
+    path_to_file = os.path.join(definitions.DATA_DIR, generate_file_name(time_window, security))
+    if os.path.isfile(path_to_file):
+        stock_data = load_from_disk(path_to_file)
+    else:
+        start = datetime.now()
+        candles = download_backtesting_data(time_window, security)
+        stop = datetime.now()
+        print("Elapsed download time: {}".format(stop - start))
+        for candle in candles:
+            print("{}\n".format(candle))
+        stock_data = StockData(candles, security)
+        save_to_disk(stock_data, path_to_file)
+    return stock_data
+
+
 if __name__ == '__main__':
     security = "XRPBTC"
-    # time_window = TimeWindow(start_time=datetime(2017, 7, 15),
-    #                          end_time=datetime(2018, 3, 1))
-    #
     time_window = TimeWindow(start_time=datetime(2018, 3, 2),
                              end_time=datetime(2018, 4, 10))
-    start = datetime.now()
-    # price_points = download_live_data(Client("", ""), security)
-    candles = download_backtesting_data(time_window, security)
-    stop = datetime.now()
-    print("Elapsed download time: {}".format(stop - start))
-    for candle in candles:
-        print("{}\n".format(candle))
-    stock_data = StockData(candles, security)
-    save_to_disk(stock_data, os.path.join(definitions.DATA_DIR, generate_file_name(time_window, security)))
+    download_save_load(time_window, security)
