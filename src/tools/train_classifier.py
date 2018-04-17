@@ -13,7 +13,7 @@ from containers.candle import Candle
 from containers.data_point import PricePoint
 from containers.stock_data import StockData
 from containers.time_windows import TimeWindow
-from containers.trade_helper import generate_trading_signals_from_array, generate_trading_signal_from_prediction
+from containers.trade_helper import generate_trading_signal_from_prediction
 from live_logic.parameters import LiveParameters
 from live_logic.portfolio import Portfolio
 from live_logic.technical_indicator import AutoCorrelationTechnicalIndicator, MovingAverageTechnicalIndicator, \
@@ -29,6 +29,15 @@ def _extract_indicators_from_stock_data(stock_data, list_of_technical_indicators
             indicator.update(candle)
             indicator_key = str(indicator)
             training_data[indicator_key].append(indicator.result)
+    return training_data
+
+
+def _extract_indicator_from_candle(candle, list_of_technical_indicators):
+    training_data = defaultdict(list)
+    for indicator in list_of_technical_indicators:
+        indicator.update(candle)
+        indicator_key = str(indicator)
+        training_data[indicator_key].append(indicator.result)
     return training_data
 
 
@@ -89,12 +98,12 @@ class TradingClassifier:
         predictors, _ = _convert_to_pandas(predictors=testing_data, labels=None)
         return self._sklearn_classifier.predict(predictors)
 
-    def predict_one(self):
+    def predict_one(self, candle: Candle):
         if self._is_candles_requirement_satisfied:
-            testing_data = _extract_indicators_from_stock_data(self._stock_data_live,
-                                                               self._list_of_technical_indicators)
+            testing_data = _extract_indicator_from_candle(candle,
+                                                        self._list_of_technical_indicators)
             predictors, _ = _convert_to_pandas(predictors=testing_data, labels=None)
-            return self._sklearn_classifier.predict(predictors)[-1]
+            return self._sklearn_classifier.predict(predictors)
 
     @property
     def sklearn_classifier(self):
@@ -157,10 +166,12 @@ def main():
 
     for candle in stock_data_testing_set.candles:
         my_classifier.append_new_candle(candle)
-        prediction = my_classifier.predict_one()
-        signal = generate_trading_signal_from_prediction(prediction, candle)
-        if signal is not None:
+        prediction = my_classifier.predict_one(candle)
+        if prediction is not None:
+            signal = generate_trading_signal_from_prediction(prediction[0], candle)
             portfolio.update(signal)
+            print(signal)
+
 
     # testing_data = _extract_indicators_from_stock_data(stock_data_testing_set, list_of_technical_indicators)
     # predictors, labels = _convert_to_pandas(predictors=testing_data,
