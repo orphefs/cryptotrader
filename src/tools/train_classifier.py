@@ -163,23 +163,29 @@ def main():
     )
     portfolio = Portfolio(initial_capital=5,
                           trade_amount=parameters.trade_amount)
+    reference_portfolio = Portfolio(initial_capital=5,
+                          trade_amount=parameters.trade_amount)
 
+    predicted_signals = []
     for candle in stock_data_testing_set.candles:
         my_classifier.append_new_candle(candle)
         prediction = my_classifier.predict_one(candle)
         if prediction is not None:
             signal = generate_trading_signal_from_prediction(prediction[0], candle)
             portfolio.update(signal)
-            print(signal)
-
-
-    # testing_data = _extract_indicators_from_stock_data(stock_data_testing_set, list_of_technical_indicators)
-    # predictors, labels = _convert_to_pandas(predictors=testing_data,
-    #                                         labels=_get_training_labels(stock_data_testing_set))
-    #
+            predicted_signals.append(signal)
+            # print(signal)
     portfolio.compute_performance()
+
+    training_signals = _get_training_labels(stock_data_testing_set)
+    for signal in training_signals:
+        reference_portfolio.update(signal)
+    reference_portfolio.compute_performance()
+
     custom_plot(portfolio=portfolio, strategy=None, parameters=parameters, stock_data=stock_data_testing_set)
+    custom_plot(portfolio=reference_portfolio, strategy=None, parameters=parameters, stock_data=stock_data_testing_set)
     print(my_classifier.sklearn_classifier.feature_importances_)
+    print(list(zip(predicted_signals, training_signals)))
     plt.show()
 
 
