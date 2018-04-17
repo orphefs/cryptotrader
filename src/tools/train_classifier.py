@@ -13,7 +13,7 @@ from containers.candle import Candle
 from containers.data_point import PricePoint
 from containers.stock_data import StockData
 from containers.time_windows import TimeWindow
-from containers.trade_helper import generate_trading_signals_from_array
+from containers.trade_helper import generate_trading_signals_from_array, generate_trading_signal_from_prediction
 from live_logic.parameters import LiveParameters
 from live_logic.portfolio import Portfolio
 from live_logic.technical_indicator import AutoCorrelationTechnicalIndicator, MovingAverageTechnicalIndicator, \
@@ -91,10 +91,10 @@ class TradingClassifier:
 
     def predict_one(self):
         if self._is_candles_requirement_satisfied:
-            testing_data = _extract_indicators_from_stock_data(self._stock_data_live[-1],
+            testing_data = _extract_indicators_from_stock_data(self._stock_data_live,
                                                                self._list_of_technical_indicators)
             predictors, _ = _convert_to_pandas(predictors=testing_data, labels=None)
-            return self._sklearn_classifier.predict(predictors)
+            return self._sklearn_classifier.predict(predictors)[-1]
 
     @property
     def sklearn_classifier(self):
@@ -102,7 +102,7 @@ class TradingClassifier:
 
     def append_new_candle(self, candle: Candle):
         self._stock_data_live.append_new_candle(candle)
-        if len(self._stock_data_live.candles) > self._maximum_lag:
+        if len(self._stock_data_live.candles) >= self._maximum_lag:
             self._is_candles_requirement_satisfied = True
 
 
@@ -155,17 +155,17 @@ def main():
     portfolio = Portfolio(initial_capital=5,
                           trade_amount=parameters.trade_amount)
 
-    for candle in stock_data_testing_set:
+    for candle in stock_data_testing_set.candles:
         my_classifier.append_new_candle(candle)
-        my_classifier.predict_one(list_of_technical_indicators)
+        prediction = my_classifier.predict_one()
+        signal = generate_trading_signal_from_prediction(prediction, candle)
+        if signal is not None:
+            portfolio.update(signal)
 
-    for signal in generate_trading_signals_from_array(predictions, stock_data_testing_set):
-        portfolio.update(signal)
-
-    testing_data = _extract_indicators_from_stock_data(stock_data_testing_set, list_of_technical_indicators)
-    predictors, labels = _convert_to_pandas(predictors=testing_data,
-                                            labels=_get_training_labels(stock_data_testing_set))
-
+    # testing_data = _extract_indicators_from_stock_data(stock_data_testing_set, list_of_technical_indicators)
+    # predictors, labels = _convert_to_pandas(predictors=testing_data,
+    #                                         labels=_get_training_labels(stock_data_testing_set))
+    #
     portfolio.compute_performance()
     custom_plot(portfolio=portfolio, strategy=None, parameters=parameters, stock_data=stock_data_testing_set)
     print(my_classifier.sklearn_classifier.feature_importances_)
