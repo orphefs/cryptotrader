@@ -1,10 +1,9 @@
 import os
 from collections import defaultdict
-from datetime import timedelta
-from typing import List, Type
+from datetime import timedelta, datetime
+from typing import List
 
 import matplotlib.pyplot as plt
-
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
@@ -14,13 +13,14 @@ from backtesting_logic.logic import Buy, Sell
 from containers.candle import Candle
 from containers.data_point import PricePoint
 from containers.stock_data import StockData
+from containers.time_windows import TimeWindow
 from containers.trade_helper import generate_trading_signals_from_array
 from live_logic.parameters import LiveParameters
 from live_logic.portfolio import Portfolio
 from live_logic.technical_indicator import AutoCorrelationTechnicalIndicator, MovingAverageTechnicalIndicator, \
     TechnicalIndicator
 from plotting.plot_candles import custom_plot
-from tools.downloader import load_from_disk
+from tools.downloader import load_from_disk, download_save_load
 
 
 def _extract_indicators_from_stock_data(stock_data, list_of_technical_indicators):
@@ -28,7 +28,7 @@ def _extract_indicators_from_stock_data(stock_data, list_of_technical_indicators
     for candle in stock_data.candles:
         for indicator in list_of_technical_indicators:
             indicator.update(candle)
-            training_data[type(indicator).__name__].append(indicator.result)
+            training_data[type(indicator).__name__ + ].append(indicator.result)
     return training_data
 
 
@@ -96,15 +96,26 @@ def calculate_gains(predictions, stock_data_testing_set):
 
 
 def main():
-    stock_data_training_set = load_from_disk(
-        os.path.join(definitions.DATA_DIR, "local_data_01_Oct,_2017_01_Mar,_2018_XRPBTC.dill"))
-    stock_data_testing_set = load_from_disk(
-        os.path.join(definitions.DATA_DIR, "local_data_02_Mar,_2018_10_Apr,_2018_XRPBTC.dill"))
+    security = "ETHBTC"
+    training_time_window = TimeWindow(start_time=datetime(2017, 1, 1),
+                             end_time=datetime(2018, 3, 10))
 
-    list_of_technical_indicators = [AutoCorrelationTechnicalIndicator(Candle.get_close_price, 5),
-                                    MovingAverageTechnicalIndicator(Candle.get_close_price, 5)]
+    stock_data_training_set = download_save_load(training_time_window, security)
+    testing_time_window = TimeWindow(start_time=datetime(2018, 3, 11),
+                                      end_time=datetime(2018, 4, 10))
+
+    stock_data_testing_set = download_save_load(testing_time_window, security)
+
+
+
+
+    list_of_technical_indicators = [
+        AutoCorrelationTechnicalIndicator(Candle.get_number_of_trades, 5),
+        AutoCorrelationTechnicalIndicator(Candle.get_close_price, 5),
+        MovingAverageTechnicalIndicator(Candle.get_close_price, 5)
+    ]
     sklearn_classifier = RandomForestClassifier(n_estimators=1000)
-    training_ratio = 0.99
+    training_ratio = 0.3
 
     my_classifier = TradingClassifier(stock_data_training_set, list_of_technical_indicators, sklearn_classifier,
                                       training_ratio)
@@ -117,7 +128,7 @@ def main():
         short_sma_period=timedelta(hours=2),
         long_sma_period=timedelta(hours=20),
         update_period=timedelta(hours=1),
-        trade_amount=100,
+        trade_amount=0.5,
         sleep_time=0
     )
     portfolio = Portfolio(initial_capital=0.5,
@@ -125,9 +136,14 @@ def main():
     for signal in generate_trading_signals_from_array(predictions, stock_data_testing_set):
         portfolio.update(signal)
 
+    testing_data = _extract_indicators_from_stock_data(stock_data_testing_set, list_of_technical_indicators)
+    predictors, labels = _convert_to_pandas(predictors=testing_data,
+                                            labels=_get_training_labels(stock_data_testing_set))
+
     portfolio.compute_performance()
     custom_plot(portfolio=portfolio, strategy=None, parameters=parameters, stock_data=stock_data_testing_set)
     plt.show()
+
 
 if __name__ == "__main__":
     main()
