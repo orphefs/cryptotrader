@@ -35,7 +35,7 @@ class TechnicalIndicator(ABC):
 
 class MovingAverageTechnicalIndicator(TechnicalIndicator):
     def __init__(self, feature_getter_callback: Callable, lags: int):
-        super().__init__(feature_getter_callback, lags)
+        super(MovingAverageTechnicalIndicator, self).__init__(feature_getter_callback, lags)
         self._compute_callback = RollingMean(self._lags)
         self._feature_getter_callback = feature_getter_callback
         self._result = self._compute_callback.mean
@@ -63,7 +63,7 @@ def _area_of_normalized_autocorrelation(arr: np.ndarray) -> float:
 
 class AutoCorrelationTechnicalIndicator(TechnicalIndicator):
     def __init__(self, feature_getter_callback: Callable, lags: int):
-        super().__init__(feature_getter_callback, lags)
+        super(AutoCorrelationTechnicalIndicator, self).__init__(feature_getter_callback, lags)
         self._compute_callback = _area_of_normalized_autocorrelation
         self._feature_getter_callback = feature_getter_callback
         self._result = None
