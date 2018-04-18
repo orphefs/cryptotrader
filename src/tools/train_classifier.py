@@ -92,10 +92,10 @@ class TradingClassifier:
             X=self._predictors.as_matrix(),
             y=self._labels.as_matrix())
 
-    def predict(self, stock_data: StockData, list_of_technical_indicators: List[TechnicalIndicator]):
+    def predict(self, stock_data: StockData):
         '''Return Buy/Sell/Hold prediction for a stock dataset.
         stock_data.candles must be of length at least self._maximum_lag'''
-        testing_data = _extract_indicators_from_stock_data(stock_data, list_of_technical_indicators)
+        testing_data = _extract_indicators_from_stock_data(stock_data, self._list_of_technical_indicators)
         predictors, _ = _convert_to_pandas(predictors=testing_data, labels=None)
         return self._sklearn_classifier.predict(predictors)
 
@@ -125,6 +125,48 @@ def calculate_gains(predictions, stock_data_testing_set):
     sum(predictions * amount * close_prices)
 
     pass
+
+
+def generate_reference_to_prediction_portfolio(initial_capital, parameters, stock_data_testing_set, classifier):
+    reference_portfolio = Portfolio(initial_capital=initial_capital,
+                                    trade_amount=parameters.trade_amount)
+    training_signals = _get_training_labels(stock_data_testing_set)
+    for signal in training_signals:
+        reference_portfolio.update(signal)
+    reference_portfolio.compute_performance()
+
+    predicted_portfolio = Portfolio(initial_capital=initial_capital,
+                                    trade_amount=parameters.trade_amount)
+
+    classifier, predicted_portfolio, predicted_signals = generate_signals_iteratively(stock_data_testing_set,
+                                                                                      classifier,
+                                                                                      predicted_portfolio)
+
+    predicted_portfolio.compute_performance()
+
+    return predicted_portfolio, predicted_signals, reference_portfolio, training_signals
+
+
+def generate_signals_iteratively(stock_data: StockData, classifier: TradingClassifier, predicted_portfolio: Portfolio):
+    predicted_signals = []
+    for candle in stock_data.candles:
+        classifier.append_new_candle(candle)
+        prediction = classifier.predict_one(candle)
+        if prediction is not None:
+            signal = generate_trading_signal_from_prediction(prediction[0], candle)
+            predicted_portfolio.update(signal)
+            predicted_signals.append(signal)
+    return classifier, predicted_portfolio, predicted_signals
+
+
+def generate_all_signals_at_once(stock_data_testing_set, classifier, predicted_portfolio):
+    predicted_signals = []
+    signals = classifier.predict(stock_data_testing_set)
+    for signal in signals:
+        if signal is not None:
+            predicted_portfolio.update(signal)
+            predicted_signals.append(signal)
+    return classifier, predicted_portfolio, predicted_signals
 
 
 def main():
@@ -162,27 +204,12 @@ def main():
         trade_amount=0.5,
         sleep_time=0
     )
-    reference_portfolio = Portfolio(initial_capital=5,
-                                    trade_amount=parameters.trade_amount)
-    training_signals = _get_training_labels(stock_data_testing_set)
-    for signal in training_signals:
-        reference_portfolio.update(signal)
-    reference_portfolio.compute_performance()
 
-    portfolio = Portfolio(initial_capital=5,
-                          trade_amount=parameters.trade_amount)
-    predicted_signals = []
-    for candle in stock_data_testing_set.candles:
-        my_classifier.append_new_candle(candle)
-        prediction = my_classifier.predict_one(candle)
-        if prediction is not None:
-            signal = generate_trading_signal_from_prediction(prediction[0], candle)
-            portfolio.update(signal)
-            predicted_signals.append(signal)
-            # print(signal)
-    portfolio.compute_performance()
+    prediction_portfolio, predicted_signals, reference_portfolio, training_signals = generate_reference_to_prediction_portfolio(
+        5, parameters, stock_data_testing_set, my_classifier)
 
-    custom_plot(portfolio=portfolio, strategy=None, parameters=parameters, stock_data=stock_data_testing_set)
+
+    custom_plot(portfolio=prediction_portfolio, strategy=None, parameters=parameters, stock_data=stock_data_testing_set)
     custom_plot(portfolio=reference_portfolio, strategy=None, parameters=parameters, stock_data=stock_data_testing_set)
     print(my_classifier.sklearn_classifier.feature_importances_)
     conf_matrix = compute_confusion_matrix(training_signals, predicted_signals)
