@@ -14,7 +14,7 @@ from containers.candle import Candle
 from containers.data_point import PricePoint
 from containers.stock_data import StockData
 from containers.time_windows import TimeWindow
-from containers.trade_helper import generate_trading_signal_from_prediction
+from containers.trade_helper import generate_trading_signal_from_prediction, generate_trading_signals_from_array
 from live_logic.parameters import LiveParameters
 from live_logic.portfolio import Portfolio
 from live_logic.technical_indicator import AutoCorrelationTechnicalIndicator, MovingAverageTechnicalIndicator, \
@@ -138,7 +138,7 @@ def generate_reference_to_prediction_portfolio(initial_capital, parameters, stoc
     predicted_portfolio = Portfolio(initial_capital=initial_capital,
                                     trade_amount=parameters.trade_amount)
 
-    classifier, predicted_portfolio, predicted_signals = generate_signals_iteratively(stock_data_testing_set,
+    classifier, predicted_portfolio, predicted_signals = generate_all_signals_at_once(stock_data_testing_set,
                                                                                       classifier,
                                                                                       predicted_portfolio)
 
@@ -161,7 +161,8 @@ def generate_signals_iteratively(stock_data: StockData, classifier: TradingClass
 
 def generate_all_signals_at_once(stock_data_testing_set, classifier, predicted_portfolio):
     predicted_signals = []
-    signals = classifier.predict(stock_data_testing_set)
+    predictions = classifier.predict(stock_data_testing_set)
+    signals = generate_trading_signals_from_array(predictions, stock_data_testing_set)
     for signal in signals:
         if signal is not None:
             predicted_portfolio.update(signal)
