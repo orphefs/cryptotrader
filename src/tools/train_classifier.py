@@ -171,13 +171,14 @@ def generate_all_signals_at_once(stock_data_testing_set, classifier, predicted_p
 
 
 def main():
+    # TODO:
     security = "ETHBTC"
-    training_time_window = TimeWindow(start_time=datetime(2017, 1, 1),
+    training_time_window = TimeWindow(start_time=datetime(2017, 10, 1),
                                       end_time=datetime(2018, 2, 1))
 
     stock_data_training_set = download_save_load(training_time_window, security)
     testing_time_window = TimeWindow(start_time=datetime(2018, 2, 2),
-                                     end_time=datetime(2018, 3, 2))
+                                     end_time=datetime(2018, 2, 12))
 
     stock_data_testing_set = download_save_load(testing_time_window, security)
 
@@ -185,14 +186,19 @@ def main():
         # AutoCorrelationTechnicalIndicator(Candle.get_number_of_trades, 2),
         # AutoCorrelationTechnicalIndicator(Candle.get_number_of_trades, 5),
         AutoCorrelationTechnicalIndicator(Candle.get_close_price, 5),
-        MovingAverageTechnicalIndicator(Candle.get_close_price, 5)
+        AutoCorrelationTechnicalIndicator(Candle.get_close_price, 4),
+        AutoCorrelationTechnicalIndicator(Candle.get_close_price, 3),
+        AutoCorrelationTechnicalIndicator(Candle.get_close_price, 1),
+        AutoCorrelationTechnicalIndicator(Candle.get_number_of_trades, 3),
+        AutoCorrelationTechnicalIndicator(Candle.get_number_of_trades, 1),
+        # MovingAverageTechnicalIndicator(Candle.get_close_price, 5)
     ]
     # sklearn_classifier = RandomForestClassifier(n_estimators=1000)
     sklearn_classifier = RandomForestClassifier(n_estimators=1000)
-    training_ratio = 0.3
+    training_ratio = 0.5
 
-    my_classifier = TradingClassifier(stock_data_training_set, list_of_technical_indicators, sklearn_classifier,
-                                      training_ratio)
+    my_classifier = TradingClassifier(stock_data_training_set, list_of_technical_indicators,
+                                      sklearn_classifier, training_ratio)
     my_classifier.precondition()
     my_classifier.train()
 
@@ -205,6 +211,8 @@ def main():
         trade_amount=0.5,
         sleep_time=0
     )
+
+    # stock_data_testing_set = stock_data_training_set
 
     prediction_portfolio, predicted_signals, \
     reference_portfolio, training_signals = generate_reference_to_prediction_portfolio(
