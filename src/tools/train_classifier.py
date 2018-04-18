@@ -1,14 +1,15 @@
 from collections import defaultdict
 from collections import defaultdict
 from datetime import timedelta, datetime
-from typing import List
+from typing import List, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import confusion_matrix
 
-from backtesting_logic.logic import Buy, Sell
+from backtesting_logic.logic import Buy, Sell, Hold
 from containers.candle import Candle
 from containers.data_point import PricePoint
 from containers.stock_data import StockData
@@ -101,7 +102,7 @@ class TradingClassifier:
     def predict_one(self, candle: Candle):
         if self._is_candles_requirement_satisfied:
             testing_data = _extract_indicator_from_candle(candle,
-                                                        self._list_of_technical_indicators)
+                                                          self._list_of_technical_indicators)
             predictors, _ = _convert_to_pandas(predictors=testing_data, labels=None)
             return self._sklearn_classifier.predict(predictors)
 
@@ -161,11 +162,15 @@ def main():
         trade_amount=0.5,
         sleep_time=0
     )
+    reference_portfolio = Portfolio(initial_capital=5,
+                                    trade_amount=parameters.trade_amount)
+    training_signals = _get_training_labels(stock_data_testing_set)
+    for signal in training_signals:
+        reference_portfolio.update(signal)
+    reference_portfolio.compute_performance()
+
     portfolio = Portfolio(initial_capital=5,
                           trade_amount=parameters.trade_amount)
-    reference_portfolio = Portfolio(initial_capital=5,
-                          trade_amount=parameters.trade_amount)
-
     predicted_signals = []
     for candle in stock_data_testing_set.candles:
         my_classifier.append_new_candle(candle)
@@ -177,16 +182,25 @@ def main():
             # print(signal)
     portfolio.compute_performance()
 
-    training_signals = _get_training_labels(stock_data_testing_set)
-    for signal in training_signals:
-        reference_portfolio.update(signal)
-    reference_portfolio.compute_performance()
-
     custom_plot(portfolio=portfolio, strategy=None, parameters=parameters, stock_data=stock_data_testing_set)
     custom_plot(portfolio=reference_portfolio, strategy=None, parameters=parameters, stock_data=stock_data_testing_set)
     print(my_classifier.sklearn_classifier.feature_importances_)
-    print(list(zip(predicted_signals, training_signals)))
+    conf_matrix = compute_confusion_matrix(training_signals, predicted_signals)
+    print(conf_matrix)
     plt.show()
+
+
+def convert_signals_to_pandas(signals: List[Union[Buy, Sell, Hold]]) -> pd.DataFrame:
+    return pd.DataFrame([{'Action': s.type.__name__, 'Timestamp': s.price_point.date_time} for s in signals])
+
+
+def compute_confusion_matrix(training_signals: List[Union[Buy, Sell, Hold]],
+                             predicted_signals: List[Union[Buy, Sell, Hold]]) -> np.ndarray:
+    training_df = convert_signals_to_pandas(training_signals)
+    predicted_df = convert_signals_to_pandas(predicted_signals)
+    df = pd.merge_asof(training_df, predicted_df, on='Timestamp')
+    clean_df = df.dropna()
+    return confusion_matrix(y_true=clean_df.Action_x.as_matrix(), y_pred=clean_df.Action_y.as_matrix())
 
 
 if __name__ == "__main__":
