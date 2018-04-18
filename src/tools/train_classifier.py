@@ -173,11 +173,11 @@ def generate_all_signals_at_once(stock_data_testing_set, classifier, predicted_p
 def main():
     security = "ETHBTC"
     training_time_window = TimeWindow(start_time=datetime(2017, 1, 1),
-                                      end_time=datetime(2018, 3, 10))
+                                      end_time=datetime(2018, 2, 1))
 
     stock_data_training_set = download_save_load(training_time_window, security)
-    testing_time_window = TimeWindow(start_time=datetime(2018, 3, 11),
-                                     end_time=datetime(2018, 4, 10))
+    testing_time_window = TimeWindow(start_time=datetime(2018, 2, 2),
+                                     end_time=datetime(2018, 3, 2))
 
     stock_data_testing_set = download_save_load(testing_time_window, security)
 
@@ -206,12 +206,14 @@ def main():
         sleep_time=0
     )
 
-    prediction_portfolio, predicted_signals, reference_portfolio, training_signals = generate_reference_to_prediction_portfolio(
+    prediction_portfolio, predicted_signals, \
+    reference_portfolio, training_signals = generate_reference_to_prediction_portfolio(
         5, parameters, stock_data_testing_set, my_classifier)
 
-
-    custom_plot(portfolio=prediction_portfolio, strategy=None, parameters=parameters, stock_data=stock_data_testing_set)
-    custom_plot(portfolio=reference_portfolio, strategy=None, parameters=parameters, stock_data=stock_data_testing_set)
+    custom_plot(portfolio=prediction_portfolio, strategy=None,
+                parameters=parameters, stock_data=stock_data_testing_set, title='Prediction portfolio')
+    custom_plot(portfolio=reference_portfolio, strategy=None,
+                parameters=parameters, stock_data=stock_data_testing_set, title='Reference portfolio')
     print(my_classifier.sklearn_classifier.feature_importances_)
     conf_matrix = compute_confusion_matrix(training_signals, predicted_signals)
     print(conf_matrix)
