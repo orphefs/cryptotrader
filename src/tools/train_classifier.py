@@ -162,6 +162,8 @@ def generate_signals_iteratively(stock_data: StockData, classifier: TradingClass
 def generate_all_signals_at_once(stock_data_testing_set, classifier, predicted_portfolio):
     predicted_signals = []
     predictions = classifier.predict(stock_data_testing_set)
+    # do not repeat signal in a row
+    predictions = np.sign(np.diff(predictions)) # TODO: rewrite this
     signals = generate_trading_signals_from_array(predictions, stock_data_testing_set)
     for signal in signals:
         if signal is not None:
@@ -183,15 +185,10 @@ def main():
     stock_data_testing_set = download_save_load(testing_time_window, security)
 
     list_of_technical_indicators = [
-        # AutoCorrelationTechnicalIndicator(Candle.get_number_of_trades, 2),
-        # AutoCorrelationTechnicalIndicator(Candle.get_number_of_trades, 5),
-        AutoCorrelationTechnicalIndicator(Candle.get_close_price, 5),
         AutoCorrelationTechnicalIndicator(Candle.get_close_price, 4),
         AutoCorrelationTechnicalIndicator(Candle.get_close_price, 3),
         AutoCorrelationTechnicalIndicator(Candle.get_close_price, 1),
-        AutoCorrelationTechnicalIndicator(Candle.get_number_of_trades, 3),
         AutoCorrelationTechnicalIndicator(Candle.get_number_of_trades, 1),
-        # MovingAverageTechnicalIndicator(Candle.get_close_price, 5)
     ]
     # sklearn_classifier = RandomForestClassifier(n_estimators=1000)
     sklearn_classifier = RandomForestClassifier(n_estimators=1000)
