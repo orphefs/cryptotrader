@@ -116,17 +116,6 @@ class TradingClassifier:
             self._is_candles_requirement_satisfied = True
 
 
-def calculate_gains(predictions, stock_data_testing_set):
-    print(len(predictions))
-    print(len(stock_data_testing_set.candles))
-
-    amount = 1000
-    close_prices = [candle.get_close_price() for candle in stock_data_testing_set.candles]
-    sum(predictions * amount * close_prices)
-
-    pass
-
-
 def generate_reference_to_prediction_portfolio(initial_capital, parameters, stock_data_testing_set, classifier):
     reference_portfolio = Portfolio(initial_capital=initial_capital,
                                     trade_amount=parameters.trade_amount)
