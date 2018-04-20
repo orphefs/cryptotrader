@@ -91,6 +91,27 @@ class AutoCorrelationTechnicalIndicator(TechnicalIndicator):
         self._result = self._compute_callback(np.array(list(self._candles.queue)))
 
 
+class PriceTechnicalIndicator(TechnicalIndicator):
+    def __init__(self, feature_getter_callback: Callable, lags: int):
+        super(PriceTechnicalIndicator, self).__init__(feature_getter_callback, lags)
+        self._compute_callback = lambda x: x[lags-1]
+        self._feature_getter_callback = feature_getter_callback
+        self._result = None
+
+    @property
+    def result(self):
+        return self._result
+
+    def update(self, candle: Candle):
+        self._candles.put(self._feature_getter_callback(candle), block=False)
+        if self._candles.full():
+            self._compute()
+            self._candles.get(block=False)
+
+    def _compute(self):
+        self._result = self._compute_callback(np.array(list(self._candles.queue)))
+
+
 # class OnBalanceVolumeTechnicalIndicator(TechnicalIndicator):
 #     def __init__(self, lags: int):
 #         super().__init__(lags)

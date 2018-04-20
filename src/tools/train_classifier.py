@@ -7,6 +7,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
+from sklearn.model_selection import cross_val_predict
+
 from sklearn.metrics import confusion_matrix
 
 from backtesting_logic.logic import Buy, Sell, Hold
@@ -18,7 +21,7 @@ from containers.trade_helper import generate_trading_signal_from_prediction, gen
 from live_logic.parameters import LiveParameters
 from live_logic.portfolio import Portfolio
 from live_logic.technical_indicator import AutoCorrelationTechnicalIndicator, MovingAverageTechnicalIndicator, \
-    TechnicalIndicator
+    TechnicalIndicator, PriceTechnicalIndicator
 from plotting.plot_candles import custom_plot
 from tools.downloader import download_save_load
 
@@ -131,6 +134,7 @@ def generate_reference_to_prediction_portfolio(initial_capital, parameters, stoc
                                                                                       classifier,
                                                                                       predicted_portfolio)
 
+
     predicted_portfolio.compute_performance()
 
     return predicted_portfolio, predicted_signals, reference_portfolio, training_signals
@@ -152,8 +156,10 @@ def generate_all_signals_at_once(stock_data_testing_set, classifier, predicted_p
     predicted_signals = []
     predictions = classifier.predict(stock_data_testing_set)
     # do not repeat signal in a row
-    predictions = np.sign(np.diff(predictions)) # TODO: rewrite this
+    # predictions = np.sign(np.diff(predictions)) # TODO: rewrite this
+
     signals = generate_trading_signals_from_array(predictions, stock_data_testing_set)
+    # signals = filter_signals
     for signal in signals:
         if signal is not None:
             predicted_portfolio.update(signal)
@@ -174,13 +180,14 @@ def main():
     stock_data_testing_set = download_save_load(testing_time_window, security)
 
     list_of_technical_indicators = [
+        PriceTechnicalIndicator(Candle.get_close_price, 1),
         AutoCorrelationTechnicalIndicator(Candle.get_close_price, 4),
         AutoCorrelationTechnicalIndicator(Candle.get_close_price, 3),
         AutoCorrelationTechnicalIndicator(Candle.get_close_price, 1),
         AutoCorrelationTechnicalIndicator(Candle.get_number_of_trades, 1),
     ]
-    # sklearn_classifier = RandomForestClassifier(n_estimators=1000)
-    sklearn_classifier = RandomForestClassifier(n_estimators=1000)
+    sklearn_classifier = RandomForestClassifier(n_estimators=1000, class_weight="balanced")
+
     training_ratio = 0.5
 
     my_classifier = TradingClassifier(stock_data_training_set, list_of_technical_indicators,
@@ -208,7 +215,7 @@ def main():
                 parameters=parameters, stock_data=stock_data_testing_set, title='Prediction portfolio')
     custom_plot(portfolio=reference_portfolio, strategy=None,
                 parameters=parameters, stock_data=stock_data_testing_set, title='Reference portfolio')
-    print(my_classifier.sklearn_classifier.feature_importances_)
+    # print(my_classifier.sklearn_classifier.feature_importances_)
     conf_matrix = compute_confusion_matrix(training_signals, predicted_signals)
     print(conf_matrix)
     plt.show()
