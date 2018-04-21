@@ -181,11 +181,11 @@ def main():
     stock_data_testing_set = download_save_load(testing_time_window, security)
 
     list_of_technical_indicators = [
-        PriceTechnicalIndicator(Candle.get_close_price, 1),
-        AutoCorrelationTechnicalIndicator(Candle.get_close_price, 4),
+        # PriceTechnicalIndicator(Candle.get_close_price, 1),
+        # AutoCorrelationTechnicalIndicator(Candle.get_close_price, 4),
         AutoCorrelationTechnicalIndicator(Candle.get_close_price, 3),
-        AutoCorrelationTechnicalIndicator(Candle.get_close_price, 1),
-        AutoCorrelationTechnicalIndicator(Candle.get_number_of_trades, 1),
+        # AutoCorrelationTechnicalIndicator(Candle.get_close_price, 1),
+        # AutoCorrelationTechnicalIndicator(Candle.get_number_of_trades, 10),
     ]
     sklearn_classifier = RandomForestClassifier(n_estimators=1000, criterion="entropy", class_weight="balanced")
 
@@ -206,7 +206,7 @@ def main():
         sleep_time=0
     )
 
-    stock_data_testing_set = stock_data_training_set
+    # stock_data_testing_set = stock_data_training_set
 
     prediction_portfolio, predicted_signals, \
     reference_portfolio, training_signals = generate_reference_to_prediction_portfolio(
@@ -218,7 +218,9 @@ def main():
                 parameters=parameters, stock_data=stock_data_testing_set, title='Reference portfolio')
     # print(my_classifier.sklearn_classifier.feature_importances_)
     conf_matrix = compute_confusion_matrix(training_signals, predicted_signals)
+    accuracy = np.sum(np.diag(conf_matrix))/np.sum(conf_matrix)
     print(conf_matrix)
+    print(accuracy)
     plt.show()
 
 

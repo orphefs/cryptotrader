@@ -60,6 +60,24 @@ class MovingAverageTechnicalIndicator(TechnicalIndicator):
         raise NotImplementedError
 
 
+class PPOTechnicalIndicator(TechnicalIndicator):
+    def __init__(self, feature_getter_callback: Callable, lags: int):
+        super(PPOTechnicalIndicator, self).__init__(feature_getter_callback, lags)
+        self._compute_callback = RollingMean(self._lags)
+        self._feature_getter_callback = feature_getter_callback
+        self._result = self._compute_callback.mean
+
+    @property
+    def result(self):
+        return self._compute_callback.mean
+
+    def update(self, candle: Candle):
+        self._compute_callback.insert_new_sample(self._feature_getter_callback(candle))
+
+    def _compute(self):
+        raise NotImplementedError
+
+
 def _normalized_autocorrelation(arr: np.ndarray) -> np.ndarray:
     autocorr = np.correlate(arr, arr, 'full')
     autocorr = autocorr / autocorr[len(arr) - 1]  # normalize by value at lag 0
@@ -94,7 +112,7 @@ class AutoCorrelationTechnicalIndicator(TechnicalIndicator):
 class PriceTechnicalIndicator(TechnicalIndicator):
     def __init__(self, feature_getter_callback: Callable, lags: int):
         super(PriceTechnicalIndicator, self).__init__(feature_getter_callback, lags)
-        self._compute_callback = lambda x: x[lags-1]
+        self._compute_callback = lambda x: x[lags - 1]
         self._feature_getter_callback = feature_getter_callback
         self._result = None
 
