@@ -155,6 +155,7 @@ def generate_signals_iteratively(stock_data: StockData, classifier: TradingClass
 def generate_all_signals_at_once(stock_data_testing_set, classifier, predicted_portfolio):
     predicted_signals = []
     predictions = classifier.predict(stock_data_testing_set)
+    predictions = np.roll(predictions, -1) # attach current prediction to the next candle by circular shift
     # do not repeat signal in a row
     # predictions = np.sign(np.diff(predictions)) # TODO: rewrite this
 
@@ -170,8 +171,8 @@ def generate_all_signals_at_once(stock_data_testing_set, classifier, predicted_p
 def main():
     # TODO:
     security = "ETHBTC"
-    training_time_window = TimeWindow(start_time=datetime(2017, 10, 1),
-                                      end_time=datetime(2018, 2, 1))
+    training_time_window = TimeWindow(start_time=datetime(2017, 12, 1),
+                                      end_time=datetime(2017, 12, 15))
 
     stock_data_training_set = download_save_load(training_time_window, security)
     testing_time_window = TimeWindow(start_time=datetime(2018, 2, 2),
@@ -186,9 +187,9 @@ def main():
         AutoCorrelationTechnicalIndicator(Candle.get_close_price, 1),
         AutoCorrelationTechnicalIndicator(Candle.get_number_of_trades, 1),
     ]
-    sklearn_classifier = RandomForestClassifier(n_estimators=1000, class_weight="balanced")
+    sklearn_classifier = RandomForestClassifier(n_estimators=1000, criterion="entropy", class_weight="balanced")
 
-    training_ratio = 0.5
+    training_ratio = 0.5 # this is not enabled
 
     my_classifier = TradingClassifier(stock_data_training_set, list_of_technical_indicators,
                                       sklearn_classifier, training_ratio)
@@ -205,7 +206,7 @@ def main():
         sleep_time=0
     )
 
-    # stock_data_testing_set = stock_data_training_set
+    stock_data_testing_set = stock_data_training_set
 
     prediction_portfolio, predicted_signals, \
     reference_portfolio, training_signals = generate_reference_to_prediction_portfolio(
@@ -227,6 +228,8 @@ def convert_signals_to_pandas(signals: List[Union[Buy, Sell, Hold]]) -> pd.DataF
 
 def compute_confusion_matrix(training_signals: List[Union[Buy, Sell, Hold]],
                              predicted_signals: List[Union[Buy, Sell, Hold]]) -> np.ndarray:
+    # TODO: Figure out why the two dfs are not merged properly
+    # The wrong merging results in a wrong confusion matrix
     training_df = convert_signals_to_pandas(training_signals)
     predicted_df = convert_signals_to_pandas(predicted_signals)
     df = pd.merge_asof(training_df, predicted_df, on='Timestamp')
