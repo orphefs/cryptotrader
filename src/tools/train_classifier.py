@@ -1,5 +1,4 @@
 from collections import defaultdict
-from collections import defaultdict
 from datetime import timedelta, datetime
 from typing import List, Union
 
@@ -17,8 +16,7 @@ from containers.time_windows import TimeWindow
 from containers.trade_helper import generate_trading_signal_from_prediction, generate_trading_signals_from_array
 from live_logic.parameters import LiveParameters
 from live_logic.portfolio import Portfolio
-from live_logic.technical_indicator import MovingAverageTechnicalIndicator, \
-    TechnicalIndicator, AutoCorrelationTechnicalIndicator
+from live_logic.technical_indicator import TechnicalIndicator, AutoCorrelationTechnicalIndicator, PPOTechnicalIndicator
 from plotting.plot_candles import custom_plot
 from tools.downloader import download_save_load
 
@@ -165,7 +163,6 @@ def generate_all_signals_at_once(stock_data_testing_set, classifier, predicted_p
 
 
 def main():
-    # TODO:
     security = "ETHBTC"
     training_time_window = TimeWindow(start_time=datetime(2017, 12, 1),
                                       end_time=datetime(2017, 12, 15))
@@ -176,18 +173,13 @@ def main():
 
     stock_data_testing_set = download_save_load(testing_time_window, security)
 
-    PPOTechnicalIndicator = (MovingAverageTechnicalIndicator(Candle.get_close_price, 1) -
-                             MovingAverageTechnicalIndicator(Candle.get_close_price, 5))/\
-                            MovingAverageTechnicalIndicator(Candle.get_close_price, 5)
-
     list_of_technical_indicators = [
-        # PriceTechnicalIndicator(Candle.get_close_price, 1),
         AutoCorrelationTechnicalIndicator(Candle.get_close_price, 4),
         AutoCorrelationTechnicalIndicator(Candle.get_close_price, 2),
-        PPOTechnicalIndicator,
-        # AutoCorrelationTechnicalIndicator(Candle.get_close_price, 1),
-        # AutoCorrelationTechnicalIndicator(Candle.get_number_of_trades, 10),
+        PPOTechnicalIndicator(Candle.get_close_price, 5, 1),
+        PPOTechnicalIndicator(Candle.get_number_of_trades, 5, 1),
     ]
+
     sklearn_classifier = RandomForestClassifier(n_estimators=100, criterion="entropy", class_weight="balanced")
 
     training_ratio = 0.5  # this is not enabled

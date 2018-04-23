@@ -69,7 +69,6 @@ class CompoundTechnicalIndicator(OperatorOverloadsMixin):
     def lags(self):
         return self._lags
 
-
     @property
     def result(self):
         return self._result
@@ -110,6 +109,7 @@ class MovingAverageTechnicalIndicator(TechnicalIndicator):
 
     def _compute(self):
         raise NotImplementedError
+
 
 def _normalized_autocorrelation(arr: np.ndarray) -> np.ndarray:
     autocorr = np.correlate(arr, arr, 'full')
@@ -163,9 +163,10 @@ class PriceTechnicalIndicator(TechnicalIndicator):
         self._result = self._compute_callback(np.array(list(self._candles.queue)))
 
 
-class PPOTechnicalIndicator:
-    def __init__(self, feature_getter_callback, lag_1: int, lag_2: int, lag_3:int):
-        pass
+def PPOTechnicalIndicator(feature_getter_callback: Callable, slow_ma_lag: int, fast_ma_lag: int):
+    return (MovingAverageTechnicalIndicator(feature_getter_callback, fast_ma_lag) -
+            MovingAverageTechnicalIndicator(feature_getter_callback, slow_ma_lag)) / MovingAverageTechnicalIndicator(
+        feature_getter_callback, slow_ma_lag)
 
 
 # class OnBalanceVolumeTechnicalIndicator(TechnicalIndicator):
@@ -191,8 +192,10 @@ class PPOTechnicalIndicator:
 if __name__ == "__main__":
 
     compound_maverage = (
-                        MovingAverageTechnicalIndicator(Candle.get_close_price, 10) - AutoCorrelationTechnicalIndicator(
-                            Candle.get_close_price, 10)) / MovingAverageTechnicalIndicator(Candle.get_close_price, 10)
+                            MovingAverageTechnicalIndicator(Candle.get_close_price,
+                                                            10) - AutoCorrelationTechnicalIndicator(
+                                Candle.get_close_price, 10)) / MovingAverageTechnicalIndicator(Candle.get_close_price,
+                                                                                               10)
 
     stock_data = load_from_disk(
         os.path.join(definitions.DATA_DIR, "local_data_15_Jan,_2018_01_Mar,_2018_XRPBTC.dill"))
