@@ -164,12 +164,12 @@ def generate_all_signals_at_once(stock_data_testing_set, classifier, predicted_p
 
 def main():
     security = "ETHBTC"
-    training_time_window = TimeWindow(start_time=datetime(2017, 12, 1),
-                                      end_time=datetime(2017, 12, 15))
+    training_time_window = TimeWindow(start_time=datetime(2017, 10, 1),
+                                      end_time=datetime(2018, 1, 15))
 
     stock_data_training_set = download_save_load(training_time_window, security)
-    testing_time_window = TimeWindow(start_time=datetime(2018, 2, 2),
-                                     end_time=datetime(2018, 2, 12))
+    testing_time_window = TimeWindow(start_time=datetime(2018, 1, 20),
+                                     end_time=datetime(2018, 4, 12))
 
     stock_data_testing_set = download_save_load(testing_time_window, security)
 
@@ -177,6 +177,7 @@ def main():
         AutoCorrelationTechnicalIndicator(Candle.get_close_price, 4),
         AutoCorrelationTechnicalIndicator(Candle.get_close_price, 2),
         PPOTechnicalIndicator(Candle.get_close_price, 5, 1),
+        PPOTechnicalIndicator(Candle.get_close_price, 6, 2),
         PPOTechnicalIndicator(Candle.get_number_of_trades, 5, 1),
     ]
 
