@@ -176,10 +176,15 @@ def main():
 
     stock_data_testing_set = download_save_load(testing_time_window, security)
 
+    PPOTechnicalIndicator = (MovingAverageTechnicalIndicator(Candle.get_close_price, 1) -
+                             MovingAverageTechnicalIndicator(Candle.get_close_price, 5))/\
+                            MovingAverageTechnicalIndicator(Candle.get_close_price, 5)
+
     list_of_technical_indicators = [
         # PriceTechnicalIndicator(Candle.get_close_price, 1),
         AutoCorrelationTechnicalIndicator(Candle.get_close_price, 4),
         AutoCorrelationTechnicalIndicator(Candle.get_close_price, 2),
+        PPOTechnicalIndicator,
         # AutoCorrelationTechnicalIndicator(Candle.get_close_price, 1),
         # AutoCorrelationTechnicalIndicator(Candle.get_number_of_trades, 10),
     ]

@@ -62,6 +62,13 @@ class CompoundTechnicalIndicator(OperatorOverloadsMixin):
         self._technical_indicator_1 = technical_indicator_1
         self._technical_indicator_2 = technical_indicator_2
         self._operator_callback = operator_callback
+        self._lags = max([self._technical_indicator_1.lags,
+                          self._technical_indicator_2.lags])
+
+    @property
+    def lags(self):
+        return self._lags
+
 
     @property
     def result(self):
@@ -103,25 +110,6 @@ class MovingAverageTechnicalIndicator(TechnicalIndicator):
 
     def _compute(self):
         raise NotImplementedError
-
-
-class PPOTechnicalIndicator(TechnicalIndicator):
-    def __init__(self, feature_getter_callback: Callable, lags: int):
-        super(PPOTechnicalIndicator, self).__init__(feature_getter_callback, lags)
-        self._compute_callback = RollingMean(self._lags)
-        self._feature_getter_callback = feature_getter_callback
-        self._result = self._compute_callback.mean
-
-    @property
-    def result(self):
-        return self._compute_callback.mean
-
-    def update(self, candle: Candle):
-        self._compute_callback.insert_new_sample(self._feature_getter_callback(candle))
-
-    def _compute(self):
-        raise NotImplementedError
-
 
 def _normalized_autocorrelation(arr: np.ndarray) -> np.ndarray:
     autocorr = np.correlate(arr, arr, 'full')
@@ -173,6 +161,11 @@ class PriceTechnicalIndicator(TechnicalIndicator):
 
     def _compute(self):
         self._result = self._compute_callback(np.array(list(self._candles.queue)))
+
+
+class PPOTechnicalIndicator:
+    def __init__(self, feature_getter_callback, lag_1: int, lag_2: int, lag_3:int):
+        pass
 
 
 # class OnBalanceVolumeTechnicalIndicator(TechnicalIndicator):
