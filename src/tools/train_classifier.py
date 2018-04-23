@@ -114,23 +114,33 @@ class TradingClassifier:
             self._is_candles_requirement_satisfied = True
 
 
-def generate_reference_to_prediction_portfolio(initial_capital, parameters, stock_data_testing_set, classifier):
+def generate_reference_portfolio(initial_capital, parameters, stock_data_testing_set):
     reference_portfolio = Portfolio(initial_capital=initial_capital,
                                     trade_amount=parameters.trade_amount)
     training_signals = _get_training_labels(stock_data_testing_set)
     for signal in training_signals:
         reference_portfolio.update(signal)
     reference_portfolio.compute_performance()
+    return reference_portfolio, training_signals
 
+
+def generate_predicted_portfolio(initial_capital, parameters, stock_data_testing_set, classifier):
     predicted_portfolio = Portfolio(initial_capital=initial_capital,
                                     trade_amount=parameters.trade_amount)
 
     classifier, predicted_portfolio, predicted_signals = generate_all_signals_at_once(stock_data_testing_set,
                                                                                       classifier,
                                                                                       predicted_portfolio)
-
     predicted_portfolio.compute_performance()
 
+    return predicted_portfolio, predicted_signals
+
+
+def generate_reference_to_prediction_portfolio(initial_capital, parameters, stock_data_testing_set, classifier):
+    reference_portfolio, training_signals = generate_reference_portfolio(
+        initial_capital, parameters, stock_data_testing_set)
+    predicted_portfolio, predicted_signals = generate_predicted_portfolio(
+        initial_capital, parameters, stock_data_testing_set, classifier)
     return predicted_portfolio, predicted_signals, reference_portfolio, training_signals
 
 
@@ -196,21 +206,23 @@ def main():
         short_sma_period=timedelta(hours=2),
         long_sma_period=timedelta(hours=20),
         update_period=timedelta(hours=1),
-        trade_amount=0.5,
+        trade_amount=0.1,
         sleep_time=0
     )
 
     # stock_data_testing_set = stock_data_training_set
 
-    prediction_portfolio, predicted_signals, \
-    reference_portfolio, training_signals = generate_reference_to_prediction_portfolio(
-        5, parameters, stock_data_testing_set, my_classifier)
+    initial_capital = 5
+    reference_portfolio, training_signals = generate_reference_portfolio(
+        initial_capital, parameters, stock_data_testing_set)
+    predicted_portfolio, predicted_signals = generate_predicted_portfolio(
+        initial_capital, parameters, stock_data_testing_set, my_classifier)
 
-    custom_plot(portfolio=prediction_portfolio, strategy=None,
+    custom_plot(portfolio=predicted_portfolio, strategy=None,
                 parameters=parameters, stock_data=stock_data_testing_set, title='Prediction portfolio')
     custom_plot(portfolio=reference_portfolio, strategy=None,
                 parameters=parameters, stock_data=stock_data_testing_set, title='Reference portfolio')
-    # print(my_classifier.sklearn_classifier.feature_importances_)
+    print(my_classifier.sklearn_classifier.feature_importances_)
     conf_matrix = compute_confusion_matrix(training_signals, predicted_signals)
     accuracy = np.sum(np.diag(conf_matrix)) / np.sum(conf_matrix)
     print(conf_matrix)
