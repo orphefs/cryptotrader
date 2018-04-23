@@ -7,9 +7,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.svm import SVC
-from sklearn.model_selection import cross_val_predict
-
 from sklearn.metrics import confusion_matrix
 
 from backtesting_logic.logic import Buy, Sell, Hold
@@ -20,8 +17,8 @@ from containers.time_windows import TimeWindow
 from containers.trade_helper import generate_trading_signal_from_prediction, generate_trading_signals_from_array
 from live_logic.parameters import LiveParameters
 from live_logic.portfolio import Portfolio
-from live_logic.technical_indicator import AutoCorrelationTechnicalIndicator, MovingAverageTechnicalIndicator, \
-    TechnicalIndicator, PriceTechnicalIndicator
+from live_logic.technical_indicator import MovingAverageTechnicalIndicator, \
+    TechnicalIndicator, AutoCorrelationTechnicalIndicator
 from plotting.plot_candles import custom_plot
 from tools.downloader import download_save_load
 
@@ -134,7 +131,6 @@ def generate_reference_to_prediction_portfolio(initial_capital, parameters, stoc
                                                                                       classifier,
                                                                                       predicted_portfolio)
 
-
     predicted_portfolio.compute_performance()
 
     return predicted_portfolio, predicted_signals, reference_portfolio, training_signals
@@ -155,7 +151,7 @@ def generate_signals_iteratively(stock_data: StockData, classifier: TradingClass
 def generate_all_signals_at_once(stock_data_testing_set, classifier, predicted_portfolio):
     predicted_signals = []
     predictions = classifier.predict(stock_data_testing_set)
-    predictions = np.roll(predictions, -1) # attach current prediction to the next candle by circular shift
+    predictions = np.roll(predictions, -1)  # attach current prediction to the next candle by circular shift
     # do not repeat signal in a row
     # predictions = np.sign(np.diff(predictions)) # TODO: rewrite this
 
@@ -182,14 +178,14 @@ def main():
 
     list_of_technical_indicators = [
         # PriceTechnicalIndicator(Candle.get_close_price, 1),
-        # AutoCorrelationTechnicalIndicator(Candle.get_close_price, 4),
-        AutoCorrelationTechnicalIndicator(Candle.get_close_price, 3),
+        AutoCorrelationTechnicalIndicator(Candle.get_close_price, 4),
+        AutoCorrelationTechnicalIndicator(Candle.get_close_price, 2),
         # AutoCorrelationTechnicalIndicator(Candle.get_close_price, 1),
         # AutoCorrelationTechnicalIndicator(Candle.get_number_of_trades, 10),
     ]
-    sklearn_classifier = RandomForestClassifier(n_estimators=1000, criterion="entropy", class_weight="balanced")
+    sklearn_classifier = RandomForestClassifier(n_estimators=100, criterion="entropy", class_weight="balanced")
 
-    training_ratio = 0.5 # this is not enabled
+    training_ratio = 0.5  # this is not enabled
 
     my_classifier = TradingClassifier(stock_data_training_set, list_of_technical_indicators,
                                       sklearn_classifier, training_ratio)
@@ -218,7 +214,7 @@ def main():
                 parameters=parameters, stock_data=stock_data_testing_set, title='Reference portfolio')
     # print(my_classifier.sklearn_classifier.feature_importances_)
     conf_matrix = compute_confusion_matrix(training_signals, predicted_signals)
-    accuracy = np.sum(np.diag(conf_matrix))/np.sum(conf_matrix)
+    accuracy = np.sum(np.diag(conf_matrix)) / np.sum(conf_matrix)
     print(conf_matrix)
     print(accuracy)
     plt.show()

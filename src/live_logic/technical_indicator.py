@@ -1,3 +1,4 @@
+import operator
 import os
 from abc import ABC, abstractmethod
 from queue import Queue
@@ -40,6 +41,32 @@ class TechnicalIndicator(ABC):
         return "{}_{}_{}".format(type(self).__name__,
                                  self._feature_getter_callback.__name__,
                                  self._lags)
+
+    def __sub__(self, other):
+        return CompoundTechnicalIndicator(self, other, operator.sub)
+
+
+class CompoundTechnicalIndicator:
+    def __init__(self, technical_indicator_1: TechnicalIndicator,
+                 technical_indicator_2: TechnicalIndicator, operator_callback: Callable):
+        self._result = float
+        self._technical_indicator_1 = technical_indicator_1
+        self._technical_indicator_2 = technical_indicator_2
+        self._operator_callback = operator_callback
+
+    @property
+    def result(self):
+        return self._result
+
+    @abstractmethod
+    def update(self, candle: Candle):
+        self._technical_indicator_1.update(candle)
+        self._technical_indicator_2.update(candle)
+        if self._technical_indicator_1.result is None or self._technical_indicator_2.result is None:
+            self._result = None
+        else:
+            self._result = self._operator_callback(self._technical_indicator_1.result,
+                                               self._technical_indicator_2.result)
 
 
 class MovingAverageTechnicalIndicator(TechnicalIndicator):
@@ -151,12 +178,21 @@ class PriceTechnicalIndicator(TechnicalIndicator):
 
 
 if __name__ == "__main__":
+
+    compound_maverage = MovingAverageTechnicalIndicator(Candle.get_close_price, 10) - AutoCorrelationTechnicalIndicator(
+        Candle.get_close_price, 10)
+
     stock_data = load_from_disk(
         os.path.join(definitions.DATA_DIR, "local_data_15_Jan,_2018_01_Mar,_2018_XRPBTC.dill"))
     acorr = AutoCorrelationTechnicalIndicator(Candle.get_close_price, 10)
     maverage = MovingAverageTechnicalIndicator(Candle.get_close_price, 10)
+    iteration = 0
     for candle in stock_data.candles:
         acorr.update(candle)
         maverage.update(candle)
+        compound_maverage.update(candle)
+        print("Iteration no. {}:".format(iteration))
         print(maverage.result)
         print(acorr.result)
+        print(compound_maverage.result)
+        iteration += 1
