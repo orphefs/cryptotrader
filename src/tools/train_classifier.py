@@ -161,7 +161,7 @@ def generate_all_signals_at_once(stock_data_testing_set, classifier, predicted_p
     predictions = classifier.predict(stock_data_testing_set)
     predictions = np.roll(predictions, -1)  # attach current prediction to the next candle by circular shift
     # do not repeat signal in a row
-    # predictions = np.sign(np.diff(predictions)) # TODO: rewrite this
+    predictions = np.sign(np.diff(predictions)) # TODO: rewrite this
 
     signals = generate_trading_signals_from_array(predictions, stock_data_testing_set)
     # signals = filter_signals
@@ -174,12 +174,12 @@ def generate_all_signals_at_once(stock_data_testing_set, classifier, predicted_p
 
 def main():
     security = "ETHBTC"
-    training_time_window = TimeWindow(start_time=datetime(2017, 10, 1),
-                                      end_time=datetime(2018, 1, 15))
+    training_time_window = TimeWindow(start_time=datetime(2017, 1, 1),
+                                      end_time=datetime(2017, 9, 1))
 
     stock_data_training_set = download_save_load(training_time_window, security)
-    testing_time_window = TimeWindow(start_time=datetime(2018, 1, 20),
-                                     end_time=datetime(2018, 4, 12))
+    testing_time_window = TimeWindow(start_time=datetime(2017, 9, 2),
+                                     end_time=datetime(2018, 4, 2))
 
     stock_data_testing_set = download_save_load(testing_time_window, security)
 
@@ -206,7 +206,7 @@ def main():
         short_sma_period=timedelta(hours=2),
         long_sma_period=timedelta(hours=20),
         update_period=timedelta(hours=1),
-        trade_amount=0.1,
+        trade_amount=1,
         sleep_time=0
     )
 
