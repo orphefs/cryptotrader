@@ -12,7 +12,18 @@ from externals.rolling_statistics.python.rolling_stats import RollingMean
 from tools.downloader import load_from_disk
 
 
-class TechnicalIndicator(ABC):
+class OperatorOverloadsMixin:
+    def __sub__(self, other):
+        return CompoundTechnicalIndicator(self, other, operator.sub)
+
+    def __mul__(self, other):
+        return CompoundTechnicalIndicator(self, other, operator.mul)
+
+    def __truediv__(self, other):
+        return CompoundTechnicalIndicator(self, other, operator.truediv)
+
+
+class TechnicalIndicator(ABC, OperatorOverloadsMixin):
     @abstractmethod
     def __init__(self, feature_getter_callback: Callable, lags: int):
         self._lags = lags
@@ -42,13 +53,11 @@ class TechnicalIndicator(ABC):
                                  self._feature_getter_callback.__name__,
                                  self._lags)
 
-    def __sub__(self, other):
-        return CompoundTechnicalIndicator(self, other, operator.sub)
 
-
-class CompoundTechnicalIndicator:
-    def __init__(self, technical_indicator_1: TechnicalIndicator,
-                 technical_indicator_2: TechnicalIndicator, operator_callback: Callable):
+class CompoundTechnicalIndicator(OperatorOverloadsMixin):
+    def __init__(self, technical_indicator_1,
+                 technical_indicator_2,
+                 operator_callback: Callable):
         self._result = float
         self._technical_indicator_1 = technical_indicator_1
         self._technical_indicator_2 = technical_indicator_2
@@ -66,7 +75,16 @@ class CompoundTechnicalIndicator:
             self._result = None
         else:
             self._result = self._operator_callback(self._technical_indicator_1.result,
-                                               self._technical_indicator_2.result)
+                                                   self._technical_indicator_2.result)
+
+    def __sub__(self, other):
+        return CompoundTechnicalIndicator(self, other, operator.sub)
+
+    def __mul__(self, other):
+        return CompoundTechnicalIndicator(self, other, operator.mul)
+
+    def __truediv__(self, other):
+        return CompoundTechnicalIndicator(self, other, operator.truediv)
 
 
 class MovingAverageTechnicalIndicator(TechnicalIndicator):
@@ -179,8 +197,9 @@ class PriceTechnicalIndicator(TechnicalIndicator):
 
 if __name__ == "__main__":
 
-    compound_maverage = MovingAverageTechnicalIndicator(Candle.get_close_price, 10) - AutoCorrelationTechnicalIndicator(
-        Candle.get_close_price, 10)
+    compound_maverage = (
+                        MovingAverageTechnicalIndicator(Candle.get_close_price, 10) - AutoCorrelationTechnicalIndicator(
+                            Candle.get_close_price, 10)) / MovingAverageTechnicalIndicator(Candle.get_close_price, 10)
 
     stock_data = load_from_disk(
         os.path.join(definitions.DATA_DIR, "local_data_15_Jan,_2018_01_Mar,_2018_XRPBTC.dill"))
