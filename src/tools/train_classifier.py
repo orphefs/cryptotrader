@@ -173,7 +173,7 @@ def generate_all_signals_at_once(stock_data_testing_set, classifier, predicted_p
 
 
 def main():
-    security = "XRPBTC"
+    security = "ETHBTC"
     training_time_window = TimeWindow(
         start_time=datetime(2018, 2, 2),
         end_time=datetime(2018, 4, 12)
