@@ -90,7 +90,7 @@ class Candle(object):
         return self._volume.number_of_trades
 
     def get_volume(self):
-        return self._volume
+        return self._volume.volume
 
     def get_time(self):
         return self._time
