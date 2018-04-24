@@ -95,6 +95,7 @@ class TradingClassifier:
         stock_data.candles must be of length at least self._maximum_lag'''
         testing_data = _extract_indicators_from_stock_data(stock_data, self._list_of_technical_indicators)
         predictors, _ = _convert_to_pandas(predictors=testing_data, labels=None)
+        #TODO: Implement trading based on probabilities
         return self._sklearn_classifier.predict(predictors)
 
     def predict_one(self, candle: Candle):
@@ -173,7 +174,7 @@ def generate_all_signals_at_once(stock_data_testing_set, classifier, predicted_p
 
 
 def main():
-    security = "ETHBTC"
+    security = "NEOBTC"
     training_time_window = TimeWindow(
         start_time=datetime(2018, 2, 2),
         end_time=datetime(2018, 4, 12)
@@ -213,7 +214,7 @@ def main():
         short_sma_period=timedelta(hours=2),
         long_sma_period=timedelta(hours=20),
         update_period=timedelta(hours=1),
-        trade_amount=1000,
+        trade_amount=10,
         sleep_time=0
     )
 
