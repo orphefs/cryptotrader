@@ -18,6 +18,7 @@ from tools.downloader import download_live_data
 from tools.train_classifier import TradingClassifier
 
 logging.basicConfig(filename=os.path.join(definitions.DATA_DIR, 'local_autotrader.log'), level=logging.INFO)
+logger = logging.getLogger('cryptotrader_api')
 
 
 def get_capital_from_account(capital_security: str) -> float:
@@ -25,10 +26,11 @@ def get_capital_from_account(capital_security: str) -> float:
 
 
 def run(trade_amount: float, capital_security: str, trading_pair: str):
-    client = Client("", "")
+    client = Client("SlVs0AIAk6BsU1l4L4xLIDGOhgJgsEqAFCpe9sI8ABbABxS40fCzxChtURg4",
+                    "ryGbS7EIdoF0n1xvoE7k2PpecjP7wwwnZmvDjoYTUC1P7ePO93rcApUaJkmP")
     parameters = LiveParameters(
         update_period=timedelta(hours=1),
-        trade_amount=1000,
+        trade_amount=100,
         sleep_time=1
     )
     portfolio = Portfolio(initial_capital=get_capital_from_account(capital_security=None),
@@ -37,25 +39,26 @@ def run(trade_amount: float, capital_security: str, trading_pair: str):
     threshold = timedelta(seconds=45)
 
     classifier = TradingClassifier.load_from_disk(os.path.join(definitions.DATA_DIR, "classifier.dill"))
-    market_maker = MarketMaker(client, trading_pair, 100)
-    logging.info("Initialized portfolio: {}".format(portfolio))
+    market_maker = MarketMaker(client, trading_pair, trade_amount)
+    logger.info("Initialized portfolio: {}".format(portfolio))
+
 
     candles = download_live_data(client, trading_pair, Client.KLINE_INTERVAL_1MINUTE, 30)
     for candle in candles:
         classifier.append_new_candle(candle)
     previous_candle = candles[-1]
 
-
     while True:
         print("Loop iterating...")
         current_candle = download_live_data(client, trading_pair, Client.KLINE_INTERVAL_1MINUTE, 30)[-1]
         if is_time_difference_larger_than_threshold(current_candle, previous_candle, threshold,
                                                     Candle.get_close_time_as_datetime):
-            print("Registering candle: {}".format(current_candle))
+            logger.info("Registering candle: {}".format(current_candle))
             classifier.append_new_candle(current_candle)
             prediction = classifier.predict_one(current_candle)
             if prediction is not None:
                 signal = generate_trading_signal_from_prediction(prediction[0], current_candle)
+                logger.info("Prediction for signal {}".format(signal))
                 order = market_maker.place_order(signal)
                 print(order)
                 portfolio.update(signal)

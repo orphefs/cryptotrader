@@ -3,9 +3,10 @@ from typing import Union
 
 import binance
 from binance.client import Client
-
+from datetime import datetime
 
 from backtesting_logic.logic import Buy, Sell, Hold
+logger = logging.getLogger('cryptotrader_api')
 
 
 class MarketMaker:
@@ -15,7 +16,6 @@ class MarketMaker:
         self._quantity = quantity
 
     def place_order(self, signal: Union[Buy, Sell, Hold]):
-
         if isinstance(signal, Buy):
             self.place_buy_order()
         elif isinstance(signal, Sell):
@@ -24,7 +24,7 @@ class MarketMaker:
             pass
 
     def place_buy_order(self):
-        logging.info("Placing Buy market order on {} for {}".format(self._trading_pair, self._quantity))
+        logger.info("Placing Buy market order on {} for {} {}".format(datetime.now(), self._trading_pair, self._quantity))
         order = self._client.create_test_order(
             symbol=self._trading_pair,
             side=Client.SIDE_BUY,
@@ -33,7 +33,7 @@ class MarketMaker:
         return order
 
     def place_sell_order(self):
-        logging.info("Placing Sell market order on {} for {}".format(self._trading_pair, self._quantity))
+        logger.info("Placing Sell market order on {} for {} {}".format(datetime.now(), self._trading_pair, self._quantity))
         order = self._client.create_test_order(
             symbol=self._trading_pair,
             side=Client.SIDE_SELL,
