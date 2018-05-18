@@ -5,9 +5,10 @@ import pandas as pd
 
 from backtesting_logic.logic import Buy, Sell, Hold
 from containers.data_point import PricePoint
+from mixins.save_load_mixin import SaveLoadMixin
 
 
-class Portfolio:
+class Portfolio(SaveLoadMixin):
 
     def __init__(self, initial_capital: float, trade_amount: int):
         self._fees = 0.001  # 0.1% on binance

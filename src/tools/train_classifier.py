@@ -20,6 +20,7 @@ from containers.trade_helper import generate_trading_signal_from_prediction, gen
 from live_logic.parameters import LiveParameters
 from live_logic.portfolio import Portfolio
 from live_logic.technical_indicator import TechnicalIndicator, AutoCorrelationTechnicalIndicator, PPOTechnicalIndicator
+from mixins.save_load_mixin import SaveLoadMixin
 from plotting.plot_candles import custom_plot
 from tools.downloader import download_save_load
 
@@ -66,7 +67,7 @@ def _convert_to_pandas(predictors: defaultdict(list), labels: list = None):
     return df[[col for col in df.columns if col != 'labels']], df['labels']
 
 
-class TradingClassifier:
+class TradingClassifier(SaveLoadMixin):
     def __init__(self, trading_pair: str,
                  list_of_technical_indicators: List[TechnicalIndicator],
                  sklearn_classifier: RandomForestClassifier,
@@ -116,15 +117,7 @@ class TradingClassifier:
         if len(self._stock_data_live.candles) >= self._maximum_lag:
             self._is_candles_requirement_satisfied = True
 
-    def save_to_disk(self, path_to_file: str):
-        with open(os.path.join(definitions.DATA_DIR, path_to_file), 'wb') as outfile:
-            dill.dump(self, outfile)
 
-    @staticmethod
-    def load_from_disk(path_to_file: str) -> "TradingClassifier":
-        with open(os.path.join(definitions.DATA_DIR, path_to_file), 'rb') as outfile:
-            obj = dill.load(outfile)
-        return obj
 
     def __str__(self):
         return "Trading Pair: {}, Technical Indicators: {}".format(self._stock_data_live.security,
