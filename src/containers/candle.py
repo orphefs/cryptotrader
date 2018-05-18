@@ -125,7 +125,7 @@ class Candle(object):
         )
 
     @staticmethod
-    def from_list_of_klines(klines: List[List]):
+    def from_list_of_klines(klines: List):
         return [Candle.from_kline(kline) for kline in klines]
 
 

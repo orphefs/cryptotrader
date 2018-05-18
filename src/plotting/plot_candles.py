@@ -113,7 +113,7 @@ def plot_candlesticks(ax: Axes, data: StockData):
     ax.set_title(data.security)
 
 
-def custom_plot(portfolio, strategy, parameters, stock_data, title=None):
+def custom_plot(portfolio, strategy, title=None):
     fig, ax = plt.subplots(nrows=4, ncols=1, sharex=True)
     ax[0].set_title(title)
     plot_portfolio_2(ax[1:4], portfolio._portfolio_df)

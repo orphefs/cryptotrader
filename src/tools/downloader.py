@@ -26,7 +26,7 @@ def download_backtesting_data(time_window: TimeWindow, security: Security) -> Li
 
 
 def download_live_data(client: Client, security: Security) -> List[Candle]:
-    klines = client.get_historical_klines(security, Client.KLINE_INTERVAL_15MINUTE, "20 hours ago UTC")
+    klines = client.get_historical_klines(security, Client.KLINE_INTERVAL_1MINUTE, "10 minutes ago GMT")
     return Candle.from_list_of_klines(klines)
 
 
