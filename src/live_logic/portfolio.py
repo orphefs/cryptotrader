@@ -85,3 +85,7 @@ class Portfolio:
             self._append_to_positions(signal.price_point.date_time, quantity, price_point.value)
         if isinstance(signal, Hold):
             self._append_to_positions(signal.price_point.date_time, 0.0, price_point.value)
+
+    def __str__(self):
+        return "Trade Amount: {}, \n" \
+               "Initial Capital: {}".format(self._trade_amount, self._initial_capital)

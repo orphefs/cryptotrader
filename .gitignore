@@ -25,6 +25,7 @@
 *.log
 *.sql
 *.sqlite
+*.dill
 
 # OS generated files #
 ######################
@@ -38,3 +39,5 @@ Thumbs.db
 .idea/*
 local_*
 __pycache__/
+
+

@@ -1,3 +1,4 @@
+import os
 from collections import defaultdict
 from datetime import timedelta, datetime
 from typing import List, Union
@@ -5,9 +6,11 @@ from typing import List, Union
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from dill import dill
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import confusion_matrix
 
+import definitions
 from backtesting_logic.logic import Buy, Sell, Hold
 from containers.candle import Candle
 from containers.data_point import PricePoint
@@ -64,13 +67,11 @@ def _convert_to_pandas(predictors: defaultdict(list), labels: list = None):
 
 
 class TradingClassifier:
-    def __init__(self,
-                 stock_data_training: StockData,
+    def __init__(self, trading_pair: str,
                  list_of_technical_indicators: List[TechnicalIndicator],
                  sklearn_classifier: RandomForestClassifier,
                  training_ratio: float):
-        self._stock_data_training = stock_data_training
-        self._stock_data_live = StockData(candles=[], security=stock_data_training.security)
+        self._stock_data_live = StockData(candles=[], security=trading_pair)
         self._list_of_technical_indicators = list_of_technical_indicators
         self._maximum_lag = max([ti.lags for ti in list_of_technical_indicators])
         self._is_candles_requirement_satisfied = False
@@ -79,13 +80,14 @@ class TradingClassifier:
         self._predictors = np.ndarray
         self._labels = np.ndarray
 
-    def precondition(self):
-        training_data = _extract_indicators_from_stock_data(self._stock_data_training,
+    def _precondition(self, stock_data_training: StockData):
+        training_data = _extract_indicators_from_stock_data(stock_data_training,
                                                             self._list_of_technical_indicators)
         self._predictors, self._labels = _convert_to_pandas(predictors=training_data,
-                                                            labels=_get_training_labels(self._stock_data_training))
+                                                            labels=_get_training_labels(stock_data_training))
 
-    def train(self):
+    def train(self, stock_data_training: StockData):
+        self._precondition(stock_data_training)
         self._sklearn_classifier.fit(
             X=self._predictors.as_matrix(),
             y=self._labels.as_matrix())
@@ -95,7 +97,7 @@ class TradingClassifier:
         stock_data.candles must be of length at least self._maximum_lag'''
         testing_data = _extract_indicators_from_stock_data(stock_data, self._list_of_technical_indicators)
         predictors, _ = _convert_to_pandas(predictors=testing_data, labels=None)
-        #TODO: Implement trading based on probabilities
+        # TODO: Implement trading based on probabilities
         return self._sklearn_classifier.predict(predictors)
 
     def predict_one(self, candle: Candle):
@@ -113,6 +115,20 @@ class TradingClassifier:
         self._stock_data_live.append_new_candle(candle)
         if len(self._stock_data_live.candles) >= self._maximum_lag:
             self._is_candles_requirement_satisfied = True
+
+    def save_to_disk(self, path_to_file: str):
+        with open(os.path.join(definitions.DATA_DIR, path_to_file), 'wb') as outfile:
+            dill.dump(self, outfile)
+
+    @staticmethod
+    def load_from_disk(path_to_file: str) -> "TradingClassifier":
+        with open(os.path.join(definitions.DATA_DIR, path_to_file), 'rb') as outfile:
+            obj = dill.load(outfile)
+        return obj
+
+    def __str__(self):
+        return "Trading Pair: {}, Technical Indicators: {}".format(self._stock_data_live.security,
+                                                                   self._list_of_technical_indicators)
 
 
 def generate_reference_portfolio(initial_capital, parameters, stock_data_testing_set):
@@ -174,19 +190,20 @@ def generate_all_signals_at_once(stock_data_testing_set, classifier, predicted_p
 
 
 def main():
-    security = "NEOBTC"
+    trading_pair = "XRPBTC"
+
     training_time_window = TimeWindow(
-        start_time=datetime(2018, 2, 2),
-        end_time=datetime(2018, 4, 12)
+        start_time=datetime(2018, 1, 12),
+        end_time=datetime(2018, 3, 12)
     )
 
-    stock_data_training_set = download_save_load(training_time_window, security)
+    stock_data_training_set = download_save_load(training_time_window, trading_pair)
     testing_time_window = TimeWindow(
-        start_time=datetime(2017, 11, 1),
-        end_time=datetime(2018, 2, 1)
+        start_time=datetime(2018, 4, 12),
+        end_time=datetime(2018, 5, 12)
     )
 
-    stock_data_testing_set = download_save_load(testing_time_window, security)
+    stock_data_testing_set = download_save_load(testing_time_window, trading_pair)
 
     list_of_technical_indicators = [
         AutoCorrelationTechnicalIndicator(Candle.get_volume, 24),
@@ -195,26 +212,27 @@ def main():
         PPOTechnicalIndicator(Candle.get_close_price, 5, 1),
         PPOTechnicalIndicator(Candle.get_close_price, 10, 4),
         PPOTechnicalIndicator(Candle.get_close_price, 20, 1),
+        PPOTechnicalIndicator(Candle.get_close_price, 30, 10),
         PPOTechnicalIndicator(Candle.get_number_of_trades, 5, 1),
+        PPOTechnicalIndicator(Candle.get_number_of_trades, 10, 2),
+        PPOTechnicalIndicator(Candle.get_number_of_trades, 15, 3),
+        PPOTechnicalIndicator(Candle.get_number_of_trades, 20, 1) / PPOTechnicalIndicator(Candle.get_volume, 20, 5),
         PPOTechnicalIndicator(Candle.get_volume, 5, 1),
     ]
-
     sklearn_classifier = RandomForestClassifier(n_estimators=100, criterion="entropy", class_weight="balanced")
 
     training_ratio = 0.5  # this is not enabled
-
-    my_classifier = TradingClassifier(stock_data_training_set, list_of_technical_indicators,
+    # TODO: rename variable "security" to "trading pair"
+    my_classifier = TradingClassifier(trading_pair, list_of_technical_indicators,
                                       sklearn_classifier, training_ratio)
-    my_classifier.precondition()
-    my_classifier.train()
+    my_classifier.train(stock_data_training_set)
+    my_classifier.save_to_disk(os.path.join(definitions.DATA_DIR, "classifier.dill"))
 
     # predictions = my_classifier.predict(stock_data_testing_set, list_of_technical_indicators)
 
     parameters = LiveParameters(
-        short_sma_period=timedelta(hours=2),
-        long_sma_period=timedelta(hours=20),
         update_period=timedelta(hours=1),
-        trade_amount=10,
+        trade_amount=1000,
         sleep_time=0
     )
 

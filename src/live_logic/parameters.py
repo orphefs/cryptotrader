@@ -9,12 +9,9 @@ class Parameters:
 
 
 class LiveParameters(Parameters):
-    def __init__(self, short_sma_period: timedelta,
-                 long_sma_period: timedelta, update_period: timedelta,
+    def __init__(self, update_period: timedelta,
                  trade_amount: int,
                  sleep_time: int):
-        self.short_sma_period = short_sma_period
-        self.long_sma_period = long_sma_period
         self.update_period = update_period
         self.trade_amount = trade_amount
         self.sleep_time = sleep_time
