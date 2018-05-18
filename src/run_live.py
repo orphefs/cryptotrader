@@ -10,6 +10,7 @@ from binance.client import Client
 import definitions
 from containers.candle import Candle
 from containers.trade_helper import generate_trading_signal_from_prediction
+from live_logic.market_maker import MarketMaker
 from live_logic.parameters import LiveParameters
 from live_logic.portfolio import Portfolio
 from plotting.plot_candles import custom_plot
@@ -36,7 +37,7 @@ def run(trade_amount: float, capital_security: str, trading_pair: str):
     threshold = timedelta(seconds=45)
 
     classifier = TradingClassifier.load_from_disk(os.path.join(definitions.DATA_DIR, "classifier.dill"))
-
+    market_maker = MarketMaker()
     logging.info("Initialized portfolio: {}".format(portfolio))
 
     previous_candle = download_live_data(client, security=trading_pair, )[-1]
@@ -53,6 +54,7 @@ def run(trade_amount: float, capital_security: str, trading_pair: str):
             prediction = classifier.predict_one(current_candle)
             if prediction is not None:
                 signal = generate_trading_signal_from_prediction(prediction[0], current_candle)
+                market_maker.place_order(signal)
                 portfolio.update(signal)
                 portfolio.save_to_disk(os.path.join(definitions.DATA_DIR, "portfolio.dill"))
             previous_candle = current_candle
