@@ -6,7 +6,6 @@ from typing import List, Union
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from dill import dill
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import confusion_matrix
 
@@ -117,8 +116,6 @@ class TradingClassifier(SaveLoadMixin):
         if len(self._stock_data_live.candles) >= self._maximum_lag:
             self._is_candles_requirement_satisfied = True
 
-
-
     def __str__(self):
         return "Trading Pair: {}, Technical Indicators: {}".format(self._stock_data_live.security,
                                                                    self._list_of_technical_indicators)
@@ -186,14 +183,14 @@ def main():
     trading_pair = "XRPBTC"
 
     training_time_window = TimeWindow(
-        start_time=datetime(2018, 1, 12),
-        end_time=datetime(2018, 3, 12)
+        start_time=datetime(2018, 5, 10),
+        end_time=datetime(2018, 5, 11)
     )
 
     stock_data_training_set = download_save_load(training_time_window, trading_pair)
     testing_time_window = TimeWindow(
-        start_time=datetime(2018, 4, 12),
-        end_time=datetime(2018, 5, 12)
+        start_time=datetime(2018, 5, 12),
+        end_time=datetime(2018, 5, 17)
     )
 
     stock_data_testing_set = download_save_load(testing_time_window, trading_pair)
@@ -237,10 +234,8 @@ def main():
     predicted_portfolio, predicted_signals = generate_predicted_portfolio(
         initial_capital, parameters, stock_data_testing_set, my_classifier)
 
-    custom_plot(portfolio=predicted_portfolio, strategy=None,
-                parameters=parameters, stock_data=stock_data_testing_set, title='Prediction portfolio')
-    custom_plot(portfolio=reference_portfolio, strategy=None,
-                parameters=parameters, stock_data=stock_data_testing_set, title='Reference portfolio')
+    custom_plot(portfolio=predicted_portfolio, strategy=None, title='Prediction portfolio')
+    custom_plot(portfolio=reference_portfolio, strategy=None, title='Reference portfolio')
     print(my_classifier.sklearn_classifier.feature_importances_)
     conf_matrix = compute_confusion_matrix(training_signals, predicted_signals)
     accuracy = np.sum(np.diag(conf_matrix)) / np.sum(conf_matrix)

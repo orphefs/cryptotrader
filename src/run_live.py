@@ -37,16 +37,18 @@ def run(trade_amount: float, capital_security: str, trading_pair: str):
     threshold = timedelta(seconds=45)
 
     classifier = TradingClassifier.load_from_disk(os.path.join(definitions.DATA_DIR, "classifier.dill"))
-    market_maker = MarketMaker()
+    market_maker = MarketMaker(client, trading_pair, 100)
     logging.info("Initialized portfolio: {}".format(portfolio))
 
-    previous_candle = download_live_data(client, security=trading_pair, )[-1]
+    candles = download_live_data(client, trading_pair, Client.KLINE_INTERVAL_1MINUTE, 30)
+    for candle in candles:
+        classifier.append_new_candle(candle)
+    previous_candle = candles[-1]
 
-    # time.sleep(30)
 
     while True:
         print("Loop iterating...")
-        current_candle = download_live_data(client, security=trading_pair, )[-1]
+        current_candle = download_live_data(client, trading_pair, Client.KLINE_INTERVAL_1MINUTE, 30)[-1]
         if is_time_difference_larger_than_threshold(current_candle, previous_candle, threshold,
                                                     Candle.get_close_time_as_datetime):
             print("Registering candle: {}".format(current_candle))
@@ -54,7 +56,8 @@ def run(trade_amount: float, capital_security: str, trading_pair: str):
             prediction = classifier.predict_one(current_candle)
             if prediction is not None:
                 signal = generate_trading_signal_from_prediction(prediction[0], current_candle)
-                market_maker.place_order(signal)
+                order = market_maker.place_order(signal)
+                print(order)
                 portfolio.update(signal)
                 portfolio.save_to_disk(os.path.join(definitions.DATA_DIR, "portfolio.dill"))
             previous_candle = current_candle
