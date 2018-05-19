@@ -74,8 +74,10 @@ def plot_trading_signals(ax: Axes, trading_signals: List[_TradingSignal]):
     }
     markers = [marker_map[trading_signal.type.__name__] for trading_signal in trading_signals]
 
+    prices = []
     for marker, trading_signal in zip(markers, trading_signals):
         if marker != "":
+            prices.append(trading_signal.price_point.value)
             ax.scatter(
                 x=trading_signal.price_point.date_time,
                 y=trading_signal.price_point.value,
@@ -83,6 +85,7 @@ def plot_trading_signals(ax: Axes, trading_signals: List[_TradingSignal]):
                 color='k',
                 s=40
             )
+    ax.set_ylim(min(prices), max(prices))
 
 
 def plot_candlesticks(ax: Axes, data: StockData):
