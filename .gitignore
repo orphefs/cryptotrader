@@ -39,5 +39,6 @@ Thumbs.db
 .idea/*
 local_*
 __pycache__/
+data/
 
 
