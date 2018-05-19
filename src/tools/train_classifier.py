@@ -189,8 +189,8 @@ def main():
 
     stock_data_training_set = download_save_load(training_time_window, trading_pair)
     testing_time_window = TimeWindow(
-        start_time=datetime(2018, 5, 12),
-        end_time=datetime(2018, 5, 17)
+        start_time=datetime(2018, 5, 18),
+        end_time=datetime(2018, 5, 20)
     )
 
     stock_data_testing_set = download_save_load(testing_time_window, trading_pair)
@@ -221,15 +221,15 @@ def main():
     # predictions = my_classifier.predict(stock_data_testing_set, list_of_technical_indicators)
 
     parameters = LiveParameters(
-        update_period=timedelta(hours=1),
-        trade_amount=1000,
+        update_period=timedelta(minutes=1),
+        trade_amount=100,
         sleep_time=0
     )
 
     # stock_data_testing_set = stock_data_training_set
 
     initial_capital = 5
-    reference_portfolio, training_signals = generate_reference_portfolio(
+    reference_portfolio, reference_signals = generate_reference_portfolio(
         initial_capital, parameters, stock_data_testing_set)
     predicted_portfolio, predicted_signals = generate_predicted_portfolio(
         initial_capital, parameters, stock_data_testing_set, my_classifier)
@@ -237,7 +237,7 @@ def main():
     custom_plot(portfolio=predicted_portfolio, strategy=None, title='Prediction portfolio')
     custom_plot(portfolio=reference_portfolio, strategy=None, title='Reference portfolio')
     print(my_classifier.sklearn_classifier.feature_importances_)
-    conf_matrix = compute_confusion_matrix(training_signals, predicted_signals)
+    conf_matrix = compute_confusion_matrix(reference_signals, predicted_signals)
     accuracy = np.sum(np.diag(conf_matrix)) / np.sum(conf_matrix)
     print(conf_matrix)
     print(accuracy)
