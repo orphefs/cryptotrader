@@ -8,6 +8,7 @@ from plotting.plot_candles import custom_plot
 
 
 def postprocess():
+    # TODO: Plot break-in period and annotate with profits
     portfolio = Portfolio.load_from_disk(os.path.join(definitions.DATA_DIR, "portfolio.dill"))
     portfolio.compute_performance()
     custom_plot(portfolio, None)
