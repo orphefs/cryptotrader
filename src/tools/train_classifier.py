@@ -98,14 +98,15 @@ class TradingClassifier(SaveLoadMixin):
         testing_data = _extract_indicators_from_stock_data(stock_data, self._list_of_technical_indicators)
         predictors, _ = _convert_to_pandas(predictors=testing_data, labels=None)
         # TODO: Implement trading based on probabilities
-        return self._sklearn_classifier.predict(predictors)
+        predicted_values = self._sklearn_classifier.predict(predictors)
+        return predicted_values
 
     def predict_one(self, candle: Candle):
         if self._is_candles_requirement_satisfied:
-            testing_data = _extract_indicator_from_candle(candle,
-                                                          self._list_of_technical_indicators)
+            testing_data = _extract_indicator_from_candle(candle,self._list_of_technical_indicators)
             predictors, _ = _convert_to_pandas(predictors=testing_data, labels=None)
-            return self._sklearn_classifier.predict(predictors)
+            predicted_values = self._sklearn_classifier.predict(predictors)
+            return predicted_values
 
     @property
     def sklearn_classifier(self):

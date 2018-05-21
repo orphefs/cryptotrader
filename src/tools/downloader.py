@@ -29,6 +29,10 @@ def download_live_data(client: Client, security: Security, api_interval_callback
     klines = client.get_historical_klines(security, api_interval_callback, "{} minutes ago GMT".format(lags))
     return Candle.from_list_of_klines(klines)
 
+def mock_download_live_data(client: Client, security: Security, api_interval_callback: str, lags: int) -> List[Candle]:
+    klines = client.get_historical_klines(security, api_interval_callback, "{} minutes ago GMT".format(lags))
+    return Candle.from_list_of_klines(klines)
+
 
 def serve_windowed_stock_data(data: StockData, iteration: int, window_start: int) -> Tuple[int, StockData]:
     iteration += 1
@@ -53,13 +57,13 @@ def generate_file_name(time_window: TimeWindow, security: Security) -> str:
             time_window.end_time.as_string().replace(" ", "_") + '_' + security + ".dill").replace(" ", "_")
 
 
-def download_save_load(time_window: TimeWindow, security: str):
+def download_save_load(time_window: TimeWindow, security: str, api_interval_callback: str):
     path_to_file = os.path.join(definitions.DATA_DIR, generate_file_name(time_window, security))
     if os.path.isfile(path_to_file):
         stock_data = load_from_disk(path_to_file)
     else:
         start = datetime.now()
-        candles = download_backtesting_data(time_window, security, Client.KLINE_INTERVAL_1MINUTE)
+        candles = download_backtesting_data(time_window, security, api_interval_callback)
         stop = datetime.now()
         print("Elapsed download time: {}".format(stop - start))
         for candle in candles:
