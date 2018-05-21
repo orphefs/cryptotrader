@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from binance.client import Client
 
 from containers.time_windows import TimeWindow
+from definitions import update_interval_mappings
 from mixins.save_load_mixin import SaveLoadMixin
 from src import definitions
 from src.backtesting_logic.logic import Hold
@@ -46,7 +47,7 @@ class LiveRunner(SaveLoadMixin):
         self._parameters = LiveParameters(
             update_period=timedelta(hours=1),
             trade_amount=100,
-            sleep_time=1
+            sleep_time=update_interval_mappings[self._kline_interval]
         )
         self._portfolio = Portfolio(initial_capital=get_capital_from_account(capital_security=None),
                                     trade_amount=self._parameters.trade_amount)
