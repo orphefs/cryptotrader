@@ -83,15 +83,6 @@ class CompoundTechnicalIndicator(OperatorOverloadsMixin):
             self._result = self._operator_callback(self._technical_indicator_1.result,
                                                    self._technical_indicator_2.result)
 
-    def __sub__(self, other):
-        return CompoundTechnicalIndicator(self, other, operator.sub)
-
-    def __mul__(self, other):
-        return CompoundTechnicalIndicator(self, other, operator.mul)
-
-    def __truediv__(self, other):
-        return CompoundTechnicalIndicator(self, other, operator.truediv)
-
 
 class MovingAverageTechnicalIndicator(TechnicalIndicator):
     def __init__(self, feature_getter_callback: Callable, lags: int):
