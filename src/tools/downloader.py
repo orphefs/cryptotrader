@@ -79,5 +79,6 @@ def download_test_data():
     save_to_disk(stock_data, os.path.join(definitions.DATA_DIR, "test_data.dill"))
 
 
+
 if __name__ == '__main__':
     download_test_data()
