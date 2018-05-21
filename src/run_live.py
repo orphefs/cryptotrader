@@ -47,11 +47,12 @@ class LiveRunner(SaveLoadMixin):
         self._parameters = LiveParameters(
             update_period=timedelta(hours=1),
             trade_amount=100,
-            sleep_time=update_interval_mappings[self._kline_interval]
+            # sleep_time=update_interval_mappings[self._kline_interval].total_seconds(),
+            sleep_time=0.01,
         )
         self._portfolio = Portfolio(initial_capital=get_capital_from_account(capital_security=None),
                                     trade_amount=self._parameters.trade_amount)
-        self._waiting_threshold = timedelta(seconds=45)
+        self._waiting_threshold = timedelta(seconds=update_interval_mappings[self._kline_interval].total_seconds() - 15)
 
         self._classifier = TradingClassifier.load_from_disk(os.path.join(definitions.DATA_DIR, "classifier.dill"))
         self._market_maker = MarketMaker(self._client, self._trading_pair, self._trade_amount)
@@ -64,6 +65,7 @@ class LiveRunner(SaveLoadMixin):
     def shutdown(self):
         self._stop_time = datetime.now()
         self.save_to_disk("latest_run_live.dill")
+        self._portfolio.save_to_disk(os.path.join(definitions.DATA_DIR, "portfolio.dill"))
 
     def download_candle(self) -> Candle:
         return download_live_data(self._client, self._trading_pair, self._kline_interval, 30)[-1]

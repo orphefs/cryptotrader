@@ -6,6 +6,7 @@ from typing import List, Union
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from binance.client import Client
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import confusion_matrix
 
@@ -189,12 +190,9 @@ def main():
     )
 
     stock_data_training_set = download_save_load(training_time_window, trading_pair)
-    testing_time_window = TimeWindow(
-        start_time=datetime(2018, 5, 18),
-        end_time=datetime(2018, 5, 20)
-    )
+    testing_time_window = TimeWindow(start_time=datetime(2018, 5, 2), end_time=datetime(2018, 5, 3))
 
-    stock_data_testing_set = download_save_load(testing_time_window, trading_pair)
+    stock_data_testing_set = download_save_load(testing_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
 
     list_of_technical_indicators = [
         AutoCorrelationTechnicalIndicator(Candle.get_volume, 24),
@@ -245,6 +243,36 @@ def main():
     plt.show()
 
 
+def run_trained_classifier():
+    testing_time_window = TimeWindow(start_time=datetime(2018, 5, 2), end_time=datetime(2018, 5, 3))
+
+    trading_pair = "XRPBTC"
+    stock_data_testing_set = download_save_load(testing_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
+
+    parameters = LiveParameters(
+        update_period=timedelta(minutes=1),
+        trade_amount=100,
+        sleep_time=0
+    )
+    my_classifier = TradingClassifier.load_from_disk(os.path.join(definitions.DATA_DIR, "classifier.dill"))
+
+    initial_capital = 5
+    reference_portfolio, reference_signals = generate_reference_portfolio(
+        initial_capital, parameters, stock_data_testing_set)
+    predicted_portfolio, predicted_signals = generate_predicted_portfolio(
+        initial_capital, parameters, stock_data_testing_set, my_classifier)
+
+    custom_plot(portfolio=predicted_portfolio, strategy=None, title='Prediction portfolio')
+    custom_plot(portfolio=reference_portfolio, strategy=None, title='Reference portfolio')
+    print(my_classifier.sklearn_classifier.feature_importances_)
+    conf_matrix = compute_confusion_matrix(reference_signals, predicted_signals)
+    accuracy = np.sum(np.diag(conf_matrix)) / np.sum(conf_matrix)
+    print(conf_matrix)
+    print(accuracy)
+    plt.show()
+
+
+
 def convert_signals_to_pandas(signals: List[Union[Buy, Sell, Hold]]) -> pd.DataFrame:
     return pd.DataFrame([{'Action': s.type.__name__, 'Timestamp': s.price_point.date_time} for s in signals])
 
@@ -261,4 +289,5 @@ def compute_confusion_matrix(training_signals: List[Union[Buy, Sell, Hold]],
 
 
 if __name__ == "__main__":
-    main()
+    # main()
+    run_trained_classifier()
