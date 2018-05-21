@@ -1,5 +1,7 @@
 from typing import List, Any
 
+from datetime import datetime
+
 from src.containers.time import Time, MilliSeconds
 
 
@@ -74,6 +76,8 @@ class Volume(object):
         return self._number_of_trades
 
 
+
+
 class Candle(object):
     def __init__(self, price: Price, volume: Volume, time: Time):
         self._price = price
@@ -128,6 +132,10 @@ class Candle(object):
     def from_list_of_klines(klines: List):
         return [Candle.from_kline(kline) for kline in klines]
 
+
+def instantiate_1970_candle():
+    return Candle(price=None, volume=None, time=Time(open_time=MilliSeconds(int(datetime(1970,1,1).timestamp())),
+                                              close_time=MilliSeconds(int(datetime(1970,1,1).timestamp()))))
 
 if __name__ == "__main__":
     from binance.client import Client

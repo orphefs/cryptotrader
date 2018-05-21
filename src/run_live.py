@@ -8,9 +8,10 @@ import matplotlib.pyplot as plt
 from binance.client import Client
 
 from containers.time_windows import TimeWindow
+from mixins.save_load_mixin import SaveLoadMixin
 from src import definitions
 from src.backtesting_logic.logic import Hold
-from src.containers.candle import Candle
+from src.containers.candle import Candle, instantiate_1970_candle
 from src.containers.trade_helper import generate_trading_signal_from_prediction
 from src.live_logic.market_maker import MarketMaker
 from src.live_logic.parameters import LiveParameters
@@ -27,17 +28,17 @@ def get_capital_from_account(capital_security: str) -> float:
     return 5.0
 
 
-class LiveRunner:
+class LiveRunner(SaveLoadMixin):
     def __init__(self, trading_pair, trade_amount):
         self._trading_pair = trading_pair
         self._trade_amount = trade_amount
         self._start_time = None
         self._stop_time = None
-        self._current_candle = current_candle
-        self._current_prediction = current_prediction
+        self._current_candle = None
+        self._current_prediction = None
         self._current_signal = Hold(0, None)
-        self._previous_candle = previous_candle
-        self._previous_prediction = previous_prediction
+        self._previous_candle = None
+        self._previous_prediction = None
         self._previous_signal = Hold(0, None)
         self._iteration_number = None
         self._client = Client("", "")
@@ -56,17 +57,18 @@ class LiveRunner:
 
     def initialize(self):
         # self._classifier._maximum_lag
+        self._previous_candle = instantiate_1970_candle()
         self._start_time = datetime.now()
 
     def shutdown(self):
         self._stop_time = datetime.now()
+        self.save_to_disk("latest_run_live.dill")
 
     def download_candle(self) -> Candle:
         return download_live_data(self._client, self._trading_pair, self._kline_interval, 30)[-1]
 
     def mock_download_candle(self) -> Candle:
-        return download_save_load(TimeWindow(start_time=datetime(2018, 5, 2),
-                                             end_time=datetime(2018, 5, 3)),
+        return download_save_load(TimeWindow(start_time=datetime(2018, 5, 2), end_time=datetime(2018, 5, 3)),
                                   self._trading_pair, self._kline_interval).candles[self._iteration_number]
 
     def run(self):
@@ -76,16 +78,16 @@ class LiveRunner:
             if is_time_difference_larger_than_threshold(self._current_candle, self._previous_candle,
                                                         self._waiting_threshold,
                                                         Candle.get_close_time_as_datetime):
-                logger.info("Registering candle: {}".format(self._current_candle))
+                print("Registering candle: {}".format(self._current_candle))
                 self._classifier.append_new_candle(self._current_candle)
                 prediction = self._classifier.predict_one(self._current_candle)
-                logger.info("Prediction is: {} on iteration {}".format(prediction, self._iteration_number))
+                print("Prediction is: {} on iteration {}".format(prediction, self._iteration_number))
                 if prediction is not None:
                     self._current_signal = generate_trading_signal_from_prediction(prediction[0], self._current_candle)
                     if self._current_signal.type == self._previous_signal.type:
-                        logger.info("Hodling...")
+                        print("Hodling...")
                     else:
-                        logger.info("Prediction for signal {}".format(self._current_signal))
+                        print("Prediction for signal {}".format(self._current_signal))
                         # order = market_maker.place_order(current_signal)
                         self._portfolio.update(self._current_signal)
                         self._portfolio.save_to_disk(os.path.join(definitions.DATA_DIR, "portfolio.dill"))
