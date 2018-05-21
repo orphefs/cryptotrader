@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from typing import List, Tuple, Callable
+from typing import List, Tuple
 
 import dill
 from binance.client import Client
@@ -69,8 +69,15 @@ def download_save_load(time_window: TimeWindow, security: str):
     return stock_data
 
 
-if __name__ == '__main__':
+def download_test_data():
     security = "XRPBTC"
-    time_window = TimeWindow(start_time=datetime(2018, 3, 2),
-                             end_time=datetime(2018, 4, 10))
-    download_save_load(time_window, security)
+    time_window = TimeWindow(start_time=datetime(2018, 5, 20, 6, 00),
+                             end_time=datetime(2018, 5, 21, 8, 00))
+    candles = download_backtesting_data(time_window, security, Client.KLINE_INTERVAL_1MINUTE)[-5:]
+    print(candles)
+    stock_data = StockData(candles, security)
+    save_to_disk(stock_data, os.path.join(definitions.DATA_DIR, "test_data.dill"))
+
+
+if __name__ == '__main__':
+    download_test_data()
