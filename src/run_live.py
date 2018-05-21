@@ -7,16 +7,16 @@ from typing import Callable
 import matplotlib.pyplot as plt
 from binance.client import Client
 
-import definitions
-from backtesting_logic.logic import Hold
-from containers.candle import Candle
-from containers.trade_helper import generate_trading_signal_from_prediction
-from live_logic.market_maker import MarketMaker
-from live_logic.parameters import LiveParameters
-from live_logic.portfolio import Portfolio
-from plotting.plot_candles import custom_plot
-from tools.downloader import download_live_data
-from tools.train_classifier import TradingClassifier
+from src import definitions
+from src.backtesting_logic.logic import Hold
+from src.containers.candle import Candle
+from src.containers.trade_helper import generate_trading_signal_from_prediction
+from src.live_logic.market_maker import MarketMaker
+from src.live_logic.parameters import LiveParameters
+from src.live_logic.portfolio import Portfolio
+from src.plotting.plot_candles import custom_plot
+from src.tools.downloader import download_live_data
+from src.tools.train_classifier import TradingClassifier
 
 logging.basicConfig(filename=os.path.join(definitions.DATA_DIR, 'local_autotrader.log'), level=logging.INFO)
 logger = logging.getLogger('cryptotrader_api')

@@ -1,6 +1,6 @@
 # function computes SMA and EMA based on period fed to it
-from containers.time_series import TimeSeries
-from containers.stock_data import StockData
+from src.containers.time_series import TimeSeries
+from src.containers.stock_data import StockData
 
 
 def simple_moving_average(SMA, EMA, p, closing_prices, closing_price_averaging_period):

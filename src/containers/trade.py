@@ -1,6 +1,6 @@
 from typing import List, Dict
 
-from containers.time import MilliSeconds
+from src.containers.time import MilliSeconds
 
 
 class Trade(object):

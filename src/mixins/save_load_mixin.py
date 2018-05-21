@@ -1,6 +1,6 @@
 import dill
 import os
-import definitions
+from src import definitions
 
 
 class SaveLoadMixin:

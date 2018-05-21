@@ -2,10 +2,10 @@ from typing import Tuple
 
 from copy import copy
 
-from containers.candle import Candle
+from src.containers.candle import Candle
 from plotting.plot_candles import plot_candlesticks, plot_returns
 from tools.downloader import load_from_disk
-from containers.stock_data import StockData
+from src.containers.stock_data import StockData
 import matplotlib.pyplot as plt
 
 from type_aliases import Security

@@ -2,9 +2,9 @@ from abc import ABC, abstractmethod
 from datetime import timedelta
 from typing import Dict
 
-from containers.time_series import TimeSeries
-from backtesting_logic.signal_processing import rolling_mean, _generate_trading_signals_from_sma
-from containers.stock_data import StockData
+from src.containers.time_series import TimeSeries
+from src.backtesting_logic.signal_processing import rolling_mean, _generate_trading_signals_from_sma
+from src.containers.stock_data import StockData
 
 
 class BackTestingStrategy(ABC):

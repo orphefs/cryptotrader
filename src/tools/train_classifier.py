@@ -9,19 +9,19 @@ import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import confusion_matrix
 
-import definitions
-from backtesting_logic.logic import Buy, Sell, Hold
-from containers.candle import Candle
-from containers.data_point import PricePoint
-from containers.stock_data import StockData
-from containers.time_windows import TimeWindow
-from containers.trade_helper import generate_trading_signal_from_prediction, generate_trading_signals_from_array
-from live_logic.parameters import LiveParameters
-from live_logic.portfolio import Portfolio
-from live_logic.technical_indicator import TechnicalIndicator, AutoCorrelationTechnicalIndicator, PPOTechnicalIndicator
-from mixins.save_load_mixin import SaveLoadMixin
-from plotting.plot_candles import custom_plot
-from tools.downloader import download_save_load
+from src import definitions
+from src.backtesting_logic.logic import Buy, Sell, Hold
+from src.containers.candle import Candle
+from src.containers.data_point import PricePoint
+from src.containers.stock_data import StockData
+from src.containers.time_windows import TimeWindow
+from src.containers.trade_helper import generate_trading_signal_from_prediction, generate_trading_signals_from_array
+from src.live_logic.parameters import LiveParameters
+from src.live_logic.portfolio import Portfolio
+from src.live_logic.technical_indicator import TechnicalIndicator, AutoCorrelationTechnicalIndicator, PPOTechnicalIndicator
+from src.mixins.save_load_mixin import SaveLoadMixin
+from src.plotting.plot_candles import custom_plot
+from src.tools.downloader import download_save_load
 
 
 def _extract_indicators_from_stock_data(stock_data, list_of_technical_indicators):

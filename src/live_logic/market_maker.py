@@ -5,7 +5,7 @@ import binance
 from binance.client import Client
 from datetime import datetime
 
-from backtesting_logic.logic import Buy, Sell, Hold
+from src.backtesting_logic.logic import Buy, Sell, Hold
 logger = logging.getLogger('cryptotrader_api')
 
 

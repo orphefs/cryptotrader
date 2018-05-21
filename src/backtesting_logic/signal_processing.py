@@ -4,9 +4,9 @@ from typing import List
 import pandas as pd
 import numpy as np
 
-from backtesting_logic.logic import _TradingSignal
-from containers.time_series import TimeSeries
-from containers.data_point import PricePoint
+from src.backtesting_logic.logic import _TradingSignal
+from src.containers.time_series import TimeSeries
+from src.containers.data_point import PricePoint
 
 
 def rolling_mean(window_size: timedelta, time_series: TimeSeries):

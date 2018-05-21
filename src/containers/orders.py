@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from containers.time import Time
+from src.containers.time import Time
 
 Price = float
 Instrument = str

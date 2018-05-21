@@ -4,7 +4,7 @@ from typing import List
 import pandas as pd
 
 from backtesting_logic.logic import _TradingSignal
-from containers.stock_data import StockData
+from src.containers.stock_data import StockData
 
 
 class Portfolio(ABC):

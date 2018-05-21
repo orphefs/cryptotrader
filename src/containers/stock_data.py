@@ -1,7 +1,7 @@
 from typing import List
 
-from containers.candle import Candle
-from type_aliases import Security
+from src.containers.candle import Candle
+from src.type_aliases import Security
 
 
 class StockData(object):

@@ -1,7 +1,7 @@
 from datetime import timedelta
 from typing import List
 
-from live_logic.technical_indicator import TechnicalIndicator
+from src.live_logic.technical_indicator import TechnicalIndicator
 
 
 class Parameters:

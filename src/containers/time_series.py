@@ -4,7 +4,7 @@ from typing import List, Union, Optional
 import numpy as np
 import pandas as pd
 
-from containers.data_point import Price, PricePoint
+from src.containers.data_point import Price, PricePoint
 
 
 def _compute_sampling_rate(x: Optional[List[datetime]]) -> datetime:

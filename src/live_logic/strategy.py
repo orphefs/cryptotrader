@@ -4,13 +4,13 @@ from typing import Dict, Union
 
 from dill import dill
 
-from backtesting_logic.logic import Buy, Hold, Sell
-from containers.candle import Candle
-from containers.data_point import PricePoint
-from containers.stock_data import StockData
-from containers.time_series import TimeSeries
-from externals.rolling_statistics.python.rolling_stats import RollingMean
-from live_logic.parameters import LiveParameters, ClassifierParameters
+from src.externals.rolling_statistics.python.rolling_stats import RollingMean
+from src.backtesting_logic.logic import Buy, Hold, Sell
+from src.containers.candle import Candle
+from src.containers.data_point import PricePoint
+from src.containers.stock_data import StockData
+from src.containers.time_series import TimeSeries
+from src.live_logic.parameters import LiveParameters, ClassifierParameters
 
 
 def _convert_sma_period_to_no_of_samples(sma_period: timedelta, update_period: timedelta) -> int:

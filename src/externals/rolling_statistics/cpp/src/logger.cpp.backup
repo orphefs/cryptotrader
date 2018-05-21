@@ -1,0 +1,82 @@
+// Example program
+#include <iostream>
+#include <string>
+#include <fstream>
+
+#define LOG( string ) Logger_t::Instance().writeToFile( string )
+
+std::string getTimeOfDay();
+
+template <bool isEnabled>
+class Logger;
+
+template <>
+class Logger<true>
+{
+public:
+  static Logger &Instance();
+  void openOutputStream(std::string const &filePath_t);
+  void writeToFile(std::string const &string_t);
+
+private:
+  Logger() : m_loggingStream(){};             // private default constructor
+  ~Logger();                                  // private default destructor
+  Logger(Logger const &) = delete;            // private copy constructor
+  Logger &operator=(Logger const &) = delete; // private assignment operator
+  std::ofstream m_loggingStream;
+};
+
+template <>
+class Logger<false>
+{
+public:
+  static Logger &Instance();
+  void writeToFile(std::string const &);
+  void openOutputStream(std::string const &);
+
+private:
+  Logger() = default;                // private default constructor
+  Logger(Logger const &);            // private copy constructor
+  Logger &operator=(Logger const &); // private assignment operator
+};
+
+inline Logger<true> &Logger<true>::Instance()
+{
+  static Logger<true> logger;
+  return logger;
+}
+
+inline Logger<false> &Logger<false>::Instance()
+{
+  static Logger<false> logger;
+  return logger;
+}
+
+inline Logger<true>::~Logger()
+{
+  m_loggingStream.close();
+}
+
+void inline Logger<true>::openOutputStream(std::string const &filePath)
+{
+  m_loggingStream.open(filePath, std::ofstream::out | std::ofstream::trunc);
+}
+
+void inline Logger<false>::openOutputStream(std::string const &)
+{
+}
+
+void inline Logger<true>::writeToFile(std::string const &string_t)
+{
+  m_loggingStream << getTimeOfDay() << string_t;
+}
+
+void inline Logger<false>::writeToFile(std::string const &)
+{
+}
+
+#ifdef DEBUG
+using Logger_t = Logger<true>;
+#elif NDEBUG
+using Logger_t = Logger<false>;
+#endif

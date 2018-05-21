@@ -6,10 +6,11 @@ from typing import Callable
 
 import numpy as np
 
-import definitions
-from containers.candle import Candle
-from externals.rolling_statistics.python.rolling_stats import RollingMean
-from tools.downloader import load_from_disk
+from src.externals.rolling_statistics.python.rolling_stats import RollingMean
+
+from src import definitions
+from src.containers.candle import Candle
+from src.tools.downloader import load_from_disk
 
 
 class OperatorOverloadsMixin:
@@ -181,6 +182,7 @@ def PPOTechnicalIndicator(feature_getter_callback: Callable, slow_ma_lag: int, f
 
 
 if __name__ == "__main__":
+
 
     compound_maverage = (
                             MovingAverageTechnicalIndicator(Candle.get_close_price,

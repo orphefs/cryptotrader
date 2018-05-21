@@ -1,9 +1,9 @@
 from typing import List
 
-from backtesting_logic.logic import _TradingSignal
-from containers.candle import Candle
-from containers.data_point import PricePoint
-from containers.stock_data import StockData
+from src.backtesting_logic.logic import _TradingSignal
+from src.containers.candle import Candle
+from src.containers.data_point import PricePoint
+from src.containers.stock_data import StockData
 
 
 def generate_trading_signals_from_array(signals: List[int], stock_data: StockData):

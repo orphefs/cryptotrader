@@ -1,7 +1,7 @@
 from typing import List
 
-from containers.data_point import PricePoint
-from containers.time_series import TimeSeries
+from src.containers.data_point import PricePoint
+from src.containers.time_series import TimeSeries
 
 
 class _TradingSignal(object):

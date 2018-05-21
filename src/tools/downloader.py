@@ -5,12 +5,12 @@ from typing import List, Tuple
 import dill
 from binance.client import Client
 
-import definitions
-from containers.candle import Candle
-from containers.stock_data import StockData
-from containers.time_series import TimeSeries
-from containers.time_windows import TimeWindow
-from type_aliases import Security
+from src import definitions
+from src.containers.candle import Candle
+from src.containers.stock_data import StockData
+from src.containers.time_series import TimeSeries
+from src.containers.time_windows import TimeWindow
+from src.type_aliases import Security
 
 
 def calculate_sampling_rate_of_stock_data(stock_data: StockData) -> float:

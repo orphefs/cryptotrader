@@ -1,20 +1,18 @@
 from typing import List
-import pandas as pd
+
 import matplotlib.dates as mdate
 import matplotlib.pyplot as plt
+import pandas as pd
 from matplotlib.axes import Axes
 from matplotlib.axis import Axis
 from matplotlib.dates import DateFormatter, WeekdayLocator, \
     DayLocator, MONDAY
-from externals.mpl_finance.mpl_finance import candlestick_ohlc
 
-from backtesting_logic.logic import IntersectionPoint, _TradingSignal
-from containers.time_series import TimeSeries
-from backtesting_logic.portfolio import Portfolio
-from helpers import extract_time_series_from_stock_data
-from tools.downloader import load_from_disk
-from containers.stock_data import StockData
-from backtesting_logic.signal_processing import rolling_mean
+from src.externals.mpl_finance.mpl_finance import candlestick_ohlc
+from src.backtesting_logic.logic import IntersectionPoint, _TradingSignal
+from src.backtesting_logic.portfolio import Portfolio
+from src.containers.stock_data import StockData
+from src.containers.time_series import TimeSeries
 
 
 def plot_close_price(ax: Axis, data: StockData):

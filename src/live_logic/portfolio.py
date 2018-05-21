@@ -3,9 +3,9 @@ from typing import Union
 
 import pandas as pd
 
-from backtesting_logic.logic import Buy, Sell, Hold
-from containers.data_point import PricePoint
-from mixins.save_load_mixin import SaveLoadMixin
+from src.backtesting_logic.logic import Buy, Sell, Hold
+from src.containers.data_point import PricePoint
+from src.mixins.save_load_mixin import SaveLoadMixin
 
 
 class Portfolio(SaveLoadMixin):
