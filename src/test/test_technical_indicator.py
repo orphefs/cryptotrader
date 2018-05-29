@@ -57,7 +57,7 @@ def test_mock_technical_indicator():
     assert is_equal(results, expected_results)
 
 
-def test_multiple_technical_indicators():
+def test_autocorrelation_technical_indicator():
     candles = load_candle_data()
     ati = AutoCorrelationTechnicalIndicator(Candle.get_close_price, lags=3)
     expected_results = [None, None, 1.999999861317799, 1.99999990588657, 1.9999998662489968]
