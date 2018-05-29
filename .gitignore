@@ -25,7 +25,7 @@
 *.log
 *.sql
 *.sqlite
-*.dill
+local_data*
 
 # OS generated files #
 ######################
