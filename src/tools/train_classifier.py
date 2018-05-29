@@ -233,8 +233,8 @@ def main():
     predicted_portfolio, predicted_signals = generate_predicted_portfolio(
         initial_capital, parameters, stock_data_testing_set, my_classifier)
 
-    custom_plot(portfolio=predicted_portfolio, strategy=None, title='Prediction portfolio')
-    custom_plot(portfolio=reference_portfolio, strategy=None, title='Reference portfolio')
+    custom_plot(portfolio=predicted_portfolio, strategy=None, title='Prediction portfolio_df')
+    custom_plot(portfolio=reference_portfolio, strategy=None, title='Reference portfolio_df')
     print(my_classifier.sklearn_classifier.feature_importances_)
     conf_matrix = compute_confusion_matrix(reference_signals, predicted_signals)
     accuracy = np.sum(np.diag(conf_matrix)) / np.sum(conf_matrix)
@@ -262,8 +262,8 @@ def run_trained_classifier():
     predicted_portfolio, predicted_signals = generate_predicted_portfolio(
         initial_capital, parameters, stock_data_testing_set, my_classifier)
 
-    custom_plot(portfolio=predicted_portfolio, strategy=None, title='Prediction portfolio')
-    custom_plot(portfolio=reference_portfolio, strategy=None, title='Reference portfolio')
+    custom_plot(portfolio=predicted_portfolio, strategy=None, title='Prediction portfolio_df')
+    custom_plot(portfolio=reference_portfolio, strategy=None, title='Reference portfolio_df')
     print(my_classifier.sklearn_classifier.feature_importances_)
     conf_matrix = compute_confusion_matrix(reference_signals, predicted_signals)
     accuracy = np.sum(np.diag(conf_matrix)) / np.sum(conf_matrix)

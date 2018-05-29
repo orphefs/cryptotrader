@@ -2,12 +2,12 @@ import os
 
 from binance.client import Client
 
-from helpers import convert_to_timedelta
+from src.helpers import convert_to_timedelta
 
 ROOT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')  # This is your Project Root
 CONFIG_PATH = os.path.join(ROOT_DIR, 'src', 'config', 'onoff.txt')
 DATA_DIR = os.path.join(ROOT_DIR, 'data')
-TEST_DATA_DIR = os.path.join(ROOT_DIR, 'src','test', 'data')
+TEST_DATA_DIR = os.path.join(ROOT_DIR, 'src','test', 'test_data')
 update_interval_mappings = {
     Client.KLINE_INTERVAL_1MINUTE: convert_to_timedelta(Client.KLINE_INTERVAL_1MINUTE),
     Client.KLINE_INTERVAL_3MINUTE: convert_to_timedelta(Client.KLINE_INTERVAL_3MINUTE),

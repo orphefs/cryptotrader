@@ -1,7 +1,9 @@
 import os
 from typing import List
 
+import pandas as pd
 import pytest
+from pandas._libs.tslib import Timestamp
 
 from src import definitions
 from src.backtesting_logic.logic import Buy
@@ -23,17 +25,40 @@ def create_mock_signals_from_candles(candles: List[Candle]) -> List[Buy]:
                                                  date_time=candle.get_close_time_as_datetime())) for candle in candles]
 
 
-def test_portfolio():
+def initialize_portfolio() -> Portfolio:
     candles = load_candle_data()
     portfolio = Portfolio(initial_capital=5, trade_amount=100)
     signals = create_mock_signals_from_candles(candles)
-    print(signals)
+    # print(signals)
     for signal in signals:
         portfolio.update(signal)
     portfolio.compute_performance()
+    return portfolio
 
-    expected_results = portfolio.portfolio_df["holdings"]
-    results = [1]
+
+def test_portfolio_holdings():
+    portfolio = initialize_portfolio()
+
+    results = [
+        (portfolio.portfolio_df["holdings"][0], portfolio.portfolio_df["holdings"].index[0]),
+        (portfolio.portfolio_df["holdings"][4], portfolio.portfolio_df["holdings"].index[4]),
+    ]
+    expected_results = [
+        (-0.008198793000000001, Timestamp('2018-05-21 00:56:59.999000')),
+        (-0.040975983, Timestamp('2018-05-21 01:00:59.999000'))
+    ]
+
+    print("\nTest result is {}".format(results))
+    print("Expected result is {}".format(expected_results))
+    assert is_equal(results, expected_results)
+
+
+def test__compute_holdings():
+    holdings = Portfolio._compute_holdings(fees=0.00,
+                                           positions=pd.Series([1, -1, 1, 1]),
+                                           prices=pd.Series([1, 1, 1, 1]))
+    results = list(holdings)
+    expected_results = [1.0, 0.0, 1.0, 2.0]
 
     print("\nTest result is {}".format(results))
     print("Expected result is {}".format(expected_results))

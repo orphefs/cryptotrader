@@ -1,5 +1,6 @@
 # function computes SMA and EMA based on period fed to it
 from datetime import timedelta
+from typing import List
 
 from src.containers.time_series import TimeSeries
 from src.containers.stock_data import StockData
@@ -30,3 +31,11 @@ def convert_to_timedelta(time_val):
         return timedelta(hours=num)
     elif time_val.endswith('d'):
         return timedelta(days=num)
+
+
+def is_equal(list_1: List, list_2: List) -> bool:
+    if len(list_1) != len(list_2):
+        return False
+    if len(list_1) == 0 or len(list_2) == 0:
+        return False
+    return all([item_1 == item_2 for item_1, item_2 in zip(list_1, list_2)])

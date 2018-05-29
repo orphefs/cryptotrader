@@ -8,13 +8,13 @@ from src.containers.stock_data import StockData
 
 
 class Portfolio(ABC):
-    """An abstract base class representing a portfolio of
+    """An abstract base class representing a portfolio_df of
     _positions (including both instruments and cash), determined
     on the basis of a set of signals provided by a Strategy."""
 
     @abstractmethod
     def generate_positions(self):
-        """Provides the backtesting_logic to determine how the portfolio
+        """Provides the backtesting_logic to determine how the portfolio_df
         _positions are allocated on the basis of forecasting
         signals and available cash."""
         raise NotImplementedError("Should implement generate_positions()!")
@@ -26,7 +26,7 @@ class Portfolio(ABC):
         as a sum of holdings and cash, and the bar-period returns
         associated with this curve based on the '_positions' DataFrame.
 
-        Produces a portfolio object that can be examined by
+        Produces a portfolio_df object that can be examined by
         other classes/functions."""
         raise NotImplementedError("Should implement backtest_portfolio()!")
 
@@ -44,10 +44,10 @@ class MarketOnClosePortfolio(Portfolio):
     borrowed for shorting (no margin posting or interest requirements).
 
     Requires:
-    symbol - A stock symbol which forms the basis of the portfolio.
+    symbol - A stock symbol which forms the basis of the portfolio_df.
     bars - A DataFrame of bars for a symbol set.
     signals - A pandas DataFrame of signals (1, 0, -1) for each symbol.
-    initial_capital - The amount in cash at the start of the portfolio."""
+    initial_capital - The amount in cash at the start of the portfolio_df."""
 
     def __init__(self, stock_data: StockData, trading_signals: List[_TradingSignal],
                  initial_capital: float = 1.0):
@@ -74,7 +74,7 @@ class MarketOnClosePortfolio(Portfolio):
         return positions
 
     def backtest_portfolio(self):
-        """Constructs a portfolio from the _positions DataFrame by
+        """Constructs a portfolio_df from the _positions DataFrame by
         assuming the ability to trade at the precise market close price
         of each bar (an unrealistic assumption?).
 
@@ -82,9 +82,9 @@ class MarketOnClosePortfolio(Portfolio):
         each position per bar), in order to generate an equity curve
         ('total') and a set of bar-based returns ('returns').
 
-        Returns the portfolio object to be used elsewhere."""
+        Returns the portfolio_df object to be used elsewhere."""
 
-        # Construct the portfolio DataFrame to use the same index
+        # Construct the portfolio_df DataFrame to use the same index
         # as '_positions' and with a set of 'trading orders' in the
         # 'pos_diff' object, assuming market open prices.
         pos = self._positions[0] * self._candles['Open'] * (1-self._fees)
@@ -99,7 +99,7 @@ class MarketOnClosePortfolio(Portfolio):
         self._portfolio['cash'] = self._initial_capital - (pos_diff * self._candles['Open']).cumsum(axis=0)
 
         # Finalise the total and bar-based returns based on the 'cash'
-        # and 'holdings' figures for the portfolio
+        # and 'holdings' figures for the portfolio_df
         self._portfolio['total'] = self._portfolio['cash'] + self._portfolio['holdings']
         self._portfolio['returns'] = self._portfolio['total'].pct_change()
         return self._portfolio

@@ -3,6 +3,7 @@ from typing import List, Callable
 
 import pytest
 
+from src.helpers import is_equal
 from src import definitions
 from src.containers.candle import Candle
 from src.live_logic.technical_indicator import TechnicalIndicator, AutoCorrelationTechnicalIndicator
@@ -38,10 +39,6 @@ class MockTechnicalIndicator(TechnicalIndicator):
 def load_candle_data() -> List[Candle]:
     stock_data = load_from_disk(os.path.join(definitions.TEST_DATA_DIR, "test_data.dill"))
     return stock_data.candles
-
-
-def is_equal(list_1: List, list_2: List) -> bool:
-    return all([item_1 == item_2 for item_1, item_2 in zip(list_1, list_2)])
 
 
 def test_mock_technical_indicator():

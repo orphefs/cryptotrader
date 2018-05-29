@@ -65,7 +65,7 @@ class LiveRunner(SaveLoadMixin):
     def shutdown(self):
         self._stop_time = datetime.now()
         self.save_to_disk("latest_run_live.dill")
-        self._portfolio.save_to_disk(os.path.join(definitions.DATA_DIR, "portfolio.dill"))
+        self._portfolio.save_to_disk(os.path.join(definitions.DATA_DIR, "portfolio_df.dill"))
 
     def download_candle(self) -> Candle:
         return download_live_data(self._client, self._trading_pair, self._kline_interval, 30)[-1]
@@ -93,7 +93,7 @@ class LiveRunner(SaveLoadMixin):
                         print("Prediction for signal {}".format(self._current_signal))
                         # order = market_maker.place_order(current_signal)
                         self._portfolio.update(self._current_signal)
-                        self._portfolio.save_to_disk(os.path.join(definitions.DATA_DIR, "portfolio.dill"))
+                        self._portfolio.save_to_disk(os.path.join(definitions.DATA_DIR, "portfolio_df.dill"))
                         self._previous_signal = self._current_signal
                 self._previous_candle = self._current_candle
             time.sleep(self._parameters.sleep_time)
@@ -130,7 +130,7 @@ def is_time_difference_larger_than_threshold(current_candle: Candle, previous_ca
 
 
 def postprocess():
-    portfolio = Portfolio.load_from_disk(os.path.join(definitions.DATA_DIR, "portfolio.dill"))
+    portfolio = Portfolio.load_from_disk(os.path.join(definitions.DATA_DIR, "portfolio_df.dill"))
     portfolio.compute_performance()
     custom_plot(portfolio)
     print(portfolio._point_stats['base_index_pct_change'])

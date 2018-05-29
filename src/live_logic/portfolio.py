@@ -22,6 +22,18 @@ class Portfolio(SaveLoadMixin):
         self._portfolio_df = pd.DataFrame(columns=['holdings', 'cash', 'returns', 'total'])
         self._point_stats = {}
 
+    @property
+    def portfolio_df(self):
+        return self._portfolio_df
+
+    @property
+    def positions_df(self):
+        return self._positions_df
+
+    @property
+    def signals(self):
+        return self._signals
+
     def update(self, signal: Union[Buy, Sell, Hold]):
         self._place_order(signal, self._trade_amount, signal.price_point)
         self._signals.append(signal)
