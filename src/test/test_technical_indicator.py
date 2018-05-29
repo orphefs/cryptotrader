@@ -36,7 +36,7 @@ class MockTechnicalIndicator(TechnicalIndicator):
 
 @pytest.fixture()
 def load_candle_data() -> List[Candle]:
-    stock_data = load_from_disk(os.path.join(definitions.DATA_DIR, "test_data.dill"))
+    stock_data = load_from_disk(os.path.join(definitions.TEST_DATA_DIR, "test_data.dill"))
     return stock_data.candles
 
 
@@ -60,7 +60,7 @@ def test_mock_technical_indicator():
 def test_multiple_technical_indicators():
     candles = load_candle_data()
     ati = AutoCorrelationTechnicalIndicator(Candle.get_close_price, lags=3)
-    expected_results = [None, None, 1.0, 1.0, 1.0]
+    expected_results = [None, None, 1.999999861317799, 1.99999990588657, 1.9999998662489968]
     results = []
     for candle in candles:
         ati.update(candle)
