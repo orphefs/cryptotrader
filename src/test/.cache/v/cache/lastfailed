@@ -1,3 +1,5 @@
 {
+  "test_portfolio.py::test__compute_cash": true,
+  "test_portfolio.py::test_portfolio_holdings": true,
   "test_technical_indicator.py::test_autocorrelation_technical_indicator": true
 }

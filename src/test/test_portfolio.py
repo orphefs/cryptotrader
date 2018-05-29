@@ -1,6 +1,7 @@
 import os
 from typing import List
 
+import numpy as np
 import pandas as pd
 import pytest
 from pandas._libs.tslib import Timestamp
@@ -12,6 +13,9 @@ from src.containers.data_point import PricePoint, Price
 from src.helpers import is_equal
 from src.live_logic.portfolio import Portfolio
 from src.tools.downloader import load_from_disk
+
+positions = pd.Series([1000, 1000, 1000, 1000])
+prices = pd.Series(np.array([1, 1, 1, 1]) * 1e-4)
 
 
 @pytest.fixture()
@@ -27,7 +31,7 @@ def create_mock_signals_from_candles(candles: List[Candle]) -> List[Buy]:
 
 def initialize_portfolio() -> Portfolio:
     candles = load_candle_data()
-    portfolio = Portfolio(initial_capital=5, trade_amount=100)
+    portfolio = Portfolio(initial_capital=5, trade_amount=1000)
     signals = create_mock_signals_from_candles(candles)
     # print(signals)
     for signal in signals:
@@ -55,10 +59,23 @@ def test_portfolio_holdings():
 
 def test__compute_holdings():
     holdings = Portfolio._compute_holdings(fees=0.1,
-                                           positions=pd.Series([1, -1, 1, 1]),
-                                           prices=pd.Series([1, 1, 1, 1]))
+                                           positions=positions,
+                                           prices=prices,
+                                           )
     results = list(holdings)
-    expected_results = [0.9, 0.0, 0.9, 1.8]
+    expected_results = [0.09000000000000001, 0.18000000000000002, 0.27, 0.36000000000000004]
+
+    print("\nTest result is {}".format(results))
+    print("Expected result is {}".format(expected_results))
+    assert is_equal(results, expected_results)
+
+
+def test__compute_cash():
+    cash = Portfolio._compute_cash(initial_capital=5.0,
+                                   positions_diff=positions.diff(),
+                                   prices=prices)
+    results = list(cash)
+    expected_results = list(5.0 - np.ndarray([0.09000000000000001, 0.18000000000000002, 0.27, 0.36000000000000004]))
 
     print("\nTest result is {}".format(results))
     print("Expected result is {}".format(expected_results))

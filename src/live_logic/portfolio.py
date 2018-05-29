@@ -79,7 +79,7 @@ class Portfolio(SaveLoadMixin):
         return (positions * prices * (1 - fees)).cumsum(axis=0)
 
     @staticmethod
-    def _compute_cash(initial_capital: float, positions_diff: pd.Series, prices):
+    def _compute_cash(initial_capital: float, positions_diff: pd.Series, prices: pd.Series):
         return initial_capital - (positions_diff * prices).cumsum()
 
     @staticmethod
