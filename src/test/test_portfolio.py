@@ -54,11 +54,11 @@ def test_portfolio_holdings():
 
 
 def test__compute_holdings():
-    holdings = Portfolio._compute_holdings(fees=0.00,
+    holdings = Portfolio._compute_holdings(fees=0.1,
                                            positions=pd.Series([1, -1, 1, 1]),
                                            prices=pd.Series([1, 1, 1, 1]))
     results = list(holdings)
-    expected_results = [1.0, 0.0, 1.0, 2.0]
+    expected_results = [0.9, 0.0, 0.9, 1.8]
 
     print("\nTest result is {}".format(results))
     print("Expected result is {}".format(expected_results))
