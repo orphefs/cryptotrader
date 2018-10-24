@@ -3,7 +3,7 @@ import os
 from src import definitions
 
 
-class SaveLoadMixin:
+class DillSaveLoadMixin:
     def save_to_disk(self, path_to_file: str):
         with open(os.path.join(definitions.DATA_DIR, path_to_file), 'wb') as outfile:
             dill.dump(self, outfile)

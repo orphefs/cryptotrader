@@ -15,9 +15,9 @@ class _TradingSignal(object):
         return type(self).__name__ + "({} at {})".format(self.signal, self.price_point)
 
     @staticmethod
-    def from_signal_integer(signal_integer: int, price_point: PricePoint):
-        cls = _signal_types[signal_integer]
-        return cls(signal_integer, price_point)
+    def from_integer_value(integer_value: int, price_point: PricePoint):
+        cls = _signal_types[integer_value]
+        return cls(integer_value, price_point)
 
 
 class Buy(_TradingSignal):

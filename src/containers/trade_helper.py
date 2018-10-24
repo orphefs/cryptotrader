@@ -12,6 +12,6 @@ def generate_trading_signals_from_array(signals: List[int], stock_data: StockDat
 
 
 def generate_trading_signal_from_prediction(prediction: int, candle: Candle):
-    return _TradingSignal.from_signal_integer(signal_integer=prediction,
-                                              price_point=PricePoint(value=candle.get_close_price(),
-                                                                     date_time=candle.get_close_time_as_datetime()))
+    return _TradingSignal.from_integer_value(integer_value=prediction,
+                                             price_point=PricePoint(value=candle.get_close_price(),
+                                                                    date_time=candle.get_close_time_as_datetime()))

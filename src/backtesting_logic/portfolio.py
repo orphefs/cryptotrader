@@ -3,7 +3,7 @@ from typing import List
 
 import pandas as pd
 
-from backtesting_logic.logic import _TradingSignal
+from src.backtesting_logic.logic import _TradingSignal
 from src.containers.stock_data import StockData
 
 
