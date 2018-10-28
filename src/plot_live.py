@@ -2,9 +2,9 @@ import os
 
 from matplotlib import pyplot as plt
 
-import definitions
-from live_logic.portfolio import Portfolio
-from plotting.plot_candles import custom_plot
+import src.definitions as definitions
+from src.live_logic.portfolio import Portfolio
+from src.plotting.plot_candles import custom_plot
 
 
 def postprocess():
@@ -16,6 +16,7 @@ def postprocess():
     print(portfolio._point_stats['total_pct_change'])
 
     plt.show()
+
 
 if __name__ == '__main__':
     postprocess()
