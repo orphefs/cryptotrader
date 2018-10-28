@@ -1,15 +1,18 @@
+import os
 from collections import defaultdict
 from typing import Union
 
 import pandas as pd
 
+from src import definitions
 from src.backtesting_logic.logic import Buy, Sell, Hold
 from src.containers.data_point import PricePoint
 from src.mixins.save_load_mixin import DillSaveLoadMixin
 
+percentage = float
+
 
 class Portfolio(DillSaveLoadMixin):
-
     def __init__(self, initial_capital: float, trade_amount: int):
         self._fees = 0.001  # 0.1% on binance
         self._trade_amount = trade_amount
@@ -98,6 +101,9 @@ class Portfolio(DillSaveLoadMixin):
             self._append_to_positions(signal.price_point.date_time, quantity, price_point.value)
         if isinstance(signal, Hold):
             self._append_to_positions(signal.price_point.date_time, 0.0, price_point.value)
+
+    def convert_to_csv(self):
+        self._portfolio_df.to_csv(os.path.join(definitions.DATA_DIR, "portfolio.csv"))
 
     def __str__(self):
         return "Trade Amount: {}, \n" \
