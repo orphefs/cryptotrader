@@ -94,7 +94,10 @@ class LiveRunner(DillSaveLoadMixin):
         self._portfolio.save_to_disk(os.path.join(definitions.DATA_DIR, "portfolio_df.dill"))
 
     def _download_candle(self) -> Candle:
-        return download_live_data(self._client, self._trading_pair, self._kline_interval, 30)[-1]
+        if self._run_type == "live":
+            return download_live_data(self._client, self._trading_pair, self._kline_interval, 30)[-1]
+        elif self._run_type == "mock":
+            return self._mock_download_candle_for_current_iteration()
 
     def _mock_download_candle_for_current_iteration(self) -> Candle:
         return download_save_load(TimeWindow(start_time=datetime(2018, 5, 2), end_time=datetime(2018, 5, 3)),
@@ -114,6 +117,7 @@ class LiveRunner(DillSaveLoadMixin):
         self._iteration_number = 1
         logger.debug("Waiting threshold between decisions is {}".format(self._waiting_threshold))
         while self._is_check_condition():
+
             self._current_candle = self._download_candle()
 
             logger.debug("Current candle time: {}".format(self._current_candle.get_close_time_as_datetime()))
@@ -171,7 +175,7 @@ class live_runner:
 
 
 def main():
-    with live_runner("XRPBTC", 100, "live") as lr:
+    with live_runner("XRPBTC", 100, "mock") as lr:
         lr.run()
 
 
