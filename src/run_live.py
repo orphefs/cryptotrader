@@ -30,8 +30,8 @@ logger = logging.getLogger('cryptotrader_api')
 
 
 def is_time_difference_larger_than_threshold(current_candle: Candle, previous_candle: Candle, threshold: timedelta,
-                                             time_callback: Callable):
-    return time_callback(current_candle) - time_callback(previous_candle) > threshold
+                                             time_getter_callback: Callable):
+    return time_getter_callback(current_candle) - time_getter_callback(previous_candle) > threshold
 
 
 def postprocess():
@@ -128,7 +128,7 @@ class LiveRunner(DillSaveLoadMixin):
 
             if is_time_difference_larger_than_threshold(self._current_candle, self._previous_candle,
                                                         self._waiting_threshold,
-                                                        Candle.get_close_time_as_datetime):
+                                                        time_getter_callback=Candle.get_close_time_as_datetime):
                 logger.info("Registering candle: {}".format(self._current_candle))
                 self._classifier.append_new_candle(self._current_candle)
                 prediction = self._classifier.predict_one(self._current_candle)
@@ -188,3 +188,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
