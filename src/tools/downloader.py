@@ -52,13 +52,13 @@ def load_from_disk(path_to_file: str) -> StockData:
 
 # def replace_spaces_with_underscores(s: str) -> str:
 
-def generate_file_name(time_window: TimeWindow, security: Security) -> str:
+def generate_file_name(time_window: TimeWindow, security: Security, api_interval_callback: str) -> str:
     return ('local_data_' + time_window.start_time.as_string().replace(" ", "_") + '_' +
-            time_window.end_time.as_string().replace(" ", "_") + '_' + security + ".dill").replace(" ", "_")
+            time_window.end_time.as_string().replace(" ", "_") + '_' + security + '_' + api_interval_callback + ".dill").replace(" ", "_")
 
 
-def download_save_load(time_window: TimeWindow, security: str, api_interval_callback: str):
-    path_to_file = os.path.join(definitions.DATA_DIR, generate_file_name(time_window, security))
+def load_stock_data(time_window: TimeWindow, security: str, api_interval_callback: str):
+    path_to_file = os.path.join(definitions.DATA_DIR, generate_file_name(time_window, security, api_interval_callback))
     if os.path.isfile(path_to_file):
         stock_data = load_from_disk(path_to_file)
     else:

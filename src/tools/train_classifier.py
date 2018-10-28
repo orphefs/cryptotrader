@@ -24,7 +24,7 @@ from src.mixins.save_load_mixin import DillSaveLoadMixin
 from src.plotting.plot_candles import custom_plot
 from src.tools.classifier_helpers import extract_indicators_from_stock_data, \
     get_training_labels, convert_to_pandas, extract_indicator_from_candle
-from src.tools.downloader import download_save_load
+from src.tools.downloader import load_stock_data
 
 
 class TradingClassifier(DillSaveLoadMixin):
@@ -161,10 +161,10 @@ def main():
         end_time=datetime(2018, 5, 11)
     )
 
-    stock_data_training_set = download_save_load(training_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
+    stock_data_training_set = load_stock_data(training_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
     testing_time_window = TimeWindow(start_time=datetime(2018, 9, 2), end_time=datetime(2018, 9, 5))
 
-    stock_data_testing_set = download_save_load(testing_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
+    stock_data_testing_set = load_stock_data(testing_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
 
     list_of_technical_indicators = [
         AutoCorrelationTechnicalIndicator(Candle.get_volume, 24),
@@ -219,7 +219,7 @@ def run_trained_classifier():
     testing_time_window = TimeWindow(start_time=datetime(2018, 5, 2), end_time=datetime(2018, 5, 3))
 
     trading_pair = "XRPBTC"
-    stock_data_testing_set = download_save_load(testing_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
+    stock_data_testing_set = load_stock_data(testing_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
 
     parameters = LiveParameters(
         update_period=timedelta(minutes=1),

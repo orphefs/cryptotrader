@@ -19,7 +19,7 @@ from src.live_logic.parameters import LiveParameters
 from src.live_logic.portfolio import Portfolio
 from src.mixins.save_load_mixin import DillSaveLoadMixin
 from src.plotting.plot_candles import custom_plot
-from src.tools.downloader import download_live_data, download_save_load
+from src.tools.downloader import download_live_data, load_stock_data
 from src.tools.train_classifier import TradingClassifier, generate_predicted_portfolio
 import sys
 
@@ -100,12 +100,12 @@ class LiveRunner(DillSaveLoadMixin):
             return self._mock_download_candle_for_current_iteration()
 
     def _mock_download_candle_for_current_iteration(self) -> Candle:
-        return download_save_load(TimeWindow(start_time=datetime(2018, 5, 2), end_time=datetime(2018, 5, 3)),
-                                  self._trading_pair, self._kline_interval).candles[self._iteration_number]
+        return load_stock_data(TimeWindow(start_time=datetime(2018, 5, 2), end_time=datetime(2018, 5, 3)),
+                               self._trading_pair, self._kline_interval).candles[self._iteration_number]
 
     def _mock_download_stock_data_for_all_iterations(self) -> StockData:
-        return download_save_load(TimeWindow(start_time=datetime(2018, 5, 2), end_time=datetime(2018, 5, 3)),
-                                  self._trading_pair, self._kline_interval)
+        return load_stock_data(TimeWindow(start_time=datetime(2018, 5, 2), end_time=datetime(2018, 5, 3)),
+                               self._trading_pair, self._kline_interval)
 
     def _is_check_condition(self):
         if self._run_type == "mock":
