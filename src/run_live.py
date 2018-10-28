@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 import time
 from datetime import timedelta, datetime
 from typing import Callable
@@ -21,7 +22,6 @@ from src.mixins.save_load_mixin import DillSaveLoadMixin
 from src.plotting.plot_candles import custom_plot
 from src.tools.downloader import download_live_data, load_stock_data
 from src.tools.train_classifier import TradingClassifier, generate_predicted_portfolio
-import sys
 
 logging.basicConfig(
     # filename=os.path.join(definitions.DATA_DIR, 'local_autotrader.log'),
@@ -49,7 +49,9 @@ def get_capital_from_account(capital_security: str) -> float:
 
 
 class LiveRunner(DillSaveLoadMixin):
-    def __init__(self, trading_pair: str, trade_amount: int, run_type: str):
+    def __init__(self, trading_pair: str, trade_amount: float, run_type: str,
+                 mock_data_start_time: datetime,
+                 mock_data_stop_time: datetime):
         self._trading_pair = trading_pair
         self._trade_amount = trade_amount
         self._run_type = run_type
@@ -64,6 +66,8 @@ class LiveRunner(DillSaveLoadMixin):
         self._iteration_number = None
         self._client = Client("", "")
         self._kline_interval = Client.KLINE_INTERVAL_1MINUTE
+        self._mock_data_start_time = mock_data_start_time
+        self._mock_data_stop_time = mock_data_stop_time
         self._parameters = LiveParameters(
             update_period=timedelta(hours=1),
             trade_amount=100,
@@ -100,11 +104,11 @@ class LiveRunner(DillSaveLoadMixin):
             return self._mock_download_candle_for_current_iteration()
 
     def _mock_download_candle_for_current_iteration(self) -> Candle:
-        return load_stock_data(TimeWindow(start_time=datetime(2018, 5, 2), end_time=datetime(2018, 5, 3)),
+        return load_stock_data(TimeWindow(start_time=self._mock_data_start_time, end_time=self._mock_data_stop_time),
                                self._trading_pair, self._kline_interval).candles[self._iteration_number]
 
     def _mock_download_stock_data_for_all_iterations(self) -> StockData:
-        return load_stock_data(TimeWindow(start_time=datetime(2018, 5, 2), end_time=datetime(2018, 5, 3)),
+        return load_stock_data(TimeWindow(start_time=self._mock_data_start_time, end_time=self._mock_data_stop_time),
                                self._trading_pair, self._kline_interval)
 
     def _is_check_condition(self):
@@ -156,8 +160,9 @@ class LiveRunner(DillSaveLoadMixin):
 
 
 class live_runner:
-    def __init__(self, trading_pair: str, trade_amount: float, run_type: str):
-        self._live_runner = LiveRunner(trading_pair, trade_amount, run_type)
+    def __init__(self, trading_pair: str, trade_amount: float, run_type: str, mock_data_start_time: datetime,
+                 mock_data_stop_time: datetime):
+        self._live_runner = LiveRunner(trading_pair, trade_amount, run_type, mock_data_start_time, mock_data_stop_time)
 
     def __enter__(self):
         self._live_runner.initialize()
@@ -175,7 +180,9 @@ class live_runner:
 
 
 def main():
-    with live_runner("XRPBTC", 100, "mock") as lr:
+    with live_runner("XRPBTC", 100, "mock",
+                     mock_data_start_time=datetime(2018, 5, 1),
+                     mock_data_stop_time=datetime(2018, 5, 2)) as lr:
         lr.run()
 
 
