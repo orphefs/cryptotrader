@@ -162,7 +162,7 @@ def main():
     )
 
     stock_data_training_set = download_save_load(training_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
-    testing_time_window = TimeWindow(start_time=datetime(2018, 5, 2), end_time=datetime(2018, 5, 3))
+    testing_time_window = TimeWindow(start_time=datetime(2018, 9, 2), end_time=datetime(2018, 9, 5))
 
     stock_data_testing_set = download_save_load(testing_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
 
