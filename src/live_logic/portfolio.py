@@ -22,7 +22,8 @@ class Portfolio(DillSaveLoadMixin):
         self._positions_df = pd.DataFrame(columns=['intended_trade_time',
                                                    'amount_traded', 'actual_price', 'intended_price'])
         self._positions = defaultdict(list)
-        self._portfolio_df = pd.DataFrame(columns=['holdings', 'cash', 'returns', 'total'])
+        self._portfolio_df = pd.DataFrame(columns=['order_expenditure', 'cumulative_order_expenditure',
+                                                   'remaining_capital'])
         self._point_stats = {}
 
     @property
@@ -48,24 +49,23 @@ class Portfolio(DillSaveLoadMixin):
         self._positions_df['amount_traded'] = self._positions['amount_traded']
         self._positions_df['actual_price'] = self._positions['actual_price']
 
-        self._portfolio_df['holdings'] = self._compute_holdings(fees=self._fees,
+        self._portfolio_df['order_expenditure'] = self._compute_order_expenditure(fees=self._fees,
                                                                 positions=self._positions_df['amount_traded'],
                                                                 prices=self._positions_df['actual_price'])
 
-        self._portfolio_df['cash'] = self._compute_cash(initial_capital=self._initial_capital,
-                                                        positions_diff=self._positions_df['amount_traded'].diff(),
-                                                        prices=self._positions_df['actual_price'])
+        self._portfolio_df['cumulative_order_expenditure'] = self._compute_cumulative_order_expenditure(
+            self._portfolio_df['order_expenditure'])
 
-        self._portfolio_df['total'] = self._compute_total(
-            cash=self._portfolio_df['cash'],
-            holdings=self._portfolio_df['holdings'])
+        self._portfolio_df['remaining_capital'] = self._compute_remaining_capital(
+            initial_capital=self._initial_capital,
+            cumulative_order_expenditure=self._portfolio_df['cumulative_order_expenditure']
+        )
 
-        self._portfolio_df['returns'] = self._compute_returns(total_earnings=self._portfolio_df['total'])
 
         self._point_stats['base_index_pct_change'] = (self._positions_df['actual_price'][-1] -
                                                       self._positions_df['actual_price'][0]) / \
                                                      self._positions_df['actual_price'][0]
-        self._point_stats['total_pct_change'] = (self._portfolio_df['total'][-1] -
+        self._point_stats['total_pct_change'] = (self._portfolio_df['remaining_capital'][-1] -
                                                  self._initial_capital) / self._initial_capital
 
     def _append_to_positions(self, trade_time, amount, price):
@@ -74,25 +74,17 @@ class Portfolio(DillSaveLoadMixin):
         self._positions['actual_price'].append(price)
 
     @staticmethod
-    def _differentiate_positions(positions: pd.Series) -> pd.Series:
-        return positions.diff()
+    def _compute_remaining_capital(initial_capital: float, cumulative_order_expenditure: pd.Series) -> pd.Series:
+        return initial_capital - cumulative_order_expenditure
 
     @staticmethod
-    def _compute_holdings(fees: float, positions: pd.Series, prices: pd.Series) -> pd.Series:
-        return (positions * prices * (1 - fees)).cumsum(axis=0)
+    def _compute_order_expenditure(fees: float, positions: pd.Series,
+                                    prices: pd.Series) -> pd.Series:
+        return positions.multiply(prices)
 
     @staticmethod
-    def _compute_cash(initial_capital: float, positions_diff: pd.Series, prices: pd.Series):
-        return initial_capital - (positions_diff * prices).cumsum()
-
-    @staticmethod
-    def _compute_total(cash: pd.Series, holdings: pd.Series) -> pd.Series:
-        return cash + holdings
-
-    @staticmethod
-    def _compute_returns(total_earnings: pd.Series) -> pd.Series:
-        returns = total_earnings.pct_change()
-        return returns
+    def _compute_cumulative_order_expenditure(order_expenditures: pd.Series) -> pd.Series:
+        return order_expenditures.cumsum()
 
     def _place_order(self, signal: Union[Buy, Sell, Hold], quantity: int, price_point: PricePoint):
         if isinstance(signal, Buy):
