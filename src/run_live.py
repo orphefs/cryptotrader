@@ -24,8 +24,10 @@ from src.tools.downloader import download_live_data, load_stock_data
 from src.tools.train_classifier import TradingClassifier, generate_predicted_portfolio
 
 logging.basicConfig(
-    # filename=os.path.join(definitions.DATA_DIR, 'local_autotrader.log'),
-    level=logging.DEBUG, stream=sys.stdout)
+    filename=os.path.join(definitions.DATA_DIR, 'local_autotrader.log'),
+    # stream=sys.stdout,
+    level=logging.INFO,
+)
 logger = logging.getLogger('cryptotrader_api')
 
 
@@ -70,7 +72,7 @@ class LiveRunner(DillSaveLoadMixin):
         self._mock_data_stop_time = mock_data_stop_time
         self._parameters = LiveParameters(
             update_period=timedelta(hours=1),
-            trade_amount=100,
+            trade_amount=self._trade_amount,
             # sleep_time=update_interval_mappings[self._kline_interval].total_seconds(),
             sleep_time=0.01,
         )
@@ -180,7 +182,7 @@ class live_runner:
 
 
 def main():
-    with live_runner("XRPBTC", 100, "mock",
+    with live_runner("XRPBTC", 1000, "mock",
                      mock_data_start_time=datetime(2018, 5, 1),
                      mock_data_stop_time=datetime(2018, 5, 2)) as lr:
         lr.run()

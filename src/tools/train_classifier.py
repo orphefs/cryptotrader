@@ -68,7 +68,6 @@ class TradingClassifier(DillSaveLoadMixin):
 
     def predict_one(self, candle: Candle):
         if self._is_candles_requirement_satisfied:
-            print(candle)
             testing_data = extract_indicator_from_candle(candle, self._list_of_technical_indicators)
             predictors, _ = convert_to_pandas(predictors=testing_data, labels=None)
             predicted_values = self._sklearn_classifier.predict(predictors)
@@ -158,7 +157,7 @@ def main():
 
     training_time_window = TimeWindow(
         start_time=datetime(2018, 5, 10),
-        end_time=datetime(2018, 5, 11)
+        end_time=datetime(2018, 5, 13)
     )
 
     stock_data_training_set = load_stock_data(training_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
@@ -216,7 +215,7 @@ def main():
 
 
 def run_trained_classifier():
-    testing_time_window = TimeWindow(start_time=datetime(2018, 5, 2), end_time=datetime(2018, 5, 3))
+    testing_time_window = TimeWindow(start_time=datetime(2018, 5, 2), end_time=datetime(2018, 5, 5))
 
     trading_pair = "XRPBTC"
     stock_data_testing_set = load_stock_data(testing_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)

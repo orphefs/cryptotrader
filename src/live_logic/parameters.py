@@ -10,7 +10,7 @@ class Parameters:
 
 class LiveParameters(Parameters):
     def __init__(self, update_period: timedelta,
-                 trade_amount: int,
+                 trade_amount: float,
                  sleep_time: float):
         self.update_period = update_period
         self.trade_amount = trade_amount
