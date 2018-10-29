@@ -1,6 +1,5 @@
 import logging
 import os
-import sys
 import time
 from datetime import timedelta, datetime
 from typing import Callable
@@ -182,12 +181,13 @@ class live_runner:
 
 
 def main():
-    with live_runner("XRPBTC", 1000, "mock",
-                     mock_data_start_time=datetime(2018, 5, 1),
-                     mock_data_stop_time=datetime(2018, 5, 2)) as lr:
+    with live_runner(trading_pair="NEOBTC",
+                     trade_amount=50,
+                     run_type="mock",
+                     mock_data_start_time=datetime(2018, 10, 1),
+                     mock_data_stop_time=datetime(2018, 10, 2)) as lr:
         lr.run()
 
 
 if __name__ == '__main__':
     main()
-
