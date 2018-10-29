@@ -153,10 +153,10 @@ def generate_all_signals_at_once(stock_data_testing_set, classifier, predicted_p
 
 
 def main():
-    trading_pair = "XRPBTC"
+    trading_pair = "NEOBTC"
 
     training_time_window = TimeWindow(
-        start_time=datetime(2018, 5, 10),
+        start_time=datetime(2018, 5, 1),
         end_time=datetime(2018, 5, 13)
     )
 
@@ -172,30 +172,26 @@ def main():
         PPOTechnicalIndicator(Candle.get_close_price, 5, 1),
         PPOTechnicalIndicator(Candle.get_close_price, 10, 4),
         PPOTechnicalIndicator(Candle.get_close_price, 20, 1),
-        PPOTechnicalIndicator(Candle.get_close_price, 30, 10),
-        PPOTechnicalIndicator(Candle.get_number_of_trades, 5, 1),
-        PPOTechnicalIndicator(Candle.get_number_of_trades, 10, 2),
-        PPOTechnicalIndicator(Candle.get_number_of_trades, 15, 3),
-        PPOTechnicalIndicator(Candle.get_number_of_trades, 20, 1) / PPOTechnicalIndicator(Candle.get_volume, 20, 5),
-        PPOTechnicalIndicator(Candle.get_volume, 5, 1),
+        # PPOTechnicalIndicator(Candle.get_close_price, 30, 10),
+        # PPOTechnicalIndicator(Candle.get_number_of_trades, 5, 1),
+        # PPOTechnicalIndicator(Candle.get_number_of_trades, 10, 2),
+        # PPOTechnicalIndicator(Candle.get_number_of_trades, 15, 3),
+        # PPOTechnicalIndicator(Candle.get_number_of_trades, 20, 1) / PPOTechnicalIndicator(Candle.get_volume, 20, 5),
+        # PPOTechnicalIndicator(Candle.get_volume, 5, 1),
     ]
     sklearn_classifier = RandomForestClassifier(n_estimators=100, criterion="entropy", class_weight="balanced")
-
     training_ratio = 0.5  # this is not enabled
-    # TODO: rename variable "security" to "trading pair"
     my_classifier = TradingClassifier(trading_pair, list_of_technical_indicators,
                                       sklearn_classifier, training_ratio)
     my_classifier.train(stock_data_training_set)
     my_classifier.save_to_disk(os.path.join(definitions.DATA_DIR, "classifier.dill"))
 
     # predictions = my_classifier.predict(stock_data_testing_set, list_of_technical_indicators)
-
     parameters = LiveParameters(
         update_period=timedelta(minutes=1),
         trade_amount=100,
         sleep_time=0
     )
-
     # stock_data_testing_set = stock_data_training_set
 
     initial_capital = 5
