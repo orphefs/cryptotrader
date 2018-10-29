@@ -21,10 +21,11 @@ from src.mixins.save_load_mixin import DillSaveLoadMixin
 from src.plotting.plot_candles import custom_plot
 from src.tools.downloader import download_live_data, load_stock_data
 from src.tools.train_classifier import TradingClassifier, generate_predicted_portfolio
+import sys
 
 logging.basicConfig(
-    filename=os.path.join(definitions.DATA_DIR, 'local_autotrader.log'),
-    # stream=sys.stdout,
+    # filename=os.path.join(definitions.DATA_DIR, 'local_autotrader.log'),
+    stream=sys.stdout,
     level=logging.INFO,
 )
 logger = logging.getLogger('cryptotrader_api')
@@ -183,9 +184,10 @@ class live_runner:
 def main():
     with live_runner(trading_pair="NEOBTC",
                      trade_amount=50,
-                     run_type="mock",
+                     run_type="live",
                      mock_data_start_time=datetime(2018, 10, 1),
-                     mock_data_stop_time=datetime(2018, 10, 2)) as lr:
+                     mock_data_stop_time=datetime(2018, 10, 2)
+                     ) as lr:
         lr.run()
 
 
