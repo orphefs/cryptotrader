@@ -45,7 +45,7 @@ def update_portfolio(portfolio: Portfolio):
     pass
 
 
-def calculate_performance(portfolio: Portfolio)
+def calculate_performance(portfolio: Portfolio):
     pass
 
 
