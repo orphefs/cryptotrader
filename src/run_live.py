@@ -106,11 +106,13 @@ class LiveRunner(DillSaveLoadMixin):
             return self._mock_download_candle_for_current_iteration()
 
     def _mock_download_candle_for_current_iteration(self) -> Candle:
-        return load_stock_data(TimeWindow(start_time=self._mock_data_start_time, end_time=self._mock_data_stop_time),
+        return load_stock_data(TimeWindow(start_time=self._mock_data_start_time,
+                                          end_time=self._mock_data_stop_time),
                                self._trading_pair, self._kline_interval).candles[self._iteration_number]
 
     def _mock_download_stock_data_for_all_iterations(self) -> StockData:
-        return load_stock_data(TimeWindow(start_time=self._mock_data_start_time, end_time=self._mock_data_stop_time),
+        return load_stock_data(TimeWindow(start_time=self._mock_data_start_time,
+                                          end_time=self._mock_data_stop_time),
                                self._trading_pair, self._kline_interval)
 
     def _is_check_condition(self):
@@ -184,9 +186,9 @@ class live_runner:
 def main():
     with live_runner(trading_pair="NEOBTC",
                      trade_amount=50,
-                     run_type="live",
-                     mock_data_start_time=datetime(2018, 10, 1),
-                     mock_data_stop_time=datetime(2018, 10, 2)
+                     run_type="mock",
+                     mock_data_start_time=datetime(2018, 10, 28),
+                     mock_data_stop_time=datetime(2018, 10, 30)
                      ) as lr:
         lr.run()
 
