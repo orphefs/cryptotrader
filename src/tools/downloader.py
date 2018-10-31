@@ -9,19 +9,28 @@ from src import definitions
 from src.containers.candle import Candle
 from src.containers.stock_data import StockData
 from src.containers.time_series import TimeSeries
-from src.containers.time_windows import TimeWindow
+from src.containers.time_windows import TimeWindow, Date
 from src.type_aliases import Security
-
+import copy
 
 def calculate_sampling_rate_of_stock_data(stock_data: StockData) -> float:
     return TimeSeries(x=[candle.get_close_time_as_datetime() for candle in stock_data.candles],
                       y=[candle.get_close_price() for candle in stock_data.candles]).sampling_rate
 
 
+def finetune_time_window(candles: List[Candle], time_window: TimeWindow):
+    datetimes = [candle.get_close_time_as_datetime() for candle in candles]
+    datetimes2 = [datetime for datetime in
+                  datetimes if time_window.start_datetime <  datetime < time_window.end_datetime]
+    return candles
+
+
 def download_backtesting_data(time_window: TimeWindow, security: Security, api_interval_callback: str) -> List[Candle]:
     client = Client("", "")
-    klines = client.get_historical_klines(security, api_interval_callback, time_window.start_time.as_string(),
-                                          time_window.end_time.as_string())
+    klines = client.get_historical_klines(security, api_interval_callback,
+                                          Date(time_window.start_datetime).as_string(),
+                                          Date(time_window.end_datetime).as_string())
+
     return Candle.from_list_of_klines(klines)
 
 
@@ -53,8 +62,8 @@ def load_from_disk(path_to_file: str) -> StockData:
 # def replace_spaces_with_underscores(s: str) -> str:
 
 def generate_file_name(time_window: TimeWindow, security: Security, api_interval_callback: str) -> str:
-    return ('local_data_' + time_window.start_time.as_string().replace(" ", "_") + '_' +
-            time_window.end_time.as_string().replace(" ", "_") + '_' + security + '_' + api_interval_callback + ".dill").replace(" ", "_")
+    return ('local_data_' + Date(time_window.start_datetime).as_string().replace(" ", "_") + '_' +
+            Date(time_window.end_datetime).as_string().replace(" ", "_") + '_' + security + '_' + api_interval_callback + ".dill").replace(" ", "_")
 
 
 def load_stock_data(time_window: TimeWindow, security: str, api_interval_callback: str):
@@ -63,7 +72,9 @@ def load_stock_data(time_window: TimeWindow, security: str, api_interval_callbac
         stock_data = load_from_disk(path_to_file)
     else:
         start = datetime.now()
-        candles = download_backtesting_data(time_window, security, api_interval_callback)
+        extended_time_window = copy.deepcopy(time_window).increment_end_time_by_one_day().decrement_start_time_by_one_day()
+        candles = download_backtesting_data(extended_time_window, security, api_interval_callback)
+        candles = finetune_time_window(candles, time_window)
         stop = datetime.now()
         print("Elapsed download time: {}".format(stop - start))
         for candle in candles:
