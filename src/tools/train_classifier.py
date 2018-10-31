@@ -166,12 +166,12 @@ def main():
     stock_data_testing_set = load_stock_data(testing_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
 
     list_of_technical_indicators = [
-        AutoCorrelationTechnicalIndicator(Candle.get_volume, 24),
-        AutoCorrelationTechnicalIndicator(Candle.get_close_price, 4),
+        # AutoCorrelationTechnicalIndicator(Candle.get_volume, 24),
+        # AutoCorrelationTechnicalIndicator(Candle.get_close_price, 4),
         AutoCorrelationTechnicalIndicator(Candle.get_close_price, 2),
-        PPOTechnicalIndicator(Candle.get_close_price, 5, 1),
-        PPOTechnicalIndicator(Candle.get_close_price, 10, 4),
-        PPOTechnicalIndicator(Candle.get_close_price, 20, 1),
+        # PPOTechnicalIndicator(Candle.get_close_price, 5, 1),
+        # PPOTechnicalIndicator(Candle.get_close_price, 10, 4),
+        # PPOTechnicalIndicator(Candle.get_close_price, 20, 1),
         # PPOTechnicalIndicator(Candle.get_close_price, 30, 10),
         # PPOTechnicalIndicator(Candle.get_number_of_trades, 5, 1),
         # PPOTechnicalIndicator(Candle.get_number_of_trades, 10, 2),
