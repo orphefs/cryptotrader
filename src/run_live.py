@@ -26,7 +26,7 @@ import sys
 logging.basicConfig(
     # filename=os.path.join(definitions.DATA_DIR, 'local_autotrader.log'),
     stream=sys.stdout,
-    level=logging.INFO,
+    level=logging.DEBUG,
 )
 logger = logging.getLogger('cryptotrader_api')
 
