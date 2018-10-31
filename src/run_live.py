@@ -20,13 +20,14 @@ from src.live_logic.portfolio import Portfolio
 from src.mixins.save_load_mixin import DillSaveLoadMixin
 from src.plotting.plot_candles import custom_plot
 from src.tools.downloader import download_live_data, load_stock_data
+from src.tools.run_metadata import RunMetaData
 from src.tools.train_classifier import TradingClassifier, generate_predicted_portfolio
 import sys
 
 logging.basicConfig(
     # filename=os.path.join(definitions.DATA_DIR, 'local_autotrader.log'),
     stream=sys.stdout,
-    level=logging.DEBUG,
+    level=logging.INFO,
 )
 logger = logging.getLogger('cryptotrader_api')
 
@@ -50,7 +51,7 @@ def get_capital_from_account(capital_security: str) -> float:
     return 5.0
 
 
-class LiveRunner(DillSaveLoadMixin):
+class Runner(DillSaveLoadMixin):
     def __init__(self, trading_pair: str, trade_amount: float, run_type: str,
                  mock_data_start_time: datetime,
                  mock_data_stop_time: datetime):
@@ -70,11 +71,13 @@ class LiveRunner(DillSaveLoadMixin):
         self._kline_interval = Client.KLINE_INTERVAL_1MINUTE
         self._mock_data_start_time = mock_data_start_time
         self._mock_data_stop_time = mock_data_stop_time
+        self._run_metadata = RunMetaData(trading_pair=self._trading_pair,
+                                         trade_amount=self._trade_amount)
         self._parameters = LiveParameters(
             update_period=timedelta(hours=1),
             trade_amount=self._trade_amount,
             # sleep_time=update_interval_mappings[self._kline_interval].total_seconds(),
-            sleep_time=0.01,
+            sleep_time=2,
         )
         self._portfolio = Portfolio(initial_capital=get_capital_from_account(capital_security=None),
                                     trade_amount=self._parameters.trade_amount)
@@ -92,11 +95,18 @@ class LiveRunner(DillSaveLoadMixin):
         # self._classifier._maximum_lag
         self._previous_candle = instantiate_1970_candle()
         self._start_time = datetime.now()
+        self._run_metadata.start_time = self._start_time
+        self._run_metadata.save_to_disk("run_metadata.dill")
+
 
     def shutdown(self):
         """Should be called by the resource manager class"""
         self._stop_time = datetime.now()
-        self.save_to_disk("latest_run_live.dill")
+        self._run_metadata.stop_time = self._stop_time
+        self._run_metadata.stop_candle = self._current_candle
+        self._run_metadata.save_to_disk("run_metadata.dill")
+
+        self.save_to_disk("run.dill")
         self._portfolio.save_to_disk(os.path.join(definitions.DATA_DIR, "portfolio_df.dill"))
 
     def _download_candle(self) -> Candle:
@@ -105,15 +115,13 @@ class LiveRunner(DillSaveLoadMixin):
         elif self._run_type == "mock":
             return self._mock_download_candle_for_current_iteration()
 
-    def _mock_download_candle_for_current_iteration(self) -> Candle:
-        return load_stock_data(TimeWindow(start_time=self._mock_data_start_time,
-                                          end_time=self._mock_data_stop_time),
-                               self._trading_pair, self._kline_interval).candles[self._iteration_number]
-
     def _mock_download_stock_data_for_all_iterations(self) -> StockData:
         return load_stock_data(TimeWindow(start_time=self._mock_data_start_time,
                                           end_time=self._mock_data_stop_time),
                                self._trading_pair, self._kline_interval)
+
+    def _mock_download_candle_for_current_iteration(self) -> Candle:
+        return self._mock_download_stock_data_for_all_iterations().candles[self._iteration_number]
 
     def _is_check_condition(self):
         if self._run_type == "mock":
@@ -127,6 +135,8 @@ class LiveRunner(DillSaveLoadMixin):
         while self._is_check_condition():
 
             self._current_candle = self._download_candle()
+            if self._iteration_number == 1:
+                self._run_metadata.start_candle = self._current_candle
 
             logger.debug("Current candle time: {}".format(self._current_candle.get_close_time_as_datetime()))
 
@@ -149,8 +159,9 @@ class LiveRunner(DillSaveLoadMixin):
                         self._previous_signal = self._current_signal
                 self._previous_candle = self._current_candle
 
-            logger.debug("Going to sleep for {} seconds.".format(self._parameters.sleep_time))
-            time.sleep(self._parameters.sleep_time)
+            if self._run_type == "live":
+                logger.debug("Going to sleep for {} seconds.".format(self._parameters.sleep_time))
+                time.sleep(self._parameters.sleep_time)
             self._iteration_number += 1
             logger.debug("We are on the {}th iteration".format(self._iteration_number))
 
@@ -163,10 +174,12 @@ class LiveRunner(DillSaveLoadMixin):
         pass
 
 
-class live_runner:
-    def __init__(self, trading_pair: str, trade_amount: float, run_type: str, mock_data_start_time: datetime,
-                 mock_data_stop_time: datetime):
-        self._live_runner = LiveRunner(trading_pair, trade_amount, run_type, mock_data_start_time, mock_data_stop_time)
+class runner:
+    def __init__(self, trading_pair: str, trade_amount: float, run_type: str,
+                 mock_data_start_time: datetime = None,
+                 mock_data_stop_time: datetime = None,
+                 ):
+        self._live_runner = Runner(trading_pair, trade_amount, run_type, mock_data_start_time, mock_data_stop_time)
 
     def __enter__(self):
         self._live_runner.initialize()
@@ -174,8 +187,8 @@ class live_runner:
 
     def __exit__(self, exc_type, exc_value, traceback):
         if exc_type is not None:
-            traceback.print_exception(exc_type, exc_value, traceback)
             self._live_runner.shutdown()
+            traceback.print_exception(exc_type, exc_value, traceback)
             return self
 
     @property
@@ -184,12 +197,9 @@ class live_runner:
 
 
 def main():
-    with live_runner(trading_pair="NEOBTC",
-                     trade_amount=50,
-                     run_type="mock",
-                     mock_data_start_time=datetime(2018, 10, 28),
-                     mock_data_stop_time=datetime(2018, 10, 30)
-                     ) as lr:
+    with runner(trading_pair="NEOBTC",
+                trade_amount=50,
+                run_type="live") as lr:
         lr.run()
 
 
