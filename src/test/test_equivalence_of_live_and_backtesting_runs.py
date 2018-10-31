@@ -2,12 +2,12 @@
 import pytest
 
 from src.live_logic.portfolio import Portfolio
-from src.run_live import live_runner, LiveRunner
+from src.run_live import runner, Runner
 
 
 
 def get_backtesting_portfolio() -> Portfolio:
-    with live_runner("XRPBTC", 100) as lr:
+    with runner("XRPBTC", 100) as lr:
         lr.run_backtesting_batch()
         # portfolio = lr.portfolio
 
@@ -15,8 +15,8 @@ def get_backtesting_portfolio() -> Portfolio:
 
 
 def get_mock_live_run_portfolio() -> Portfolio:
-    lr = LiveRunner(trading_pair="XRPBTC",
-                    trade_amount=100)
+    lr = Runner(trading_pair="XRPBTC",
+                trade_amount=100)
     lr.initialize()
     lr.mock_run_live()
     lr.shutdown()
