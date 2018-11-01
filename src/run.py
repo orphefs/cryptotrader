@@ -25,8 +25,8 @@ from src.tools.run_metadata import RunMetaData
 from src.tools.train_classifier import TradingClassifier, generate_predicted_portfolio
 
 logging.basicConfig(
-    # filename=os.path.join(definitions.DATA_DIR, 'local_autotrader.log'),
-    stream=sys.stdout,
+    filename=os.path.join(definitions.DATA_DIR, 'local_autotrader.log'),
+    # stream=sys.stdout,
     level=logging.INFO,
 )
 logger = logging.getLogger('cryptotrader_api')
@@ -220,4 +220,5 @@ def run_mock():
 
 
 if __name__ == '__main__':
-    run_live()
+    run_mock()
+    #TODO: Handle situation where internet connection drops

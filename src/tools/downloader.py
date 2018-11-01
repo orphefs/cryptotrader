@@ -1,6 +1,6 @@
 import copy
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List, Tuple
 
 import dill
@@ -22,7 +22,9 @@ def calculate_sampling_rate_of_stock_data(stock_data: StockData) -> float:
 def finetune_time_window(candles: List[Candle], time_window: TimeWindow):
     new_candles = [candle for candle in
                    candles if
-                   time_window.start_datetime < candle.get_close_time_as_datetime() < time_window.end_datetime]
+                   time_window.start_datetime - timedelta(minutes=1)
+                   <= candle.get_close_time_as_datetime() <
+                   time_window.end_datetime + timedelta(minutes=1)]
     return new_candles
 
 
