@@ -37,15 +37,6 @@ def is_time_difference_larger_than_threshold(current_candle: Candle, previous_ca
     return time_getter_callback(current_candle) - time_getter_callback(previous_candle) > threshold
 
 
-def postprocess():
-    portfolio = Portfolio.load_from_disk(os.path.join(definitions.DATA_DIR, "portfolio_df.dill"))
-    portfolio.compute_performance()
-    custom_plot(portfolio)
-    print(portfolio._point_stats['base_index_pct_change'])
-    print(portfolio._point_stats['total_pct_change'])
-
-    plt.show()
-
 
 def get_capital_from_account(capital_security: str) -> float:
     return 5.0
@@ -220,5 +211,5 @@ def run_mock():
 
 
 if __name__ == '__main__':
-    run_mock()
+    run_live()
     #TODO: Handle situation where internet connection drops
