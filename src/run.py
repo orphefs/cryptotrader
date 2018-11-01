@@ -72,7 +72,8 @@ class Runner(DillSaveLoadMixin):
         self._mock_data_start_time = mock_data_start_time
         self._mock_data_stop_time = mock_data_stop_time
         self._run_metadata = RunMetaData(trading_pair=self._trading_pair,
-                                         trade_amount=self._trade_amount)
+                                         trade_amount=self._trade_amount,
+                                         run_type=self._run_type)
         self._parameters = LiveParameters(
             update_period=timedelta(hours=1),
             trade_amount=self._trade_amount,
@@ -219,4 +220,4 @@ def run_mock():
 
 
 if __name__ == '__main__':
-    run_mock()
+    run_live()
