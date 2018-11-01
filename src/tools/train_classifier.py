@@ -1,7 +1,6 @@
 import os
 from datetime import timedelta, datetime
 from typing import List, Union
-import simplejson as json
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -18,8 +17,7 @@ from src.containers.time_windows import TimeWindow
 from src.containers.trade_helper import generate_trading_signal_from_prediction, generate_trading_signals_from_array
 from src.live_logic.parameters import LiveParameters
 from src.live_logic.portfolio import Portfolio
-from src.live_logic.technical_indicator import TechnicalIndicator, AutoCorrelationTechnicalIndicator, \
-    PPOTechnicalIndicator
+from src.live_logic.technical_indicator import TechnicalIndicator, AutoCorrelationTechnicalIndicator
 from src.mixins.save_load_mixin import DillSaveLoadMixin
 from src.plotting.plot_candles import custom_plot
 from src.tools.classifier_helpers import extract_indicators_from_stock_data, \
@@ -68,6 +66,7 @@ class TradingClassifier(DillSaveLoadMixin):
 
     def predict_one(self, candle: Candle):
         if self._is_candles_requirement_satisfied:
+            print("Checkpoint........")
             testing_data = extract_indicator_from_candle(candle, self._list_of_technical_indicators)
             predictors, _ = convert_to_pandas(predictors=testing_data, labels=None)
             predicted_values = self._sklearn_classifier.predict(predictors)
@@ -82,15 +81,15 @@ class TradingClassifier(DillSaveLoadMixin):
         return "Trading Pair: {}, Technical Indicators: {}".format(self._stock_data_live.security,
                                                                    self._list_of_technical_indicators)
 
-    # def save_to_disk(self, path_to_file: str):
-    #     with open(os.path.join(definitions.DATA_DIR, path_to_file), 'wb') as outfile:
-    #         json.dump(self, outfile)
-    #
-    # @staticmethod
-    # def load_from_disk(path_to_file: str):
-    #     with open(os.path.join(definitions.DATA_DIR, path_to_file), 'rb') as outfile:
-    #         obj = json.load(outfile)
-    #     return obj
+        # def save_to_disk(self, path_to_file: str):
+        #     with open(os.path.join(definitions.DATA_DIR, path_to_file), 'wb') as outfile:
+        #         json.dump(self, outfile)
+        #
+        # @staticmethod
+        # def load_from_disk(path_to_file: str):
+        #     with open(os.path.join(definitions.DATA_DIR, path_to_file), 'rb') as outfile:
+        #         obj = json.load(outfile)
+        #     return obj
 
 
 def generate_reference_portfolio(initial_capital, parameters, stock_data_testing_set):
@@ -161,7 +160,7 @@ def main():
     )
 
     stock_data_training_set = load_stock_data(training_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
-    testing_time_window = TimeWindow(start_time=datetime(2018, 9, 2), end_time=datetime(2018, 9, 5))
+    testing_time_window = TimeWindow(start_time=datetime(2018, 9, 2), end_time=datetime(2018, 9, 3))
 
     stock_data_testing_set = load_stock_data(testing_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
 
@@ -257,5 +256,3 @@ def compute_confusion_matrix(training_signals: List[Union[Buy, Sell, Hold]],
 if __name__ == "__main__":
     main()
     # run_trained_classifier()
-
-

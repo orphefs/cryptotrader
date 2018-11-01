@@ -2,7 +2,7 @@
 import pytest
 
 from src.live_logic.portfolio import Portfolio
-from src.run_live import runner, Runner
+from src.run import runner, Runner
 
 
 

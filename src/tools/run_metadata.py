@@ -1,5 +1,7 @@
+import argparse
 import datetime
 import os
+from argparse import ArgumentParser
 
 from src.containers.candle import Candle
 from src.definitions import DATA_DIR
@@ -69,8 +71,10 @@ class RunMetaData(DillSaveLoadMixin):
     def stop_candle(self, stop_candle: datetime):
         self._stop_candle = stop_candle
 
-    def to_csv(self):
-        with open(os.path.join(DATA_DIR, "run_metadata.csv"), "w") as outfile:
+    def to_csv(self, path_to_metadata_csv: str = None):
+        if path_to_metadata_csv is None:
+            path_to_output = os.path.join(DATA_DIR, "run_metadata.csv")
+        with open(path_to_metadata_csv, "w") as outfile:
             outfile.write("trading_pair:" + str(self.trading_pair) + "\n")
             outfile.write("trade_amount:" + str(self.trade_amount) + "\n")
             outfile.write("start_time:" + str(self.start_time) + "\n")
@@ -78,6 +82,25 @@ class RunMetaData(DillSaveLoadMixin):
             outfile.write("start_candle:" + str(self.start_candle) + "\n")
             outfile.write("stop_candle:" + str(self.stop_candle) + "\n")
 
+
+def main(path_to_metadata_dill: str):
+    print(path_to_metadata_dill)
+    run_metadata = RunMetaData.load_from_disk(path_to_metadata_dill)
+    path_to_metadata_csv = os.path.join(os.path.split(path_to_metadata_dill)[0], "run_metadata.csv")
+    print("Output in {}".format(path_to_metadata_csv))
+    run_metadata.to_csv(path_to_metadata_csv)
+
+
+class FullPaths(argparse.Action):
+    """Expand user- and relative-paths"""
+    def __call__(self, parser, namespace, values, option_string=None):
+        setattr(namespace, self.dest, os.path.abspath(os.path.expanduser(values)))
+
+
 if __name__ == '__main__':
-    run_metadata = RunMetaData.load_from_disk(os.path.join(DATA_DIR, "run_metadata.dill"))
-    run_metadata.to_csv()
+    parser = ArgumentParser(description="Convert metadata dill into csv")
+    parser.add_argument("-i", dest="input_filename", required=False,
+                        help="input .dill", action = FullPaths)
+    args = parser.parse_args()
+    print("Input from {}".format(args.input_filename))
+    main(args.input_filename)

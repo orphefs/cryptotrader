@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 import time
 from datetime import timedelta, datetime
 from typing import Callable
@@ -13,7 +14,7 @@ from src.containers.candle import Candle, instantiate_1970_candle
 from src.containers.stock_data import StockData
 from src.containers.time_windows import TimeWindow
 from src.containers.trade_helper import generate_trading_signal_from_prediction
-from src.definitions import update_interval_mappings
+from src.definitions import update_interval_mappings, DATA_DIR
 from src.live_logic.market_maker import MarketMaker
 from src.live_logic.parameters import LiveParameters
 from src.live_logic.portfolio import Portfolio
@@ -22,7 +23,6 @@ from src.plotting.plot_candles import custom_plot
 from src.tools.downloader import download_live_data, load_stock_data
 from src.tools.run_metadata import RunMetaData
 from src.tools.train_classifier import TradingClassifier, generate_predicted_portfolio
-import sys
 
 logging.basicConfig(
     # filename=os.path.join(definitions.DATA_DIR, 'local_autotrader.log'),
@@ -96,15 +96,16 @@ class Runner(DillSaveLoadMixin):
         self._previous_candle = instantiate_1970_candle()
         self._start_time = datetime.now()
         self._run_metadata.start_time = self._start_time
-        self._run_metadata.save_to_disk("run_metadata.dill")
-
+        if self._run_type == "live":
+            self._run_metadata.save_to_disk("run_metadata.dill")
 
     def shutdown(self):
         """Should be called by the resource manager class"""
         self._stop_time = datetime.now()
         self._run_metadata.stop_time = self._stop_time
         self._run_metadata.stop_candle = self._current_candle
-        self._run_metadata.save_to_disk("run_metadata.dill")
+        if self._run_type == "live":
+            self._run_metadata.save_to_disk("run_metadata.dill")
 
         self.save_to_disk("run.dill")
         self._portfolio.save_to_disk(os.path.join(definitions.DATA_DIR, "portfolio_df.dill"))
@@ -144,6 +145,7 @@ class Runner(DillSaveLoadMixin):
                                                         self._waiting_threshold,
                                                         time_getter_callback=Candle.get_close_time_as_datetime):
                 logger.info("Registering candle: {}".format(self._current_candle))
+                print(repr(self._classifier))
                 self._classifier.append_new_candle(self._current_candle)
                 prediction = self._classifier.predict_one(self._current_candle)
                 logger.info("Prediction is: {} on iteration {}".format(prediction, self._iteration_number))
@@ -196,12 +198,25 @@ class runner:
         return self._live_runner
 
 
-def main():
+def run_live():
     with runner(trading_pair="NEOBTC",
                 trade_amount=50,
                 run_type="live") as lr:
         lr.run()
 
 
+def run_mock():
+
+    run_metadata = RunMetaData.load_from_disk(os.path.join(DATA_DIR, "run_metadata.dill"))
+
+    with runner(trading_pair="NEOBTC",
+                trade_amount=50,
+                run_type="mock",
+                mock_data_start_time=run_metadata.start_time,
+                mock_data_stop_time=run_metadata.stop_time,
+                ) as lr:
+        lr.run()
+
+
 if __name__ == '__main__':
-    main()
+    run_mock()
