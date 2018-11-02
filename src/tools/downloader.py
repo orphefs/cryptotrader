@@ -11,6 +11,7 @@ from src.containers.candle import Candle
 from src.containers.stock_data import StockData
 from src.containers.time_series import TimeSeries
 from src.containers.time_windows import TimeWindow, Date
+from src.tools.connection_handling import retry_on_network_error
 from src.type_aliases import Security
 
 
@@ -37,6 +38,7 @@ def download_backtesting_data(time_window: TimeWindow, security: Security, api_i
     return Candle.from_list_of_klines(klines)
 
 
+@retry_on_network_error
 def download_live_data(client: Client, security: Security, api_interval_callback: str, lags: int) -> List[Candle]:
     klines = client.get_historical_klines(security, api_interval_callback, "{} minutes ago GMT".format(lags))
     return Candle.from_list_of_klines(klines)
