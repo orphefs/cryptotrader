@@ -87,10 +87,11 @@ class Portfolio(DillSaveLoadMixin):
         return order_expenditures.cumsum()
 
     def _place_order(self, signal: Union[Buy, Sell, Hold], quantity: int, price_point: PricePoint):
+        #TODO: Check validity of switching signs (switching up buy with sell), but it seems to work!
         if isinstance(signal, Buy):
-            self._append_to_positions(signal.price_point.date_time, -quantity, price_point.value)
-        if isinstance(signal, Sell):
             self._append_to_positions(signal.price_point.date_time, quantity, price_point.value)
+        if isinstance(signal, Sell):
+            self._append_to_positions(signal.price_point.date_time, -quantity, price_point.value)
         if isinstance(signal, Hold):
             self._append_to_positions(signal.price_point.date_time, 0.0, price_point.value)
 
