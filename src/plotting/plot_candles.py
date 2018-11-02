@@ -37,16 +37,19 @@ def plot_portfolio(ax: List[Axis], portfolio: Portfolio):
 
 
 def plot_portfolio_2(ax: List[Axis], portfolio_df: pd.DataFrame):
-    if 'holdings' in portfolio_df:
-        portfolio_df['holdings'].plot(ax=ax[0], alpha=0.7)
-    if 'cash' in portfolio_df:
-        portfolio_df['cash'].plot(ax=ax[2], alpha=0.7)
-    if 'total' in portfolio_df:
-        portfolio_df['total'].plot(ax=ax[2], alpha=0.7)
+    if 'order_expenditure' in portfolio_df:
+        portfolio_df['order_expenditure'].plot(ax=ax[0], alpha=0.7)
+    if 'cumulative_order_expenditure' in portfolio_df:
+        portfolio_df['cumulative_order_expenditure'].plot(ax=ax[1], alpha=0.7)
+    if 'remaining_capital' in portfolio_df:
+        portfolio_df['remaining_capital'].plot(ax=ax[2], alpha=0.7)
     if 'returns' in portfolio_df:
         portfolio_df['returns'].plot(ax=ax[1], alpha=0.7)
     ax[0].legend()
     ax[1].legend()
+
+
+
 
 
 def plot_returns(ax: Axes, stock_data: StockData, returns: List[float]):
