@@ -38,6 +38,8 @@ def download_backtesting_data(time_window: TimeWindow, security: Security, api_i
     return Candle.from_list_of_klines(klines)
 
 
+# TODO: handle case of missing data due to broken connection
+
 @retry_on_network_error
 def download_live_data(client: Client, security: Security, api_interval_callback: str, lags: int) -> List[Candle]:
     klines = client.get_historical_klines(security, api_interval_callback, "{} minutes ago GMT".format(lags))
