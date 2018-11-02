@@ -1,11 +1,9 @@
 import logging
 import os
-import sys
 import time
 from datetime import timedelta, datetime
 from typing import Callable
 
-import matplotlib.pyplot as plt
 from binance.client import Client
 
 from src import definitions
@@ -19,7 +17,6 @@ from src.live_logic.market_maker import MarketMaker
 from src.live_logic.parameters import LiveParameters
 from src.live_logic.portfolio import Portfolio
 from src.mixins.save_load_mixin import DillSaveLoadMixin
-from src.plotting.plot_candles import custom_plot
 from src.tools.downloader import download_live_data, load_stock_data
 from src.tools.run_metadata import RunMetaData
 from src.tools.train_classifier import TradingClassifier, generate_predicted_portfolio
@@ -35,7 +32,6 @@ logger = logging.getLogger('cryptotrader_api')
 def is_time_difference_larger_than_threshold(current_candle: Candle, previous_candle: Candle, threshold: timedelta,
                                              time_getter_callback: Callable):
     return time_getter_callback(current_candle) - time_getter_callback(previous_candle) > threshold
-
 
 
 def get_capital_from_account(capital_security: str) -> float:
@@ -198,7 +194,6 @@ def run_live():
 
 
 def run_mock():
-
     run_metadata = RunMetaData.load_from_disk(os.path.join(DATA_DIR, "run_metadata.dill"))
 
     with runner(trading_pair="NEOBTC",
@@ -210,6 +205,16 @@ def run_mock():
         lr.run()
 
 
+def run_backtest():
+    with runner(trading_pair="NEOBTC",
+                trade_amount=50,
+                run_type="mock",
+                mock_data_start_time=datetime(2018, 9, 2),
+                mock_data_stop_time=datetime(2018, 9, 5),
+                ) as lr:
+        lr.run()
+
+
 if __name__ == '__main__':
-    run_live()
-    #TODO: Handle situation where internet connection drops
+    run_backtest()
+    # TODO: Handle situation where internet connection drops
