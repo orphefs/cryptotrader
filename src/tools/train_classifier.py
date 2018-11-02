@@ -17,7 +17,8 @@ from src.containers.time_windows import TimeWindow
 from src.containers.trade_helper import generate_trading_signal_from_prediction, generate_trading_signals_from_array
 from src.live_logic.parameters import LiveParameters
 from src.live_logic.portfolio import Portfolio
-from src.live_logic.technical_indicator import TechnicalIndicator, AutoCorrelationTechnicalIndicator
+from src.live_logic.technical_indicator import TechnicalIndicator, AutoCorrelationTechnicalIndicator, \
+    PPOTechnicalIndicator
 from src.mixins.save_load_mixin import DillSaveLoadMixin
 from src.plotting.plot_candles import custom_plot
 from src.tools.classifier_helpers import extract_indicators_from_stock_data, \
@@ -155,22 +156,22 @@ def main():
     trading_pair = "NEOBTC"
 
     training_time_window = TimeWindow(
-        start_time=datetime(2018, 5, 1),
-        end_time=datetime(2018, 5, 13)
+        start_time=datetime(2018, 10, 15),
+        end_time=datetime(2018, 10, 20)
     )
 
     stock_data_training_set = load_stock_data(training_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
-    testing_time_window = TimeWindow(start_time=datetime(2018, 9, 2), end_time=datetime(2018, 9, 3))
+    testing_time_window = TimeWindow(start_time=datetime(2018, 10, 26), end_time=datetime(2018, 10, 28))
 
     stock_data_testing_set = load_stock_data(testing_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
 
     list_of_technical_indicators = [
-        # AutoCorrelationTechnicalIndicator(Candle.get_volume, 24),
-        # AutoCorrelationTechnicalIndicator(Candle.get_close_price, 4),
+        # AutoCorrelationTechnicalIndicator(Candle.get_volume, 4),
+        AutoCorrelationTechnicalIndicator(Candle.get_close_price, 1),
         AutoCorrelationTechnicalIndicator(Candle.get_close_price, 2),
-        # PPOTechnicalIndicator(Candle.get_close_price, 5, 1),
-        # PPOTechnicalIndicator(Candle.get_close_price, 10, 4),
-        # PPOTechnicalIndicator(Candle.get_close_price, 20, 1),
+        PPOTechnicalIndicator(Candle.get_close_price, 5, 1),
+        PPOTechnicalIndicator(Candle.get_close_price, 10, 4),
+        PPOTechnicalIndicator(Candle.get_close_price, 20, 1),
         # PPOTechnicalIndicator(Candle.get_close_price, 30, 10),
         # PPOTechnicalIndicator(Candle.get_number_of_trades, 5, 1),
         # PPOTechnicalIndicator(Candle.get_number_of_trades, 10, 2),
@@ -178,7 +179,7 @@ def main():
         # PPOTechnicalIndicator(Candle.get_number_of_trades, 20, 1) / PPOTechnicalIndicator(Candle.get_volume, 20, 5),
         # PPOTechnicalIndicator(Candle.get_volume, 5, 1),
     ]
-    sklearn_classifier = RandomForestClassifier(n_estimators=100, criterion="entropy", class_weight="balanced")
+    sklearn_classifier = RandomForestClassifier(n_estimators=1000, criterion="entropy", class_weight="balanced")
     training_ratio = 0.5  # this is not enabled
     my_classifier = TradingClassifier(trading_pair, list_of_technical_indicators,
                                       sklearn_classifier, training_ratio)
