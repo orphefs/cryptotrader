@@ -15,6 +15,7 @@ from src.containers.candle import Candle
 from src.containers.stock_data import StockData
 from src.containers.time_windows import TimeWindow
 from src.containers.trade_helper import generate_trading_signal_from_prediction, generate_trading_signals_from_array
+from src.definitions import DATA_DIR
 from src.live_logic.parameters import LiveParameters
 from src.live_logic.portfolio import Portfolio
 from src.live_logic.technical_indicator import TechnicalIndicator, AutoCorrelationTechnicalIndicator, \
@@ -67,7 +68,6 @@ class TradingClassifier(DillSaveLoadMixin):
 
     def predict_one(self, candle: Candle):
         if self._is_candles_requirement_satisfied:
-            print("Checkpoint........")
             testing_data = extract_indicator_from_candle(candle, self._list_of_technical_indicators)
             predictors, _ = convert_to_pandas(predictors=testing_data, labels=None)
             predicted_values = self._sklearn_classifier.predict(predictors)
@@ -153,7 +153,7 @@ def generate_all_signals_at_once(stock_data_testing_set, classifier, predicted_p
 
 
 def main():
-    trading_pair = "NEOBTC"
+    trading_pair = "XRPBTC"
 
     training_time_window = TimeWindow(
         start_time=datetime(2018, 10, 15),
@@ -161,7 +161,7 @@ def main():
     )
 
     stock_data_training_set = load_stock_data(training_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
-    testing_time_window = TimeWindow(start_time=datetime(2018, 10, 26), end_time=datetime(2018, 10, 28))
+    testing_time_window = TimeWindow(start_time=datetime(2018, 10, 29), end_time=datetime(2018, 10, 30))
 
     stock_data_testing_set = load_stock_data(testing_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
 
@@ -200,6 +200,8 @@ def main():
     predicted_portfolio, predicted_signals = generate_predicted_portfolio(
         initial_capital, parameters, stock_data_testing_set, my_classifier)
 
+    predicted_portfolio.save_to_disk(os.path.join(DATA_DIR, "portfolio_df.dill"))
+
     custom_plot(portfolio=predicted_portfolio, strategy=None, title='Prediction portfolio_df')
     custom_plot(portfolio=reference_portfolio, strategy=None, title='Reference portfolio_df')
     print(my_classifier.sklearn_classifier.feature_importances_)
@@ -211,7 +213,7 @@ def main():
 
 
 def run_trained_classifier():
-    testing_time_window = TimeWindow(start_time=datetime(2018, 5, 2), end_time=datetime(2018, 5, 5))
+    testing_time_window = TimeWindow(start_time=datetime(2018, 10, 2), end_time=datetime(2018, 10, 5))
 
     trading_pair = "XRPBTC"
     stock_data_testing_set = load_stock_data(testing_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
@@ -228,6 +230,8 @@ def run_trained_classifier():
         initial_capital, parameters, stock_data_testing_set)
     predicted_portfolio, predicted_signals = generate_predicted_portfolio(
         initial_capital, parameters, stock_data_testing_set, my_classifier)
+
+    predicted_portfolio.save_to_disk(os.path.join(DATA_DIR, "portfolio_df.dill"))
 
     custom_plot(portfolio=predicted_portfolio, strategy=None, title='Prediction portfolio_df')
     custom_plot(portfolio=reference_portfolio, strategy=None, title='Reference portfolio_df')
@@ -255,5 +259,5 @@ def compute_confusion_matrix(training_signals: List[Union[Buy, Sell, Hold]],
 
 
 if __name__ == "__main__":
-    main()
-    # run_trained_classifier()
+    # main()
+    run_trained_classifier()
