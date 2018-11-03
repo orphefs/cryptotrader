@@ -20,11 +20,12 @@ from src.mixins.save_load_mixin import DillSaveLoadMixin
 from src.tools.downloader import download_live_data, load_stock_data
 from src.tools.run_metadata import RunMetaData
 from src.tools.train_classifier import TradingClassifier, generate_predicted_portfolio
+import sys
 
 logging.basicConfig(
     filename=os.path.join(definitions.DATA_DIR, 'local_autotrader.log'),
     # stream=sys.stdout,
-    level=logging.INFO,
+    level=logging.DEBUG,
 )
 logger = logging.getLogger('cryptotrader_api')
 
@@ -133,7 +134,7 @@ class Runner(DillSaveLoadMixin):
                                                         self._waiting_threshold,
                                                         time_getter_callback=Candle.get_close_time_as_datetime):
                 logger.info("Registering candle: {}".format(self._current_candle))
-                print(repr(self._classifier))
+                # print(repr(self._classifier))
                 self._classifier.append_new_candle(self._current_candle)
                 prediction = self._classifier.predict_one(self._current_candle)
                 logger.info("Prediction is: {} on iteration {}".format(prediction, self._iteration_number))
@@ -206,11 +207,11 @@ def run_mock():
 
 
 def run_backtest():
-    with runner(trading_pair="NEOBTC",
-                trade_amount=50,
+    with runner(trading_pair="XRPBTC",
+                trade_amount=100,
                 run_type="mock",
-                mock_data_start_time=datetime(2018, 9, 2),
-                mock_data_stop_time=datetime(2018, 9, 5),
+                mock_data_start_time=datetime(2018, 10, 2),
+                mock_data_stop_time=datetime(2018, 10, 5),
                 ) as lr:
         lr.run()
 
