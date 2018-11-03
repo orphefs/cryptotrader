@@ -12,13 +12,21 @@ from src.live_logic.portfolio import Portfolio
 from src.tools.run_metadata import FullPaths
 
 
-class PercentageGains:
+class _Gains:
     def __init__(self, gains: float, elapsed_time: timedelta):
         self.gains = gains
         self.elapsed_time = elapsed_time
 
+
+class PercentageGains(_Gains):
     def __str__(self):
         return "Gained {} percent within timeframe of {}.".format(self.gains * 100, self.elapsed_time)
+
+
+class IndexPerformance(_Gains):
+    def __str__(self):
+        return "The asset price changed by {} percent within timeframe of {}.".format(self.gains * 100,
+                                                                                      self.elapsed_time)
 
 
 def load_portfolio(path_to_portfolio_df_dill: str) -> Portfolio:
@@ -77,6 +85,13 @@ def calculate_percentage_gains(portfolio: Portfolio, order_pairs: List[Tuple[Buy
                                                      order_pairs[0][1].price_point.date_time)
 
 
+def calculate_index_performance(order_pairs: List[Tuple[Buy, Sell]]) -> IndexPerformance:
+    index_gains = (order_pairs[-1][1].price_point.value - order_pairs[0][1].price_point.value) / order_pairs[0][
+        1].price_point.value
+    return IndexPerformance(gains=index_gains, elapsed_time=order_pairs[-1][1].price_point.date_time -
+                                                            order_pairs[0][1].price_point.date_time)
+
+
 def main(path_to_portfolio_df_dill: str):
     portfolio = load_portfolio(path_to_portfolio_df_dill)
     signals = extract_signals_from_portfolio(portfolio)
@@ -84,6 +99,8 @@ def main(path_to_portfolio_df_dill: str):
     order_pairs = generate_order_pairs(signals)
     percentage_gains = calculate_percentage_gains(portfolio, order_pairs)
     print(percentage_gains)
+    index_performance = calculate_index_performance(order_pairs)
+    print(index_performance)
     net = compute_profits_and_losses(order_pairs)
     plot_histograms(net)
 
