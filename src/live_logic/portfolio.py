@@ -35,6 +35,10 @@ class Portfolio(DillSaveLoadMixin):
         return self._positions_df
 
     @property
+    def trade_amount(self):
+        return self._trade_amount
+
+    @property
     def signals(self):
         return self._signals
 
