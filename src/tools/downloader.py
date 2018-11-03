@@ -4,6 +4,8 @@ from datetime import datetime, timedelta
 from typing import List, Tuple
 
 import dill
+dill.dill._reverse_typemap['ClassType'] = type
+
 from binance.client import Client
 
 from src import definitions

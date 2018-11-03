@@ -1,4 +1,5 @@
 import dill
+dill.dill._reverse_typemap['ClassType'] = type
 import os
 from src import definitions
 
