@@ -1,5 +1,6 @@
 import os
 from argparse import ArgumentParser
+from datetime import timedelta
 from typing import Tuple, List, Union
 
 import matplotlib.pyplot as plt
@@ -9,6 +10,15 @@ from src.backtesting_logic.logic import Sell, Buy, Hold
 from src.definitions import DATA_DIR
 from src.live_logic.portfolio import Portfolio
 from src.tools.run_metadata import FullPaths
+
+
+class PercentageGains:
+    def __init__(self, gains: float, elapsed_time: timedelta):
+        self.gains = gains
+        self.elapsed_time = elapsed_time
+
+    def __str__(self):
+        return "Gained {} percent within timeframe of {}.".format(self.gains * 100, self.elapsed_time)
 
 
 def load_portfolio(path_to_portfolio_df_dill: str) -> Portfolio:
@@ -58,11 +68,22 @@ def plot_histograms(net: np.array):
     plt.show()
 
 
+def calculate_percentage_gains(portfolio: Portfolio, order_pairs: List[Tuple[Buy, Sell]]) -> PercentageGains:
+    net = compute_profits_and_losses(order_pairs)
+    total_profit = np.sum(net)
+    initial_investment = order_pairs[0][1].price_point.value * portfolio._trade_amount
+    gains = (total_profit * portfolio._trade_amount) / initial_investment
+    return PercentageGains(gains=gains, elapsed_time=order_pairs[-1][1].price_point.date_time -
+                                                     order_pairs[0][1].price_point.date_time)
+
+
 def main(path_to_portfolio_df_dill: str):
     portfolio = load_portfolio(path_to_portfolio_df_dill)
     signals = extract_signals_from_portfolio(portfolio)
     signals = cleanup_signals(signals)
     order_pairs = generate_order_pairs(signals)
+    percentage_gains = calculate_percentage_gains(portfolio, order_pairs)
+    print(percentage_gains)
     net = compute_profits_and_losses(order_pairs)
     plot_histograms(net)
 
