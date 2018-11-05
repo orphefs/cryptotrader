@@ -10,16 +10,19 @@ from matplotlib.dates import DateFormatter, WeekdayLocator, \
 
 from src.backtesting_logic.logic import IntersectionPoint, _TradingSignal
 from src.backtesting_logic.portfolio import Portfolio
+from src.containers.candle import Candle
 from src.containers.stock_data import StockData
 from src.containers.time_series import TimeSeries
 from src.externals.mpl_finance.mpl_finance import candlestick_ohlc
 
 
-def plot_close_price(ax: Axis, data: StockData):
+def plot_close_price(ax: Axes, candles: List[Candle], color: str = None):
+    if color is None:
+        color = 'k'
     ax.scatter(
-        y=[candle.get_close_price() for candle in data.candles],
-        x=[candle.get_close_time_as_datetime() for candle in data.candles],
-        c='r', alpha=0.3
+        y=[candle.get_close_price() for candle in candles],
+        x=[candle.get_close_time_as_datetime() for candle in candles],
+        c=color, alpha=0.3
     )
 
 
@@ -67,7 +70,10 @@ def plot_intersection_point(ax: Axes, intersection_point: IntersectionPoint):
     ax.scatter(y=intersection_point.data_point.value, x=intersection_point.data_point.date_time)
 
 
-def plot_trading_signals(ax: Axes, trading_signals: List[_TradingSignal]):
+def plot_trading_signals(ax: Axes, trading_signals: List[_TradingSignal], color: str = None, **kwargs):
+    if color is None:
+        color = 'k'
+
     marker_map = {
         "Buy": '^',
         "Sell": 'v',
@@ -80,11 +86,12 @@ def plot_trading_signals(ax: Axes, trading_signals: List[_TradingSignal]):
         if marker != "":
             prices.append(trading_signal.price_point.value)
             ax.scatter(
-                x=trading_signal.price_point.date_time,
-                y=trading_signal.price_point.value,
-                marker=marker,
-                color='k',
-                s=40
+                trading_signal.price_point.date_time,
+                trading_signal.price_point.value,
+                40,
+                color,
+                marker,
+                kwargs
             )
     ax.set_ylim(min(prices), max(prices))
 
