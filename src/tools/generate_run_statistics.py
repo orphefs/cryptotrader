@@ -75,9 +75,10 @@ def plot_histograms(net: np.array):
         compute_ratio_of_profit_to_loss(net)))
     plt.show()
 
+
 def display_timeframe(order_pairs: List[Tuple[Buy, Sell]]) -> str:
     return "Run started on {} and ended on {}".format(order_pairs[0][1].price_point.date_time,
-                                                     order_pairs[-1][1].price_point.date_time)
+                                                      order_pairs[-1][1].price_point.date_time)
 
 
 def calculate_percentage_gains(portfolio: Portfolio, order_pairs: List[Tuple[Buy, Sell]]) -> PercentageGains:
@@ -96,20 +97,26 @@ def calculate_index_performance(order_pairs: List[Tuple[Buy, Sell]]) -> IndexPer
                                                             order_pairs[0][1].price_point.date_time)
 
 
-def main(path_to_portfolio_df_dill: str):
+def compute_all_statistics(path_to_portfolio_df_dill: str):
     portfolio = load_portfolio(path_to_portfolio_df_dill)
     signals = extract_signals_from_portfolio(portfolio)
     signals = cleanup_signals(signals)
     order_pairs = generate_order_pairs(signals)
     percentage_gains = calculate_percentage_gains(portfolio, order_pairs)
+    index_performance = calculate_index_performance(order_pairs)
+    net = compute_profits_and_losses(order_pairs)
+    return order_pairs, percentage_gains, index_performance
+
+
+def display_and_plot(order_pairs: List[Tuple[Union[Buy,Sell]]],
+                     percentage_gains: PercentageGains,
+                     index_performance: IndexPerformance,
+                     ):
     print(display_timeframe(order_pairs))
     print(percentage_gains)
-    index_performance = calculate_index_performance(order_pairs)
     print(index_performance)
 
-
-    net = compute_profits_and_losses(order_pairs)
-    plot_histograms(net)
+    plot_histograms(compute_profits_and_losses(order_pairs))
 
 
 if __name__ == '__main__':
@@ -118,4 +125,5 @@ if __name__ == '__main__':
                         help="input .dill", action=FullPaths)
     args = parser.parse_args()
     print("Input from {}".format(args.input_filename))
-    main(args.input_filename)
+    order_pairs, percentage_gains, index_performance = compute_all_statistics(args.input_filename)
+    display_and_plot(order_pairs, percentage_gains, index_performance)
