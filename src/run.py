@@ -130,15 +130,15 @@ class Runner(DillSaveLoadMixin):
             return True
 
     def run(self):
-        self._iteration_number = 1
+        self._iteration_number = 0
         logger.debug("Waiting threshold between decisions is {}".format(self._waiting_threshold))
         if self._run_type == "mock":
             self._mock_download_stock_data_for_all_iterations()
 
         while self._is_check_condition():
-
             self._current_candle = self._download_candle()
-            if self._iteration_number == 1:
+            print("Current candle is {} \n\n".format(self._current_candle))
+            if self._iteration_number == 0:
                 self._run_metadata.start_candle = self._current_candle
 
             logger.debug("Current candle time: {}".format(self._current_candle.get_close_time_as_datetime()))
@@ -150,11 +150,16 @@ class Runner(DillSaveLoadMixin):
                 # print(repr(self._classifier))
                 self._classifier.append_new_candle(self._current_candle)
                 prediction = self._classifier.predict_one(self._current_candle)
+
                 logger.info("Prediction is: {} on iteration {}".format(prediction, self._iteration_number))
                 if prediction is not None:
                     self._current_signal = generate_trading_signal_from_prediction(prediction[0], self._current_candle)
+                    # print("\n\n Prediction for signal {} \n\n".format(self._current_signal))
+                    logger.debug("Prediction for signal {}".format(self._current_signal))
+
                     if self._current_signal.type == self._previous_signal.type:
                         logger.info("Hodling...")
+                        self._portfolio.update(self._current_signal)
                     else:
                         logger.info("Prediction for signal {}".format(self._current_signal))
                         # order = market_maker.place_order(current_signal)

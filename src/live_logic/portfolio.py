@@ -2,6 +2,7 @@ import os
 from collections import defaultdict
 from typing import Union
 
+import logging
 import pandas as pd
 
 from src import definitions
@@ -45,6 +46,7 @@ class Portfolio(DillSaveLoadMixin):
     def update(self, signal: Union[Buy, Sell, Hold]):
         self._place_order(signal, self._trade_amount, signal.price_point)
         self._signals.append(signal)
+        logging.debug("Appended signal: {}".format(signal))
 
     def compute_performance(self):
 

@@ -141,9 +141,9 @@ def generate_signals_iteratively(stock_data: StockData, classifier: TradingClass
 def generate_all_signals_at_once(stock_data_testing_set, classifier, predicted_portfolio):
     predicted_signals = []
     predictions = classifier.predict(stock_data_testing_set)
-    predictions = np.roll(predictions, -1)  # attach current prediction to the next candle by circular shift
-    # do not repeat signal in a row
-    predictions = np.sign(np.diff(predictions))  # TODO: rewrite this
+    predictions = np.roll(np.sign(np.diff(predictions)), 1)
+    # predictions = np.roll(predictions, 7)
+    predictions[0] = - predictions[0]
 
     signals = generate_trading_signals_from_array(predictions, stock_data_testing_set)
     # signals = filter_signals
