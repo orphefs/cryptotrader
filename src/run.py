@@ -17,7 +17,7 @@ from src.live_logic.market_maker import MarketMaker
 from src.live_logic.parameters import LiveParameters
 from src.live_logic.portfolio import Portfolio
 from src.mixins.save_load_mixin import DillSaveLoadMixin
-from src.tools.downloader import download_live_data, load_stock_data
+from src.tools.downloader import download_live_data, load_stock_data, load_from_disk
 from src.tools.run_metadata import RunMetaData
 from src.tools.train_classifier import TradingClassifier, generate_predicted_portfolio
 
@@ -41,7 +41,8 @@ def get_capital_from_account(capital_security: str) -> float:
 class Runner(DillSaveLoadMixin):
     def __init__(self, trading_pair: str, trade_amount: float, run_type: str,
                  mock_data_start_time: datetime,
-                 mock_data_stop_time: datetime):
+                 mock_data_stop_time: datetime,
+                 path_to_stock_data: str):
         self._trading_pair = trading_pair
         self._trade_amount = trade_amount
         self._run_type = run_type
@@ -58,6 +59,8 @@ class Runner(DillSaveLoadMixin):
         self._kline_interval = Client.KLINE_INTERVAL_1MINUTE
         self._mock_data_start_time = mock_data_start_time
         self._mock_data_stop_time = mock_data_stop_time
+        self._path_to_stock_data = path_to_stock_data
+        self._stock_data = StockData
         self._run_metadata = RunMetaData(trading_pair=self._trading_pair,
                                          trade_amount=self._trade_amount,
                                          run_type=self._run_type)
@@ -104,23 +107,34 @@ class Runner(DillSaveLoadMixin):
         elif self._run_type == "mock":
             return self._mock_download_candle_for_current_iteration()
 
-    def _mock_download_stock_data_for_all_iterations(self) -> StockData:
-        return load_stock_data(TimeWindow(start_time=self._mock_data_start_time,
-                                          end_time=self._mock_data_stop_time),
-                               self._trading_pair, self._kline_interval)
+    def _mock_download_stock_data_for_all_iterations(self):
+        if self._mock_data_start_time and self._mock_data_stop_time:
+            self._stock_data = load_stock_data(TimeWindow(start_time=self._mock_data_start_time,
+                                                          end_time=self._mock_data_stop_time),
+                                               self._trading_pair, self._kline_interval)
+        elif self._path_to_stock_data:
+            self._stock_data = load_from_disk(self._path_to_stock_data)
 
     def _mock_download_candle_for_current_iteration(self) -> Candle:
-        return self._mock_download_stock_data_for_all_iterations().candles[self._iteration_number]
+        if self._path_to_stock_data:
+            if not self._stock_data:
+                self._stock_data = load_from_disk(self._path_to_stock_data)
+            return self._stock_data.candles[self._iteration_number]
+        else:
+            return self._stock_data.candles[self._iteration_number]
 
     def _is_check_condition(self):
         if self._run_type == "mock":
-            return self._iteration_number < len(self._mock_download_stock_data_for_all_iterations().candles)
+            return self._iteration_number < len(self._stock_data.candles)
         elif self._run_type == "live":
             return True
 
     def run(self):
         self._iteration_number = 1
         logger.debug("Waiting threshold between decisions is {}".format(self._waiting_threshold))
+        if self._run_type == "mock":
+            self._mock_download_stock_data_for_all_iterations()
+
         while self._is_check_condition():
 
             self._current_candle = self._download_candle()
@@ -156,20 +170,31 @@ class Runner(DillSaveLoadMixin):
             logger.debug("We are on the {}th iteration".format(self._iteration_number))
 
     def run_backtesting_batch(self):
+        self._mock_download_stock_data_for_all_iterations()
         portfolio, _ = generate_predicted_portfolio(initial_capital=self._portfolio._initial_capital,
                                                     parameters=self._parameters,
-                                                    stock_data_testing_set=self._mock_download_stock_data_for_all_iterations(),
+                                                    stock_data_testing_set=self._stock_data,
                                                     classifier=self._classifier,
                                                     )
         pass
+
+
+class TooManyArgumentsError(ValueError):
+    pass
 
 
 class runner:
     def __init__(self, trading_pair: str, trade_amount: float, run_type: str,
                  mock_data_start_time: datetime = None,
                  mock_data_stop_time: datetime = None,
+                 path_to_stock_data: str = None
                  ):
-        self._live_runner = Runner(trading_pair, trade_amount, run_type, mock_data_start_time, mock_data_stop_time)
+        if (mock_data_start_time and mock_data_stop_time) and path_to_stock_data:
+            raise TooManyArgumentsError("Either specify start and end time OR a path to the stock data file.")
+
+        self._live_runner = Runner(trading_pair, trade_amount, run_type,
+                                   mock_data_start_time, mock_data_stop_time,
+                                   path_to_stock_data)
 
     def __enter__(self):
         self._live_runner.initialize()
@@ -197,6 +222,8 @@ def run_live():
 def run_mock():
     "Replicate live run by using the information in the metadata file generated by the live runner. For comparing to live run."
     run_metadata = RunMetaData.load_from_disk(os.path.join(DATA_DIR, "run_metadata.dill"))
+    if run_metadata.stop_time is None:
+        run_metadata.stop_time = datetime.now()
 
     with runner(trading_pair="XRPBTC",
                 trade_amount=100,
@@ -212,11 +239,12 @@ def run_backtest():
     with runner(trading_pair="XRPBTC",
                 trade_amount=100,
                 run_type="mock",
-                mock_data_start_time=datetime(2018, 10, 2),
-                mock_data_stop_time=datetime(2018, 10, 5),
+                # mock_data_start_time=datetime(2018, 10, 2),
+                # mock_data_stop_time=datetime(2018, 10, 5),
+                path_to_stock_data=os.path.join(DATA_DIR, "local_data_03_Nov,_2018_06_Nov,_2018_XRPBTC_1m.dill")
                 ) as lr:
         lr.run()
 
 
 if __name__ == '__main__':
-    run_live()
+    run_backtest()

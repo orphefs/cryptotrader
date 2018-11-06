@@ -2,6 +2,7 @@ import os
 from datetime import timedelta, datetime
 from typing import List, Union
 
+import logging
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -24,7 +25,7 @@ from src.mixins.save_load_mixin import DillSaveLoadMixin
 from src.plotting.plot_candles import custom_plot
 from src.tools.classifier_helpers import extract_indicators_from_stock_data, \
     get_training_labels, convert_to_pandas, extract_indicator_from_candle
-from src.tools.downloader import load_stock_data
+from src.tools.downloader import load_stock_data, load_from_disk
 
 
 class TradingClassifier(DillSaveLoadMixin):
@@ -67,11 +68,12 @@ class TradingClassifier(DillSaveLoadMixin):
         return predicted_values
 
     def predict_one(self, candle: Candle):
-        if self._is_candles_requirement_satisfied:
-            testing_data = extract_indicator_from_candle(candle, self._list_of_technical_indicators)
-            predictors, _ = convert_to_pandas(predictors=testing_data, labels=None)
-            predicted_values = self._sklearn_classifier.predict(predictors)
-            return predicted_values
+        # if self._is_candles_requirement_satisfied:
+        testing_data = extract_indicator_from_candle(candle, self._list_of_technical_indicators)
+        predictors, _ = convert_to_pandas(predictors=testing_data, labels=None)
+        predicted_values = self._sklearn_classifier.predict(predictors)
+        # print(self._sklearn_classifier.predict_proba(predictors))
+        return predicted_values
 
     def append_new_candle(self, candle: Candle):
         self._stock_data_live.append_new_candle(candle)
@@ -213,10 +215,12 @@ def main():
 
 
 def run_trained_classifier():
-    testing_time_window = TimeWindow(start_time=datetime(2018, 10, 2), end_time=datetime(2018, 10, 5))
+    # testing_time_window = TimeWindow(start_time=datetime(2018, 11, 3,22,58), end_time=datetime(2018, 11,5,14,22))
 
     trading_pair = "XRPBTC"
-    stock_data_testing_set = load_stock_data(testing_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
+    # stock_data_testing_set = load_stock_data(testing_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
+    stock_data_testing_set = load_from_disk(os.path.join(DATA_DIR, "local_data_03_Nov,_2018_06_Nov,_2018_XRPBTC_1m.dill"))
+
 
     parameters = LiveParameters(
         update_period=timedelta(minutes=1),
@@ -231,7 +235,7 @@ def run_trained_classifier():
     predicted_portfolio, predicted_signals = generate_predicted_portfolio(
         initial_capital, parameters, stock_data_testing_set, my_classifier)
 
-    predicted_portfolio.save_to_disk(os.path.join(DATA_DIR, "portfolio_df.dill"))
+    predicted_portfolio.save_to_disk(os.path.join(DATA_DIR, "portfolio_backtest_df.dill"))
 
     custom_plot(portfolio=predicted_portfolio, strategy=None, title='Prediction portfolio_df')
     custom_plot(portfolio=reference_portfolio, strategy=None, title='Reference portfolio_df')
@@ -259,5 +263,12 @@ def compute_confusion_matrix(training_signals: List[Union[Buy, Sell, Hold]],
 
 
 if __name__ == "__main__":
+    logging.basicConfig(
+        filename=os.path.join(definitions.DATA_DIR, 'local_autotrader_training_run.log'),
+        # stream=sys.stdout,
+        level=logging.DEBUG,
+    )
+    logger = logging.getLogger('cryptotrader_api')
+
     # main()
     run_trained_classifier()

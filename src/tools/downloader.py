@@ -78,7 +78,7 @@ def generate_file_name(time_window: TimeWindow, security: Security, api_interval
         " ", "_")
 
 
-def load_stock_data(time_window: TimeWindow, security: str, api_interval_callback: str):
+def load_stock_data(time_window: TimeWindow, security: str, api_interval_callback: str) -> StockData:
     path_to_file = os.path.join(definitions.DATA_DIR, generate_file_name(time_window, security, api_interval_callback))
     if os.path.isfile(path_to_file):
         stock_data = load_from_disk(path_to_file)
