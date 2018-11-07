@@ -21,6 +21,7 @@ from src.feature_extraction.technical_indicator import AutoCorrelationTechnicalI
     PPOTechnicalIndicator
 from src.live_logic.parameters import LiveParameters
 from src.plotting.plot_candles import custom_plot
+from src.type_aliases import Path
 
 
 def generate_predicted_portfolio(initial_capital: int, parameters: LiveParameters,
@@ -104,13 +105,10 @@ def main():
     plt.show()
 
 
-def run_trained_classifier(trade_amount: float, path_to_stock_data: str):
-    # testing_time_window = TimeWindow(start_time=datetime(2018, 10, 1), end_time=datetime(2018, 10, 2))
+def run_trained_classifier(trading_pair: str, trade_amount: float, path_to_stock_data: Path,
+                           path_to_portfolio: Path):
 
-    trading_pair = "NEOBTC"
-    # stock_data_testing_set = load_stock_data(testing_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
     stock_data_testing_set = load_from_disk(path_to_stock_data)
-    # stock_data_testing_set = load_from_disk(os.path.join(DATA_DIR, "local_data_03_Nov,_2018_06_Nov,_2018_XRPBTC_1m.dill"))
 
     parameters = LiveParameters(
         update_period=timedelta(minutes=1),
@@ -125,7 +123,7 @@ def run_trained_classifier(trade_amount: float, path_to_stock_data: str):
     predicted_portfolio, predicted_signals = generate_predicted_portfolio(
         initial_capital, parameters, stock_data_testing_set, my_classifier)
 
-    predicted_portfolio.save_to_disk(os.path.join(DATA_DIR, "portfolio_training_df.dill"))
+    predicted_portfolio.save_to_disk(path_to_portfolio)
 
     custom_plot(portfolio=predicted_portfolio, strategy=None, title='Prediction portfolio_df')
     custom_plot(portfolio=reference_portfolio, strategy=None, title='Reference portfolio_df')

@@ -1,3 +1,4 @@
+import logging
 import os
 import time
 from datetime import datetime, timedelta
@@ -5,6 +6,7 @@ from datetime import datetime, timedelta
 from binance.client import Client
 
 from src import definitions
+from src.analysis_tools.run_metadata import RunMetaData
 from src.backtesting_logic.logic import Hold
 from src.classification.trading_classifier import TradingClassifier
 from src.connection.downloader import download_live_data, load_stock_data, load_from_disk
@@ -18,15 +20,15 @@ from src.helpers import is_time_difference_larger_than_threshold, get_capital_fr
 from src.live_logic.market_maker import MarketMaker
 from src.live_logic.parameters import LiveParameters
 from src.mixins.save_load_mixin import DillSaveLoadMixin
-from src.run import logger
-from src.analysis_tools.run_metadata import RunMetaData
+from src.type_aliases import Path
 
 
 class Runner(DillSaveLoadMixin):
     def __init__(self, trading_pair: str, trade_amount: float, run_type: str,
                  mock_data_start_time: datetime,
                  mock_data_stop_time: datetime,
-                 path_to_stock_data: str):
+                 path_to_stock_data: str,
+                 path_to_portfolio: Path):
         self._trading_pair = trading_pair
         self._trade_amount = trade_amount
         self._run_type = run_type
@@ -44,6 +46,7 @@ class Runner(DillSaveLoadMixin):
         self._mock_data_start_time = mock_data_start_time
         self._mock_data_stop_time = mock_data_stop_time
         self._path_to_stock_data = path_to_stock_data
+        self._path_to_portfolio = path_to_portfolio
         self._stock_data = StockData
         self._run_metadata = RunMetaData(trading_pair=self._trading_pair,
                                          trade_amount=self._trade_amount,
@@ -82,7 +85,7 @@ class Runner(DillSaveLoadMixin):
             self._run_metadata.save_to_disk("run_metadata.dill")
 
         self.save_to_disk("run.dill")
-        self._portfolio.save_to_disk(os.path.join(definitions.DATA_DIR, "portfolio_df.dill"))
+        self._portfolio.save_to_disk(self._path_to_portfolio)
 
     def _download_candle(self) -> Candle:
         if self._run_type == "live":
@@ -114,45 +117,43 @@ class Runner(DillSaveLoadMixin):
 
     def run(self):
         self._iteration_number = 0
-        logger.debug("Waiting threshold between decisions is {}".format(self._waiting_threshold))
+        logging.debug("Waiting threshold between decisions is {}".format(self._waiting_threshold))
         if self._run_type == "mock":
             self._mock_download_stock_data_for_all_iterations()
 
         while self._is_check_condition():
             self._current_candle = self._download_candle()
-            print("Current candle is {} \n\n".format(self._current_candle))
             if self._iteration_number == 0:
                 self._run_metadata.start_candle = self._current_candle
 
-            logger.debug("Current candle time: {}".format(self._current_candle.get_close_time_as_datetime()))
+            logging.debug("Current candle time: {}".format(self._current_candle.get_close_time_as_datetime()))
 
             if is_time_difference_larger_than_threshold(self._current_candle, self._previous_candle,
                                                         self._waiting_threshold,
                                                         time_getter_callback=Candle.get_close_time_as_datetime):
-                logger.info("Registering candle: {}".format(self._current_candle))
+                logging.info("Registering candle: {}".format(self._current_candle))
                 # print(repr(self._classifier))
                 self._classifier.append_new_candle(self._current_candle)
                 prediction = self._classifier.predict_one(self._current_candle)
 
-                logger.info("Prediction is: {} on iteration {}".format(prediction, self._iteration_number))
+                logging.info("Prediction is: {} on iteration {}".format(prediction, self._iteration_number))
                 if prediction is not None:
                     self._current_signal = generate_trading_signal_from_prediction(prediction[0], self._current_candle)
                     # print("\n\n Prediction for signal {} \n\n".format(self._current_signal))
-                    logger.debug("Prediction for signal {}".format(self._current_signal))
+                    logging.debug("Prediction for signal {}".format(self._current_signal))
 
                     if self._current_signal.type == self._previous_signal.type:
-                        logger.info("Hodling...")
-                        # self._portfolio.update(self._current_signal)
+                        logging.info("Hodling...")
                     else:
-                        logger.info("Prediction for signal {}".format(self._current_signal))
+                        logging.info("Prediction for signal {}".format(self._current_signal))
                         # order = market_maker.place_order(current_signal)
                         self._portfolio.update(self._current_signal)
-                        self._portfolio.save_to_disk(os.path.join(definitions.DATA_DIR, "portfolio_df.dill"))
+                        self._portfolio.save_to_disk(self._path_to_portfolio)
                         self._previous_signal = self._current_signal
                 self._previous_candle = self._current_candle
 
             if self._run_type == "live":
-                logger.debug("Going to sleep for {} seconds.".format(self._parameters.sleep_time))
+                logging.debug("Going to sleep for {} seconds.".format(self._parameters.sleep_time))
                 time.sleep(self._parameters.sleep_time)
             self._iteration_number += 1
-            logger.debug("We are on the {}th iteration".format(self._iteration_number))
+            logging.debug("We are on the {}th iteration".format(self._iteration_number))

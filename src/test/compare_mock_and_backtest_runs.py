@@ -1,34 +1,22 @@
+import logging
 import os
 from typing import Tuple, List
 
+from src import definitions
 from src.classification.train_classifier import run_trained_classifier
 from src.containers.portfolio import Portfolio
 from src.definitions import DATA_DIR
 from src.resource_manager import runner
-
-
-def run_backtest():
-    with runner(trading_pair="NEOBTC",
-                trade_amount=100,
-                run_type="mock",
-                path_to_stock_data=os.path.join(
-                    DATA_DIR, "test", "test_data.dill")
-                ) as lr:
-        lr.run()
-
-    return os.path.join(DATA_DIR, "portfolio_df.dill")
-
-
-def run_training():
-    run_trained_classifier(trade_amount=100,
-                           path_to_stock_data=os.path.join(
-                               DATA_DIR, "test", "test_data.dill"))
-    return os.path.join(DATA_DIR, "portfolio_training_df.dill")
+from src.run_backtest import run_backtest
 
 
 def run():
-    path_to_training_portfolio_df = run_training()
-    path_to_backtest_portfolio_df = run_backtest()
+    path_to_training_portfolio_df = run_backtest(trading_pair="NEOBTC",
+                                                 trade_amount=100,
+                                                 path_to_stock_data=os.path.join(DATA_DIR,"test", "test_data"))
+    path_to_backtest_portfolio_df = run_backtest(trading_pair="NEOBTC",
+                                                 trade_amount=100,
+                                                 path_to_stock_data=os.path.join(DATA_DIR,"test", "test_data"))
 
     return path_to_training_portfolio_df, path_to_backtest_portfolio_df
 
