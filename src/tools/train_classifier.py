@@ -1,8 +1,8 @@
+import logging
 import os
 from datetime import timedelta, datetime
 from typing import List, Union
 
-import logging
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -25,7 +25,16 @@ from src.mixins.save_load_mixin import DillSaveLoadMixin
 from src.plotting.plot_candles import custom_plot
 from src.tools.classifier_helpers import extract_indicators_from_stock_data, \
     get_training_labels, convert_to_pandas, extract_indicator_from_candle
-from src.tools.downloader import load_stock_data, load_from_disk
+from src.tools.downloader import load_stock_data
+
+fudge_factor = 10000
+
+
+def timeshift_predictions(labels: pd.Series) -> pd.Series:
+    # Shift label by 1 minute to associate previous prediction with next price move - Experimental
+    ser = pd.Series(np.roll(labels, -1))
+    ser.index += 1
+    return ser
 
 
 class TradingClassifier(DillSaveLoadMixin):
@@ -52,10 +61,12 @@ class TradingClassifier(DillSaveLoadMixin):
         self._predictors, self._labels = convert_to_pandas(predictors=training_data,
                                                            labels=get_training_labels(stock_data_training))
 
+        self._labels = timeshift_predictions(self._labels)
+
     def train(self, stock_data_training: StockData):
         self._precondition(stock_data_training)
         self._sklearn_classifier.fit(
-            X=self._predictors.as_matrix(),
+            X=self._predictors.as_matrix() * fudge_factor,
             y=self._labels.as_matrix())
 
     def predict(self, stock_data: StockData):
@@ -63,6 +74,7 @@ class TradingClassifier(DillSaveLoadMixin):
         stock_data.candles must be of length at least self._maximum_lag'''
         testing_data = extract_indicators_from_stock_data(stock_data, self._list_of_technical_indicators)
         predictors, _ = convert_to_pandas(predictors=testing_data, labels=None)
+        predictors *= 10000
         # TODO: Implement trading based on probabilities
         predicted_values = self._sklearn_classifier.predict(predictors)
         return predicted_values
@@ -71,6 +83,7 @@ class TradingClassifier(DillSaveLoadMixin):
         # if self._is_candles_requirement_satisfied:
         testing_data = extract_indicator_from_candle(candle, self._list_of_technical_indicators)
         predictors, _ = convert_to_pandas(predictors=testing_data, labels=None)
+        predictors *= 10000
         predicted_values = self._sklearn_classifier.predict(predictors)
         # print(self._sklearn_classifier.predict_proba(predictors))
         return predicted_values
@@ -155,15 +168,15 @@ def generate_all_signals_at_once(stock_data_testing_set, classifier, predicted_p
 
 
 def main():
-    trading_pair = "XRPBTC"
+    trading_pair = "NEOBTC"
 
     training_time_window = TimeWindow(
-        start_time=datetime(2018, 10, 15),
-        end_time=datetime(2018, 10, 20)
+        start_time=datetime(2018, 9, 24),
+        end_time=datetime(2018, 9, 25)
     )
 
     stock_data_training_set = load_stock_data(training_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
-    testing_time_window = TimeWindow(start_time=datetime(2018, 10, 29), end_time=datetime(2018, 10, 30))
+    testing_time_window = TimeWindow(start_time=datetime(2018, 10, 1), end_time=datetime(2018, 10, 30))
 
     stock_data_testing_set = load_stock_data(testing_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
 
@@ -174,12 +187,12 @@ def main():
         PPOTechnicalIndicator(Candle.get_close_price, 5, 1),
         PPOTechnicalIndicator(Candle.get_close_price, 10, 4),
         PPOTechnicalIndicator(Candle.get_close_price, 20, 1),
-        # PPOTechnicalIndicator(Candle.get_close_price, 30, 10),
-        # PPOTechnicalIndicator(Candle.get_number_of_trades, 5, 1),
-        # PPOTechnicalIndicator(Candle.get_number_of_trades, 10, 2),
-        # PPOTechnicalIndicator(Candle.get_number_of_trades, 15, 3),
+        PPOTechnicalIndicator(Candle.get_close_price, 30, 10),
+        PPOTechnicalIndicator(Candle.get_number_of_trades, 5, 1),
+        PPOTechnicalIndicator(Candle.get_number_of_trades, 10, 2),
+        PPOTechnicalIndicator(Candle.get_number_of_trades, 15, 3),
         # PPOTechnicalIndicator(Candle.get_number_of_trades, 20, 1) / PPOTechnicalIndicator(Candle.get_volume, 20, 5),
-        # PPOTechnicalIndicator(Candle.get_volume, 5, 1),
+        PPOTechnicalIndicator(Candle.get_volume, 5, 1),
     ]
     sklearn_classifier = RandomForestClassifier(n_estimators=1000, criterion="entropy", class_weight="balanced")
     training_ratio = 0.5  # this is not enabled
@@ -202,7 +215,7 @@ def main():
     predicted_portfolio, predicted_signals = generate_predicted_portfolio(
         initial_capital, parameters, stock_data_testing_set, my_classifier)
 
-    predicted_portfolio.save_to_disk(os.path.join(DATA_DIR, "portfolio_df.dill"))
+    predicted_portfolio.save_to_disk(os.path.join(DATA_DIR, "portfolio_backtest_df.dill"))
 
     custom_plot(portfolio=predicted_portfolio, strategy=None, title='Prediction portfolio_df')
     custom_plot(portfolio=reference_portfolio, strategy=None, title='Reference portfolio_df')
@@ -215,11 +228,11 @@ def main():
 
 
 def run_trained_classifier():
-    # testing_time_window = TimeWindow(start_time=datetime(2018, 11, 3,22,58), end_time=datetime(2018, 11,5,14,22))
+    testing_time_window = TimeWindow(start_time=datetime(2018, 10, 1), end_time=datetime(2018, 10, 30))
 
-    trading_pair = "XRPBTC"
-    # stock_data_testing_set = load_stock_data(testing_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
-    stock_data_testing_set = load_from_disk(os.path.join(DATA_DIR, "local_data_03_Nov,_2018_06_Nov,_2018_XRPBTC_1m.dill"))
+    trading_pair = "NEOBTC"
+    stock_data_testing_set = load_stock_data(testing_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
+    # stock_data_testing_set = load_from_disk(os.path.join(DATA_DIR, "local_data_03_Nov,_2018_06_Nov,_2018_XRPBTC_1m.dill"))
 
 
     parameters = LiveParameters(
@@ -266,9 +279,9 @@ if __name__ == "__main__":
     logging.basicConfig(
         filename=os.path.join(definitions.DATA_DIR, 'local_autotrader_training_run.log'),
         # stream=sys.stdout,
-        level=logging.DEBUG,
+        level=logging.INFO,
     )
     logger = logging.getLogger('cryptotrader_api')
 
-    # main()
-    run_trained_classifier()
+    main()
+    # run_trained_classifier()
