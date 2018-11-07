@@ -18,12 +18,12 @@ def run():
     return path_to_offline_portfolio, path_to_backtest_portfolio
 
 
-def load_portfolio(path_to_training_portfolio_df: str, path_to_backtest_portfolio_df: str) -> Tuple[
+def load_portfolio(path_to_offline_portfolio_df: str, path_to_backtest_portfolio_df: str) -> Tuple[
     Portfolio, Portfolio]:
-    training_portfolio = Portfolio.load_from_disk(path_to_training_portfolio_df)
+    offline_portfolio = Portfolio.load_from_disk(path_to_offline_portfolio_df)
     backtest_portfolio = Portfolio.load_from_disk(path_to_backtest_portfolio_df)
 
-    return training_portfolio, backtest_portfolio
+    return offline_portfolio, backtest_portfolio
 
 
 def compare_lists(a: List, b: List):
@@ -32,17 +32,23 @@ def compare_lists(a: List, b: List):
     return len(a) == sum([1 for i, j in zip(a, b) if i == j])
 
 
-def compare(training_portfolio: Portfolio, backtest_portfolio: Portfolio):
-    training_signals = training_portfolio.signals
+def compare(offline_portfolio: Portfolio, backtest_portfolio: Portfolio):
+    offline_signals = offline_portfolio.signals
     backtest_signals = backtest_portfolio.signals
-    assert compare_lists(training_signals, backtest_signals)
+
+    for t, b in zip(offline_signals, backtest_signals):
+        print("offline run: {}".format(t))
+        print("backtest_run: {}".format(b))
+        print("\n")
+
+    assert compare_lists(offline_signals, backtest_signals)
 
 
 def main():
-    path_to_training_portfolio_df, path_to_backtest_portfolio_df = run()
-    training_portfolio, backtest_portfolio = load_portfolio(
-        path_to_training_portfolio_df, path_to_backtest_portfolio_df)
-    compare(training_portfolio, backtest_portfolio)
+    path_to_offline_portfolio_df, path_to_backtest_portfolio_df = run()
+    offline_portfolio, backtest_portfolio = load_portfolio(
+        path_to_offline_portfolio_df, path_to_backtest_portfolio_df)
+    compare(offline_portfolio, backtest_portfolio)
 
 
 if __name__ == '__main__':

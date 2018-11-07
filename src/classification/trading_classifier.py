@@ -56,13 +56,13 @@ class TradingClassifier(DillSaveLoadMixin):
         return predicted_values
 
     def predict_one(self, candle: Candle):
-        # if self._is_candles_requirement_satisfied:
-        testing_data = extract_indicator_from_candle(candle, self._list_of_technical_indicators)
-        predictors, _ = convert_to_pandas(predictors=testing_data, labels=None)
-        predictors *= fudge_factor
-        predicted_values = self._sklearn_classifier.predict(predictors)
-        # print(self._sklearn_classifier.predict_proba(predictors))
-        return predicted_values
+        if self._is_candles_requirement_satisfied:
+            testing_data = extract_indicator_from_candle(candle, self._list_of_technical_indicators)
+            predictors, _ = convert_to_pandas(predictors=testing_data, labels=None)
+            predictors *= fudge_factor
+            predicted_values = self._sklearn_classifier.predict(predictors)
+            # print(self._sklearn_classifier.predict_proba(predictors))
+            return predicted_values
 
     def append_new_candle(self, candle: Candle):
         self._stock_data_live.append_new_candle(candle)
