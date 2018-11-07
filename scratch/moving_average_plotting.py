@@ -1,14 +1,15 @@
-from datetime import timedelta
 import os
+from datetime import timedelta
+
+import definitions
 import matplotlib.pyplot as plt
 import numpy as np
+from src.backtesting_logic.portfolio import MarketOnClosePortfolio
+from tools.downloader import load_from_disk
 
 from src.containers.time_series import TimeSeries
-from src.backtesting_logic.signal_processing import rolling_mean, _generate_trading_signals_from_sma
-from src.backtesting_logic.portfolio import MarketOnClosePortfolio
+from src.feature_extraction.signal_processing import rolling_mean, _generate_trading_signals_from_sma
 from src.plotting.plot_candles import plot_moving_average, plot_trading_signals, plot_close_price, plot_portfolio
-from tools.downloader import load_from_disk
-import definitions
 
 
 def main():

@@ -1,9 +1,9 @@
-import copy
 import os
 from datetime import datetime, timedelta
 from typing import List, Tuple
 
 import dill
+
 dill.dill._reverse_typemap['ClassType'] = type
 
 from binance.client import Client
@@ -13,7 +13,7 @@ from src.containers.candle import Candle
 from src.containers.stock_data import StockData
 from src.containers.time_series import TimeSeries
 from src.containers.time_windows import TimeWindow, Date
-from src.tools.connection_handling import retry_on_network_error
+from src.connection.connection_handling import retry_on_network_error
 from src.type_aliases import Security
 
 
@@ -84,10 +84,10 @@ def load_stock_data(time_window: TimeWindow, security: str, api_interval_callbac
         stock_data = load_from_disk(path_to_file)
     else:
         start = datetime.now()
-        extended_time_window = copy.deepcopy(
-            time_window).increment_end_time_by_one_day().decrement_start_time_by_one_day()
-        candles = download_backtesting_data(extended_time_window, security, api_interval_callback)
-        candles = finetune_time_window(candles, time_window)
+        # extended_time_window = copy.deepcopy(
+        #     time_window).increment_end_time_by_one_day().decrement_start_time_by_one_day()
+        candles = download_backtesting_data(time_window, security, api_interval_callback)
+        # candles = finetune_time_window(candles, time_window)
         stop = datetime.now()
         print("Elapsed download time: {}".format(stop - start))
         for candle in candles:
@@ -98,7 +98,7 @@ def load_stock_data(time_window: TimeWindow, security: str, api_interval_callbac
 
 
 def download_test_data():
-    security = "XRPBTC"
+    security = "NEOBTC"
     time_window = TimeWindow(start_time=datetime(2018, 5, 20, 6, 00),
                              end_time=datetime(2018, 5, 21, 8, 00))
     candles = download_backtesting_data(time_window, security, Client.KLINE_INTERVAL_1MINUTE)[-5:]

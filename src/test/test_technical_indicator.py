@@ -3,11 +3,11 @@ from typing import List, Callable
 
 import pytest
 
-from src.helpers import is_equal
 from src import definitions
+from src.connection.downloader import load_from_disk
 from src.containers.candle import Candle
-from src.live_logic.technical_indicator import TechnicalIndicator, AutoCorrelationTechnicalIndicator
-from src.tools.downloader import load_from_disk
+from src.feature_extraction.technical_indicator import TechnicalIndicator, AutoCorrelationTechnicalIndicator
+from src.helpers import is_equal
 
 
 def mock_compute_callback():

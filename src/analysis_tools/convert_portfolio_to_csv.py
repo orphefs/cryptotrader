@@ -1,7 +1,7 @@
 import os
 
 from src import definitions
-from src.live_logic.portfolio import Portfolio
+from src.containers.portfolio import Portfolio
 
 
 def convert_portfolio_to_csv():

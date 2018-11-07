@@ -7,9 +7,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from src.backtesting_logic.logic import Sell, Buy, Hold
+from src.containers.portfolio import Portfolio
 from src.definitions import DATA_DIR
-from src.live_logic.portfolio import Portfolio
-from src.tools.run_metadata import FullPaths
+from src.analysis_tools.run_metadata import FullPaths
 
 
 class _Gains:

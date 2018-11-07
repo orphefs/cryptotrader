@@ -1,9 +1,11 @@
 from argparse import ArgumentParser
 
-from src.live_logic.portfolio import Portfolio
-from src.plotting.plot_candles import custom_plot
-from src.tools.run_metadata import FullPaths
 import matplotlib.pyplot as plt
+
+from src.containers.portfolio import Portfolio
+from src.plotting.plot_candles import custom_plot
+from src.analysis_tools.run_metadata import FullPaths
+
 
 def main(path_to_portfolio_dill: str):
     predicted_portfolio = Portfolio.load_from_disk(path_to_portfolio_dill)

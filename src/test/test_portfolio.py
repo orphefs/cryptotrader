@@ -8,11 +8,11 @@ from pandas._libs.tslib import Timestamp
 
 from src import definitions
 from src.backtesting_logic.logic import Buy
+from src.connection.downloader import load_from_disk
 from src.containers.candle import Candle
 from src.containers.data_point import PricePoint, Price
+from src.containers.portfolio import Portfolio
 from src.helpers import is_equal
-from src.live_logic.portfolio import Portfolio
-from src.tools.downloader import load_from_disk
 
 positions = pd.Series([1000, 1000, 1000, 1000])
 prices = pd.Series(np.array([1, 1, 1, 1]) * 1e-4)

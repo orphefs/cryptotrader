@@ -6,11 +6,10 @@ from typing import Callable
 
 import numpy as np
 
-from src.externals.rolling_statistics.python.rolling_stats import RollingMean
-
 from src import definitions
+from src.connection.downloader import load_from_disk
 from src.containers.candle import Candle
-from src.tools.downloader import load_from_disk
+from src.externals.rolling_statistics.python.rolling_stats import RollingMean
 
 
 class OperatorOverloadsMixin:

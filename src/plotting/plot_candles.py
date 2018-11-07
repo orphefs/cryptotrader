@@ -9,7 +9,7 @@ from matplotlib.dates import DateFormatter, WeekdayLocator, \
     DayLocator, MONDAY
 
 from src.backtesting_logic.logic import IntersectionPoint, _TradingSignal
-from src.backtesting_logic.portfolio import Portfolio
+from src.containers.portfolio import Portfolio
 from src.containers.candle import Candle
 from src.containers.stock_data import StockData
 from src.containers.time_series import TimeSeries

@@ -1,9 +1,5 @@
-
-import pytest
-
-from src.live_logic.portfolio import Portfolio
-from src.run import runner, Runner
-
+from src.containers.portfolio import Portfolio
+from src.resource_manager import runner
 
 
 def get_backtesting_portfolio() -> Portfolio:
