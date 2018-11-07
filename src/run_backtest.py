@@ -34,4 +34,10 @@ def run_backtest(trading_pair: str, trade_amount: float, path_to_stock_data: Pat
 
 
 if __name__ == '__main__':
-    run_backtest()
+    path_to_portfolio, path_to_log = run_backtest("NEOBTC",
+                100,
+                os.path.join(DATA_DIR, "test", "test_data.dill"),
+                os.path.join(DATA_DIR, "backtest_run.log"),
+                os.path.join(DATA_DIR, "backtest_portfolio.dill"))
+    print(path_to_portfolio, path_to_log)
+
