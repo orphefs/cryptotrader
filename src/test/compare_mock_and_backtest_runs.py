@@ -1,24 +1,21 @@
-import logging
 import os
 from typing import Tuple, List
 
-from src import definitions
-from src.classification.train_classifier import run_trained_classifier
 from src.containers.portfolio import Portfolio
 from src.definitions import DATA_DIR
-from src.resource_manager import runner
 from src.run_backtest import run_backtest
+from src.run_offline import run_offline
 
 
 def run():
-    path_to_training_portfolio_df = run_backtest(trading_pair="NEOBTC",
-                                                 trade_amount=100,
-                                                 path_to_stock_data=os.path.join(DATA_DIR,"test", "test_data"))
-    path_to_backtest_portfolio_df = run_backtest(trading_pair="NEOBTC",
-                                                 trade_amount=100,
-                                                 path_to_stock_data=os.path.join(DATA_DIR,"test", "test_data"))
+    path_to_offline_portfolio, _ = run_backtest(trading_pair="NEOBTC",
+                                                trade_amount=100,
+                                                path_to_stock_data=os.path.join(DATA_DIR, "test", "test_data.dill"))
+    path_to_backtest_portfolio, _ = run_offline(trading_pair="NEOBTC",
+                                                trade_amount=100,
+                                                path_to_stock_data=os.path.join(DATA_DIR, "test", "test_data.dill"))
 
-    return path_to_training_portfolio_df, path_to_backtest_portfolio_df
+    return path_to_offline_portfolio, path_to_backtest_portfolio
 
 
 def load_portfolio(path_to_training_portfolio_df: str, path_to_backtest_portfolio_df: str) -> Tuple[

@@ -1,6 +1,7 @@
 import logging
 import os
 from datetime import timedelta, datetime
+from typing import List
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -8,6 +9,7 @@ from binance.client import Client
 from sklearn.ensemble import RandomForestClassifier
 
 from src import definitions
+from src.backtesting_logic.logic import _TradingSignal
 from src.classification.classifier_helpers import compute_confusion_matrix, \
     generate_reference_portfolio, generate_all_signals_at_once
 from src.classification.trading_classifier import TradingClassifier
@@ -107,7 +109,6 @@ def main():
 
 def run_trained_classifier(trading_pair: str, trade_amount: float, path_to_stock_data: Path,
                            path_to_portfolio: Path):
-
     stock_data_testing_set = load_from_disk(path_to_stock_data)
 
     parameters = LiveParameters(
@@ -122,9 +123,20 @@ def run_trained_classifier(trading_pair: str, trade_amount: float, path_to_stock
         initial_capital, parameters, stock_data_testing_set)
     predicted_portfolio, predicted_signals = generate_predicted_portfolio(
         initial_capital, parameters, stock_data_testing_set, my_classifier)
-
     predicted_portfolio.save_to_disk(path_to_portfolio)
+    if 0:
+        plot_portfolios(
+            my_classifier,
+            predicted_portfolio,
+            reference_portfolio,
+            reference_signals,
+            predicted_signals)
 
+
+def plot_portfolios(my_classifier: TradingClassifier,
+                    predicted_portfolio: Portfolio, reference_portfolio: Portfolio,
+                    reference_signals: List[_TradingSignal],
+                    predicted_signals: List[_TradingSignal]):
     custom_plot(portfolio=predicted_portfolio, strategy=None, title='Prediction portfolio_df')
     custom_plot(portfolio=reference_portfolio, strategy=None, title='Reference portfolio_df')
     print(my_classifier.sklearn_classifier.feature_importances_)
