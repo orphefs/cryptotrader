@@ -1,5 +1,6 @@
 import os
 from typing import Tuple, List
+import logging
 
 from src.containers.portfolio import Portfolio
 from src.definitions import DATA_DIR
@@ -13,7 +14,8 @@ def run():
                                                 path_to_stock_data=os.path.join(DATA_DIR, "test", "test_data.dill"))
     path_to_backtest_portfolio, _ = run_offline(trading_pair="NEOBTC",
                                                 trade_amount=100,
-                                                path_to_stock_data=os.path.join(DATA_DIR, "test", "test_data.dill"))
+                                                path_to_stock_data=os.path.join(DATA_DIR, "test", "test_data.dill"),
+                                                )
 
     return path_to_offline_portfolio, path_to_backtest_portfolio
 

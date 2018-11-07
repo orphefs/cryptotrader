@@ -109,6 +109,7 @@ def main():
 
 def run_trained_classifier(trading_pair: str, trade_amount: float, path_to_stock_data: Path,
                            path_to_portfolio: Path):
+
     stock_data_testing_set = load_from_disk(path_to_stock_data)
 
     parameters = LiveParameters(
@@ -124,6 +125,7 @@ def run_trained_classifier(trading_pair: str, trade_amount: float, path_to_stock
     predicted_portfolio, predicted_signals = generate_predicted_portfolio(
         initial_capital, parameters, stock_data_testing_set, my_classifier)
     predicted_portfolio.save_to_disk(path_to_portfolio)
+
     if 0:
         plot_portfolios(
             my_classifier,

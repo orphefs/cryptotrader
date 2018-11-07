@@ -25,8 +25,8 @@ def run_offline(trading_pair: str, trade_amount: float, path_to_stock_data: Path
 
 if __name__ == '__main__':
     path_to_portfolio, path_to_log = run_offline("NEOBTC",
-                100,
-                os.path.join(DATA_DIR, "test", "test_data.dill"),
-                os.path.join(DATA_DIR, "offline_run.log"),
-                os.path.join(DATA_DIR, "offline_portfolio.dill"))
+                                                 100,
+                                                 os.path.join(DATA_DIR, "test", "test_data.dill"),
+                                                 os.path.join(DATA_DIR, "offline_run.log"),
+                                                 os.path.join(DATA_DIR, "offline_portfolio.dill"))
     print(path_to_portfolio, path_to_log)
