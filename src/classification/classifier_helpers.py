@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import List, Union
 import logging
 import numpy as np
@@ -56,17 +57,24 @@ def generate_signals_iteratively(stock_data: StockData, classifier: TradingClass
     return classifier, predicted_portfolio, predicted_signals
 
 
-def generate_all_signals_at_once(stock_data_testing_set, classifier, predicted_portfolio):
-    predicted_signals = []
-    predictions = classifier.predict(stock_data_testing_set)
-    predictions = np.roll(np.sign(np.diff(predictions)), 1)
-    # predictions = np.roll(predictions, 7)
-    predictions[0] = - predictions[0]
-
-    signals = generate_trading_signals_from_array(predictions, stock_data_testing_set)
-    # signals = filter_signals
+def replace_repeating_signals_with_holds(signals: List[Union[Buy, Sell]]) -> List[Union[Buy, Sell, Hold]]:
+    cleaned_up_signals = []
+    previous_signal = None
     for signal in signals:
-        if signal is not None:
-            predicted_portfolio.update(signal)
-            predicted_signals.append(signal)
-    return classifier, predicted_portfolio, predicted_signals
+        if isinstance(signal, type(previous_signal)):
+            hold_signal = Hold(0, signal.price_point)
+            cleaned_up_signals.append(hold_signal)
+        else:
+            cleaned_up_signals.append(signal)
+        previous_signal = signal
+    return cleaned_up_signals
+
+
+def generate_all_signals_at_once(stock_data_testing_set, classifier, predicted_portfolio):
+    predictions = classifier.predict(stock_data_testing_set)
+    signals = generate_trading_signals_from_array(predictions[:], stock_data_testing_set)
+    # signals = filter_signals
+    cleaned_up_signals = replace_repeating_signals_with_holds(signals[:])
+    for signal in cleaned_up_signals:
+        predicted_portfolio.update(signal)
+    return classifier, predicted_portfolio, cleaned_up_signals
