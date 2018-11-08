@@ -74,8 +74,9 @@ def main():
         # PPOTechnicalIndicator(Candle.get_number_of_trades, 20, 1) / PPOTechnicalIndicator(Candle.get_volume, 20, 5),
         PPOTechnicalIndicator(Candle.get_volume, 5, 1),
     ]
-    sklearn_classifier = RandomForestClassifier(n_estimators=1000,
-                                                criterion="entropy",
+    sklearn_classifier = RandomForestClassifier(max_depth=2,
+                                                n_estimators=1000,
+                                                criterion="gini",
                                                 class_weight="balanced",
                                                 random_state=15325)
     training_ratio = 0.5  # this is not enabled
@@ -85,35 +86,9 @@ def main():
     my_classifier.save_to_disk(os.path.join(definitions.TEST_DATA_DIR, "classifier.dill"))
     my_classifier.save_to_disk(os.path.join(definitions.DATA_DIR, "classifier.dill"))
 
-    # predictions = my_classifier.predict(stock_data_testing_set, list_of_technical_indicators)
-    parameters = LiveParameters(
-        update_period=timedelta(minutes=1),
-        trade_amount=100,
-        sleep_time=0
-    )
-    # stock_data_testing_set = stock_data_training_set
-
-    initial_capital = 5
-    reference_portfolio, reference_signals = generate_reference_portfolio(
-        initial_capital, parameters, stock_data_testing_set)
-    predicted_portfolio, predicted_signals = generate_predicted_portfolio(
-        initial_capital, parameters, stock_data_testing_set, my_classifier)
-
-    predicted_portfolio.save_to_disk(os.path.join(DATA_DIR, "portfolio_backtest_df.dill"))
-
-    custom_plot(portfolio=predicted_portfolio, strategy=None, title='Prediction portfolio_df')
-    custom_plot(portfolio=reference_portfolio, strategy=None, title='Reference portfolio_df')
-    print(my_classifier.sklearn_classifier.feature_importances_)
-    conf_matrix = compute_confusion_matrix(reference_signals, predicted_signals)
-    accuracy = np.sum(np.diag(conf_matrix)) / np.sum(conf_matrix)
-    print(conf_matrix)
-    print(accuracy)
-    plt.show()
-
 
 def run_trained_classifier(trading_pair: str, trade_amount: float, path_to_stock_data: Path,
                            path_to_portfolio: Path):
-
     stock_data_testing_set = load_from_disk(path_to_stock_data)
 
     parameters = LiveParameters(
