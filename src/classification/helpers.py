@@ -59,3 +59,10 @@ def extract_indicator_from_candle(candle, list_of_technical_indicators):
     logging.debug("Running update_indicators() on candle {}\n".format(candle))
     training_data = update_indicators(candle, training_data, list_of_technical_indicators)
     return training_data
+
+
+def timeshift_predictions(labels: pd.Series) -> pd.Series:
+    # Shift label by 1 minute to associate previous prediction with next price move - Experimental
+    ser = pd.Series(np.roll(labels, -1))
+    ser.index += 1
+    return ser

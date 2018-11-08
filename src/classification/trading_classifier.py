@@ -4,7 +4,7 @@ import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 
 from src.classification.helpers import extract_indicators_from_stock_data, convert_to_pandas, get_training_labels, \
-    extract_indicator_from_candle
+    extract_indicator_from_candle, timeshift_predictions
 from src.containers.candle import Candle
 from src.containers.stock_data import StockData
 from src.feature_extraction.technical_indicator import TechnicalIndicator
@@ -37,7 +37,7 @@ class TradingClassifier(DillSaveLoadMixin):
         self._predictors, self._labels = convert_to_pandas(predictors=training_data,
                                                            labels=get_training_labels(stock_data_training))
 
-        # self._labels = timeshift_predictions(self._labels)
+        self._labels = timeshift_predictions(self._labels)
 
     def train(self, stock_data_training: StockData):
         self._precondition(stock_data_training)
@@ -52,7 +52,7 @@ class TradingClassifier(DillSaveLoadMixin):
         predictors, _ = convert_to_pandas(predictors=testing_data, labels=None)
         predictors *= fudge_factor
         # TODO: Implement trading based on probabilities
-        predicted_values = self._sklearn_classifier.predict(predictors)
+        predicted_values = self.sklearn_classifier.predict(predictors)
         return predicted_values
 
     def predict_one(self, candle: Candle):

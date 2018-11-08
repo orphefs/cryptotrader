@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from binance.client import Client
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
 
 from src import definitions
 from src.backtesting_logic.logic import _TradingSignal
@@ -51,34 +52,35 @@ def main():
     trading_pair = "NEOBTC"
 
     training_time_window = TimeWindow(
-        start_time=datetime(2018, 9, 24),
-        end_time=datetime(2018, 9, 25)
+        start_time=datetime(2018, 9, 1),
+        end_time=datetime(2018, 9, 30)
     )
 
     stock_data_training_set = load_stock_data(training_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
-    testing_time_window = TimeWindow(start_time=datetime(2018, 10, 1), end_time=datetime(2018, 10, 2))
-
-    stock_data_testing_set = load_stock_data(testing_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
 
     list_of_technical_indicators = [
-        # AutoCorrelationTechnicalIndicator(Candle.get_volume, 4),
+        AutoCorrelationTechnicalIndicator(Candle.get_volume, 4),
         AutoCorrelationTechnicalIndicator(Candle.get_close_price, 1),
         AutoCorrelationTechnicalIndicator(Candle.get_close_price, 2),
-        # PPOTechnicalIndicator(Candle.get_close_price, 5, 1),
-        # PPOTechnicalIndicator(Candle.get_close_price, 10, 4),
-        # PPOTechnicalIndicator(Candle.get_close_price, 20, 1),
-        # PPOTechnicalIndicator(Candle.get_close_price, 30, 10),
-        # PPOTechnicalIndicator(Candle.get_number_of_trades, 5, 1),
-        # PPOTechnicalIndicator(Candle.get_number_of_trades, 10, 2),
-        # PPOTechnicalIndicator(Candle.get_number_of_trades, 15, 3),
+        PPOTechnicalIndicator(Candle.get_close_price, 5, 1),
+        PPOTechnicalIndicator(Candle.get_close_price, 10, 4),
+        PPOTechnicalIndicator(Candle.get_close_price, 20, 1),
+        # PPOTechnicalIndicator(Candle.get_close_price, 20, 5),
+        # PPOTechnicalIndicator(Candle.get_close_price, 20, 10),
+        PPOTechnicalIndicator(Candle.get_close_price, 30, 10),
+        PPOTechnicalIndicator(Candle.get_number_of_trades, 5, 1),
+        PPOTechnicalIndicator(Candle.get_number_of_trades, 10, 2),
+        PPOTechnicalIndicator(Candle.get_number_of_trades, 15, 3),
         # PPOTechnicalIndicator(Candle.get_number_of_trades, 20, 1) / PPOTechnicalIndicator(Candle.get_volume, 20, 5),
-        # PPOTechnicalIndicator(Candle.get_volume, 5, 1),
+        PPOTechnicalIndicator(Candle.get_volume, 5, 1),
     ]
     sklearn_classifier = RandomForestClassifier(max_depth=1,
                                                 n_estimators=1000,
                                                 criterion="gini",
                                                 class_weight="balanced",
                                                 random_state=15345625)
+
+    # sklearn_classifier = SVC(gamma="auto")
     training_ratio = 0.5  # this is not enabled
     my_classifier = TradingClassifier(trading_pair, list_of_technical_indicators,
                                       sklearn_classifier, training_ratio)
@@ -89,7 +91,12 @@ def main():
 
 def run_trained_classifier(trading_pair: str, trade_amount: float, path_to_stock_data: Path,
                            path_to_portfolio: Path):
-    stock_data_testing_set = load_from_disk(path_to_stock_data)
+    testing_time_window = TimeWindow(
+        start_time=datetime(2018, 11, 1),
+        end_time=datetime(2018, 11, 5)
+    )
+
+    stock_data_testing_set = load_stock_data(testing_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
 
     parameters = LiveParameters(
         update_period=timedelta(minutes=1),
@@ -135,5 +142,8 @@ if __name__ == "__main__":
         level=logging.DEBUG,
     )
 
-    main()
-    # run_trained_classifier()
+    # main()
+    run_trained_classifier(trading_pair="NEOBTC",
+                           trade_amount=100,
+                           path_to_stock_data="/home/orphefs/Documents/Code/autotrader/autotrader/data/local_data_01_Oct,_2018_02_Oct,_2018_NEOBTC_1m.dill",
+                           path_to_portfolio="/home/orphefs/Documents/Code/autotrader/autotrader/data/offline_portfolio.dill")

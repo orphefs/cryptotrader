@@ -1,6 +1,4 @@
-from copy import deepcopy
 from typing import List, Union
-import logging
 import numpy as np
 import pandas as pd
 from sklearn.metrics import confusion_matrix
@@ -26,13 +24,6 @@ def compute_confusion_matrix(training_signals: List[Union[Buy, Sell, Hold]],
     df = pd.merge_asof(training_df, predicted_df, on='Timestamp')
     clean_df = df.dropna()
     return confusion_matrix(y_true=clean_df.Action_x.as_matrix(), y_pred=clean_df.Action_y.as_matrix())
-
-
-def timeshift_predictions(labels: pd.Series) -> pd.Series:
-    # Shift label by 1 minute to associate previous prediction with next price move - Experimental
-    ser = pd.Series(np.roll(labels, -1))
-    ser.index += 1
-    return ser
 
 
 def generate_reference_portfolio(initial_capital, parameters, stock_data_testing_set):
