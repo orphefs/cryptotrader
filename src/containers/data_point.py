@@ -18,3 +18,7 @@ class PricePoint(object):
 
     def __repr__(self):
         return "DataPoint({},{})".format(self._value, self._date_time)
+
+    def __eq__(self, other):
+        return (self._value == other.value) and \
+               (self._date_time == other.date_time)

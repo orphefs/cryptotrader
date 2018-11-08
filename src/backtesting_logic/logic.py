@@ -11,13 +11,17 @@ class _TradingSignal(object):
         self.price_point = price_point
 
     def __repr__(self):
-
         return type(self).__name__ + "({} at {})".format(self.signal, self.price_point)
 
     @staticmethod
     def from_integer_value(integer_value: int, price_point: PricePoint):
         cls = _signal_types[integer_value]
         return cls(integer_value, price_point)
+
+    def __eq__(self, other):
+        return (self.signal == other.signal) and \
+               (self.type == other.type) and \
+               (self.price_point == other.price_point)
 
 
 class Buy(_TradingSignal):
