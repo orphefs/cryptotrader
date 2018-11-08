@@ -34,6 +34,7 @@ local_data*
 ._*
 .Spotlight-V100
 .Trashes
+.pytest_cache/
 ehthumbs.db
 Thumbs.db
 .idea/*
