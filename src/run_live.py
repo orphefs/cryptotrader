@@ -9,10 +9,9 @@ from src.type_aliases import Path
 
 
 def run_live(trading_pair: str, trade_amount: float,
-                 path_to_log: Path = os.path.join(DATA_DIR,"live_run.log"),
-                 path_to_portfolio: Path = os.path.join(DATA_DIR,"live_portfolio.dill")) -> Tuple[Path, Path]:
+             path_to_log: Path = os.path.join(DATA_DIR, "live_run.log"),
+             path_to_portfolio: Path = os.path.join(DATA_DIR, "live_portfolio.dill")) -> Tuple[Path, Path]:
     "Run live, on real time exchange data."
-
 
     logging.basicConfig(
         filename=path_to_log, filemode='w',
@@ -32,8 +31,7 @@ def run_live(trading_pair: str, trade_amount: float,
 
 if __name__ == '__main__':
     path_to_portfolio, path_to_log = run_live("NEOBTC",
-                100,
-                os.path.join(DATA_DIR, "live_run.log"),
-                os.path.join(DATA_DIR, "live_portfolio.dill"))
+                                              100,
+                                              os.path.join(DATA_DIR, "live_run.log"),
+                                              os.path.join(DATA_DIR, "live_portfolio.dill"))
     print(path_to_portfolio, path_to_log)
-

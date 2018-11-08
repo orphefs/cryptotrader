@@ -1,4 +1,5 @@
 import os
+from importlib import reload
 from typing import Tuple, List
 import logging
 
@@ -9,19 +10,26 @@ from src.run_offline import run_offline
 
 
 def run():
-    path_to_offline_portfolio, _ = run_backtest(trading_pair="NEOBTC",
-                                                trade_amount=100,
-                                                path_to_stock_data=os.path.join(DATA_DIR, "test", "test_data.dill"))
-    path_to_backtest_portfolio, _ = run_offline(trading_pair="NEOBTC",
-                                                trade_amount=100,
-                                                path_to_stock_data=os.path.join(DATA_DIR, "test", "test_data.dill"),
-                                                )
+    path_to_backtest_portfolio, _ = run_backtest(trading_pair="NEOBTC",
+                                                 trade_amount=100,
+                                                 path_to_stock_data=os.path.join(
+                                                     DATA_DIR, "test", "test_data.dill"))
+
+    logging.shutdown() # temporary workaround to reinit logging for next run's log
+    reload(logging)
+
+    path_to_offline_portfolio, _ = run_offline(trading_pair="NEOBTC",
+                                               trade_amount=100,
+                                               path_to_stock_data=os.path.join(
+                                                   DATA_DIR, "test", "test_data.dill"),
+                                               path_to_log=os.path.join(DATA_DIR, "offline_run.log")
+                                               )
 
     return path_to_offline_portfolio, path_to_backtest_portfolio
 
 
-def load_portfolio(path_to_offline_portfolio_df: str, path_to_backtest_portfolio_df: str) -> Tuple[
-    Portfolio, Portfolio]:
+def load_portfolio(path_to_offline_portfolio_df: str,
+                   path_to_backtest_portfolio_df: str) -> Tuple[Portfolio, Portfolio]:
     offline_portfolio = Portfolio.load_from_disk(path_to_offline_portfolio_df)
     backtest_portfolio = Portfolio.load_from_disk(path_to_backtest_portfolio_df)
 

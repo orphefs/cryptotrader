@@ -155,7 +155,6 @@ if __name__ == "__main__":
         # stream=sys.stdout,
         level=logging.DEBUG,
     )
-    logger = logging.getLogger('cryptotrader_api')
 
     main()
     # run_trained_classifier()
