@@ -73,7 +73,6 @@ def replace_repeating_signals_with_holds(signals: List[Union[Buy, Sell]]) -> Lis
 def generate_all_signals_at_once(stock_data_testing_set, classifier, predicted_portfolio):
     predictions = classifier.predict(stock_data_testing_set)
     signals = generate_trading_signals_from_array(predictions[:], stock_data_testing_set)
-    # signals = filter_signals
     cleaned_up_signals = replace_repeating_signals_with_holds(signals[:])
     for signal in cleaned_up_signals:
         predicted_portfolio.update(signal)
