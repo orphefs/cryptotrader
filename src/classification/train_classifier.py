@@ -74,11 +74,15 @@ def main():
         # PPOTechnicalIndicator(Candle.get_number_of_trades, 20, 1) / PPOTechnicalIndicator(Candle.get_volume, 20, 5),
         PPOTechnicalIndicator(Candle.get_volume, 5, 1),
     ]
-    sklearn_classifier = RandomForestClassifier(n_estimators=1000, criterion="entropy", class_weight="balanced")
+    sklearn_classifier = RandomForestClassifier(n_estimators=1000,
+                                                criterion="entropy",
+                                                class_weight="balanced",
+                                                random_state=15325)
     training_ratio = 0.5  # this is not enabled
     my_classifier = TradingClassifier(trading_pair, list_of_technical_indicators,
                                       sklearn_classifier, training_ratio)
     my_classifier.train(stock_data_training_set)
+    my_classifier.save_to_disk(os.path.join(definitions.TEST_DATA_DIR, "classifier.dill"))
     my_classifier.save_to_disk(os.path.join(definitions.DATA_DIR, "classifier.dill"))
 
     # predictions = my_classifier.predict(stock_data_testing_set, list_of_technical_indicators)

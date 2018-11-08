@@ -10,7 +10,7 @@ from src.containers.stock_data import StockData
 from src.feature_extraction.technical_indicator import TechnicalIndicator
 from src.mixins.save_load_mixin import DillSaveLoadMixin
 
-fudge_factor = 10000
+fudge_factor = 1000
 
 
 class TradingClassifier(DillSaveLoadMixin):
