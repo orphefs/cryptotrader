@@ -14,7 +14,7 @@ from src.analysis_tools.generate_run_statistics import compute_all_statistics
 from src.analysis_tools.run_metadata import FullPaths
 
 
-def convert_signals_to_mock_candles(signals: List[_TradingSignal]) -> List[Candle]:
+def convert_signals_to_backtest_candles(signals: List[_TradingSignal]) -> List[Candle]:
     return [Candle(price=Price(
         open_price=None,
         high_price=None,
@@ -32,35 +32,33 @@ def display_statistics(title: str, axis: Axes, path_to_live_portfolio_df_dill: s
 
 
 def main(path_to_live_portfolio_df_dill: str = None,
-         path_to_mock_portfolio_df_dill: str = None,
-         path_to_backtest_portfolio_df_dill: str = None):
+         path_to_backtest_portfolio_df_dill: str = None,
+         path_to_offline_portfolio_df_dill: str = None):
     fig, ax = plt.subplots(nrows=3, ncols=1, sharex="all", sharey="all")
 
-    live_signals = []
-    mock_signals = []
-    backtest_signals = []
+    ls, bs, ms = [], [], []
 
     if path_to_live_portfolio_df_dill is not None:
         live_portfolio_df = Portfolio.load_from_disk(path_to_live_portfolio_df_dill)
-        live_signals = live_portfolio_df.signals[1:]
+        live_signals = live_portfolio_df.signals
         plot_trading_signals(ax=ax[0], trading_signals=live_signals, color='k', label="live")
-        plot_close_price(ax=ax[0], candles=convert_signals_to_mock_candles(live_signals), color="k")
+        plot_close_price(ax=ax[0], candles=convert_signals_to_backtest_candles(live_signals), color="k")
         ls = [signal.price_point.date_time for signal in live_signals]
         display_statistics("Live Run", ax[0], path_to_live_portfolio_df_dill)
 
-    if path_to_mock_portfolio_df_dill is not None:
-        mock_portfolio_df = Portfolio.load_from_disk(path_to_mock_portfolio_df_dill)
-        mock_signals = mock_portfolio_df.signals[1:]
-        plot_trading_signals(ax=ax[1], trading_signals=mock_signals, color='r', label="mock")
-        ms = [signal.price_point.date_time for signal in mock_signals]
-        display_statistics("Mock Run", ax[1], path_to_mock_portfolio_df_dill)
-
     if path_to_backtest_portfolio_df_dill is not None:
         backtest_portfolio_df = Portfolio.load_from_disk(path_to_backtest_portfolio_df_dill)
-        backtest_signals = backtest_portfolio_df.signals[1:]
-        plot_trading_signals(ax=ax[2], trading_signals=backtest_signals, color='b', label="backtest")
-        bs = [signal.price_point.date_time for signal in backtest_signals]
-        display_statistics("Backtest Run", ax[2], path_to_backtest_portfolio_df_dill)
+        backtest_signals = backtest_portfolio_df.signals
+        plot_trading_signals(ax=ax[1], trading_signals=backtest_signals, color='r', label="backtest")
+        ms = [signal.price_point.date_time for signal in backtest_signals]
+        display_statistics("backtest Run", ax[1], path_to_backtest_portfolio_df_dill)
+
+    if path_to_offline_portfolio_df_dill is not None:
+        offline_portfolio_df = Portfolio.load_from_disk(path_to_offline_portfolio_df_dill)
+        offline_signals = offline_portfolio_df.signals
+        plot_trading_signals(ax=ax[2], trading_signals=offline_signals, color='b', label="offline")
+        bs = [signal.price_point.date_time for signal in offline_signals]
+        display_statistics("offline Run", ax[2], path_to_offline_portfolio_df_dill)
 
     dt = np.concatenate([ls, ms, bs])
     ax[0].set_xlim(xmin=np.min(dt), xmax=np.max(dt))
@@ -72,11 +70,11 @@ if __name__ == '__main__':
     parser = ArgumentParser(description="Convert metadata dill into csv")
     parser.add_argument("-live", dest="path_to_live_portfolio_df_dill", required=False,
                         help="live_portfolio_df.dill", action=FullPaths)
-    parser.add_argument("-mock", dest="path_to_mock_portfolio_df_dill", required=False,
-                        help="mock_portfolio_df.dill", action=FullPaths)
     parser.add_argument("-backtest", dest="path_to_backtest_portfolio_df_dill", required=False,
                         help="backtest_portfolio_df.dill", action=FullPaths)
+    parser.add_argument("-offline", dest="path_to_offline_portfolio_df_dill", required=False,
+                        help="offline_portfolio_df.dill", action=FullPaths)
     args = parser.parse_args()
     main(args.path_to_live_portfolio_df_dill,
-         args.path_to_mock_portfolio_df_dill,
-         args.path_to_backtest_portfolio_df_dill)
+         args.path_to_backtest_portfolio_df_dill,
+         args.path_to_offline_portfolio_df_dill)
