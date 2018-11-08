@@ -3,6 +3,7 @@ from importlib import reload
 from typing import Tuple, List
 import logging
 
+from src.analysis_tools.generate_run_statistics import cleanup_signals
 from src.containers.portfolio import Portfolio
 from src.definitions import DATA_DIR
 from src.run_backtest import run_backtest
@@ -39,12 +40,12 @@ def load_portfolio(path_to_offline_portfolio_df: str,
 def compare_lists(a: List, b: List):
     if not len(a) == len(b):
         return False
-    return len(a) == sum([1 for i, j in zip(a, b) if i == j])
+    return len(a) == len([i for i, j in zip(a, b) if i == j])
 
 
 def compare(offline_portfolio: Portfolio, backtest_portfolio: Portfolio):
-    offline_signals = offline_portfolio.signals
-    backtest_signals = backtest_portfolio.signals
+    offline_signals = cleanup_signals(offline_portfolio.signals)
+    backtest_signals = cleanup_signals(backtest_portfolio.signals)
 
     for t, b in zip(offline_signals, backtest_signals):
         print("offline run: {}".format(t))
