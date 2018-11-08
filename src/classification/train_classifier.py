@@ -64,21 +64,21 @@ def main():
         # AutoCorrelationTechnicalIndicator(Candle.get_volume, 4),
         AutoCorrelationTechnicalIndicator(Candle.get_close_price, 1),
         AutoCorrelationTechnicalIndicator(Candle.get_close_price, 2),
-        PPOTechnicalIndicator(Candle.get_close_price, 5, 1),
-        PPOTechnicalIndicator(Candle.get_close_price, 10, 4),
-        PPOTechnicalIndicator(Candle.get_close_price, 20, 1),
-        PPOTechnicalIndicator(Candle.get_close_price, 30, 10),
-        PPOTechnicalIndicator(Candle.get_number_of_trades, 5, 1),
-        PPOTechnicalIndicator(Candle.get_number_of_trades, 10, 2),
-        PPOTechnicalIndicator(Candle.get_number_of_trades, 15, 3),
+        # PPOTechnicalIndicator(Candle.get_close_price, 5, 1),
+        # PPOTechnicalIndicator(Candle.get_close_price, 10, 4),
+        # PPOTechnicalIndicator(Candle.get_close_price, 20, 1),
+        # PPOTechnicalIndicator(Candle.get_close_price, 30, 10),
+        # PPOTechnicalIndicator(Candle.get_number_of_trades, 5, 1),
+        # PPOTechnicalIndicator(Candle.get_number_of_trades, 10, 2),
+        # PPOTechnicalIndicator(Candle.get_number_of_trades, 15, 3),
         # PPOTechnicalIndicator(Candle.get_number_of_trades, 20, 1) / PPOTechnicalIndicator(Candle.get_volume, 20, 5),
-        PPOTechnicalIndicator(Candle.get_volume, 5, 1),
+        # PPOTechnicalIndicator(Candle.get_volume, 5, 1),
     ]
-    sklearn_classifier = RandomForestClassifier(max_depth=2,
+    sklearn_classifier = RandomForestClassifier(max_depth=1,
                                                 n_estimators=1000,
                                                 criterion="gini",
                                                 class_weight="balanced",
-                                                random_state=15325)
+                                                random_state=15345625)
     training_ratio = 0.5  # this is not enabled
     my_classifier = TradingClassifier(trading_pair, list_of_technical_indicators,
                                       sklearn_classifier, training_ratio)
