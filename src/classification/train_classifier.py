@@ -1,3 +1,4 @@
+import hashlib
 import logging
 import os
 from datetime import timedelta, datetime
@@ -21,7 +22,7 @@ from src.containers.stock_data import StockData
 from src.containers.time_windows import TimeWindow
 from src.definitions import DATA_DIR
 from src.feature_extraction.technical_indicator import AutoCorrelationTechnicalIndicator, \
-    PPOTechnicalIndicator
+    PPOTechnicalIndicator, TechnicalIndicator
 from src.live_logic.parameters import LiveParameters
 from src.plotting.plot_candles import custom_plot
 from src.type_aliases import Path
@@ -48,17 +49,17 @@ def generate_reference_to_prediction_portfolio(initial_capital, parameters, stoc
     return predicted_portfolio, predicted_signals, reference_portfolio, training_signals
 
 
-def main():
+def train_classifier(trading_pair: str,
+                     training_time_window: TimeWindow,
+                     technical_indicators: List[TechnicalIndicator],
+                     ):
+    
     trading_pair = "NEOBTC"
-
     training_time_window = TimeWindow(
         start_time=datetime(2018, 9, 1),
-        end_time=datetime(2018, 9, 30)
+        end_time=datetime(2018, 9, 2)
     )
-
-    stock_data_training_set = load_stock_data(training_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
-
-    list_of_technical_indicators = [
+    technical_indicators = [
         AutoCorrelationTechnicalIndicator(Candle.get_volume, 4),
         AutoCorrelationTechnicalIndicator(Candle.get_close_price, 1),
         AutoCorrelationTechnicalIndicator(Candle.get_close_price, 2),
@@ -74,6 +75,9 @@ def main():
         # PPOTechnicalIndicator(Candle.get_number_of_trades, 20, 1) / PPOTechnicalIndicator(Candle.get_volume, 20, 5),
         PPOTechnicalIndicator(Candle.get_volume, 5, 1),
     ]
+
+    stock_data_training_set = load_stock_data(training_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
+
     sklearn_classifier = RandomForestClassifier(max_depth=1,
                                                 n_estimators=1000,
                                                 criterion="gini",
@@ -82,11 +86,16 @@ def main():
 
     # sklearn_classifier = SVC(gamma="auto")
     training_ratio = 0.5  # this is not enabled
-    my_classifier = TradingClassifier(trading_pair, list_of_technical_indicators,
+    my_classifier = TradingClassifier(trading_pair, technical_indicators,
                                       sklearn_classifier, training_ratio)
     my_classifier.train(stock_data_training_set)
-    my_classifier.save_to_disk(os.path.join(definitions.TEST_DATA_DIR, "classifier.dill"))
-    my_classifier.save_to_disk(os.path.join(definitions.DATA_DIR, "classifier.dill"))
+    # my_classifier.save_to_disk(os.path.join(definitions.TEST_DATA_DIR, "classifier.dill"))
+    training_hash = hashlib.md5()
+    training_hash.update((str(trading_pair) + str(training_time_window)).encode("utf-8"))
+
+    my_classifier.save_to_disk(os.path.join(definitions.DATA_DIR,
+                                            "{}.dill".format(training_hash.hexdigest())))
+    return training_hash.hexdigest()
 
 
 def run_trained_classifier(trading_pair: str, trade_amount: float, path_to_stock_data: Path,
