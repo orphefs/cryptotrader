@@ -15,6 +15,8 @@ def run():
                                                trade_amount=100,
                                                path_to_stock_data=os.path.join(
                                                    DATA_DIR, "test", "test_data.dill"),
+                                               path_to_classifier=os.path.join(
+                                                   DATA_DIR, "classifier.dill"),
                                                path_to_log=os.path.join(DATA_DIR, "offline_run.log")
                                                )
 
