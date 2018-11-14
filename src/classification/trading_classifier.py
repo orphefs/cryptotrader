@@ -7,16 +7,18 @@ from src.classification.helpers import extract_indicators_from_stock_data, conve
     extract_indicator_from_candle, timeshift_predictions
 from src.containers.candle import Candle
 from src.containers.stock_data import StockData
+from src.containers.time_windows import TimeWindow
 from src.feature_extraction.technical_indicator import TechnicalIndicator
-from src.mixins.save_load_mixin import DillSaveLoadMixin
+from src.mixins.save_load_mixin import DillSaveLoadMixin, JsonSaveMixin
 
 fudge_factor = 1000
 
 
-class TradingClassifier(DillSaveLoadMixin):
+class TradingClassifier(DillSaveLoadMixin, JsonSaveMixin):
     def __init__(self, trading_pair: str,
                  list_of_technical_indicators: List[TechnicalIndicator],
                  sklearn_classifier: RandomForestClassifier,
+                 training_time_window: TimeWindow,
                  training_ratio: float):
         self._stock_data_live = StockData(candles=[], security=trading_pair)
         self._list_of_technical_indicators = list_of_technical_indicators
@@ -24,12 +26,17 @@ class TradingClassifier(DillSaveLoadMixin):
         self._is_candles_requirement_satisfied = False
         self._sklearn_classifier = sklearn_classifier
         self._training_ratio = training_ratio
+        self._training_time_window = training_time_window
         self._predictors = np.ndarray
         self._labels = np.ndarray
 
     @property
     def sklearn_classifier(self):
         return self._sklearn_classifier
+
+    @property
+    def training_time_window(self):
+        return self._training_time_window
 
     def _precondition(self, stock_data_training: StockData):
         training_data = extract_indicators_from_stock_data(stock_data_training,
@@ -72,4 +79,5 @@ class TradingClassifier(DillSaveLoadMixin):
     def __str__(self):
         return "Trading Pair: {}, Technical Indicators: {}".format(self._stock_data_live.security,
                                                                    self._list_of_technical_indicators)
+
 
