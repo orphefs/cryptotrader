@@ -34,3 +34,6 @@ class TimeWindow(object):
     def decrement_start_time_by_one_day(self):
         self._start_time -= timedelta(days=1)
         return self
+
+    def __str__(self):
+        return str(self._start_time) + str(self._end_time)
