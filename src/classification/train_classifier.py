@@ -2,7 +2,7 @@ import hashlib
 import logging
 import os
 from datetime import timedelta, datetime
-from typing import List
+from typing import List, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -25,7 +25,7 @@ from src.feature_extraction.technical_indicator import AutoCorrelationTechnicalI
     PPOTechnicalIndicator, TechnicalIndicator
 from src.live_logic.parameters import LiveParameters
 from src.plotting.plot_candles import custom_plot
-from src.type_aliases import Path
+from src.type_aliases import Path, Hash
 
 
 def generate_predicted_portfolio(initial_capital: int, parameters: LiveParameters,
@@ -52,8 +52,8 @@ def generate_reference_to_prediction_portfolio(initial_capital, parameters, stoc
 def train_classifier(trading_pair: str,
                      training_time_window: TimeWindow,
                      technical_indicators: List[TechnicalIndicator],
-                     ):
-    
+                     path_to_classifier: Path,
+                     ) -> Hash:
     trading_pair = "NEOBTC"
     training_time_window = TimeWindow(
         start_time=datetime(2018, 9, 1),
@@ -87,47 +87,50 @@ def train_classifier(trading_pair: str,
     # sklearn_classifier = SVC(gamma="auto")
     training_ratio = 0.5  # this is not enabled
     my_classifier = TradingClassifier(trading_pair, technical_indicators,
-                                      sklearn_classifier, training_ratio)
+                                      sklearn_classifier, training_time_window,training_ratio)
     my_classifier.train(stock_data_training_set)
     # my_classifier.save_to_disk(os.path.join(definitions.TEST_DATA_DIR, "classifier.dill"))
-    training_hash = hashlib.md5()
-    training_hash.update((str(trading_pair) + str(training_time_window)).encode("utf-8"))
-
-    my_classifier.save_to_disk(os.path.join(definitions.DATA_DIR,
-                                            "{}.dill".format(training_hash.hexdigest())))
-    return training_hash.hexdigest()
+    my_classifier.save_to_disk(path_to_classifier)
 
 
-def run_trained_classifier(trading_pair: str, trade_amount: float, path_to_stock_data: Path,
-                           path_to_portfolio: Path):
-    testing_time_window = TimeWindow(
-        start_time=datetime(2018, 11, 1),
-        end_time=datetime(2018, 11, 5)
-    )
-
-    stock_data_testing_set = load_stock_data(testing_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
+def run_trained_classifier(trading_pair: str,
+                           trade_amount: float,
+                           testing_data: Union[TimeWindow, StockData, Path],
+                           classifier: Union[Path, TradingClassifier],
+                           path_to_portfolio: Path, ):
+    stock_data_testing_set = None
+    if isinstance(testing_data, TimeWindow):
+        stock_data_testing_set = load_stock_data(testing_data, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
+    elif isinstance(testing_data, Path):
+        stock_data_testing_set = load_from_disk(testing_data)
+    elif isinstance(testing_data, StockData):
+        stock_data_testing_set = testing_data
+    assert isinstance(stock_data_testing_set, StockData)
 
     parameters = LiveParameters(
         update_period=timedelta(minutes=1),
         trade_amount=trade_amount,
         sleep_time=0
     )
-    my_classifier = TradingClassifier.load_from_disk(os.path.join(definitions.DATA_DIR, "classifier.dill"))
+    my_classifier = None
+    if isinstance(classifier, Path):
+        my_classifier = TradingClassifier.load_from_disk(classifier)
+    elif isinstance(classifier, TradingClassifier):
+        my_classifier = classifier
 
     initial_capital = 5
-    reference_portfolio, reference_signals = generate_reference_portfolio(
-        initial_capital, parameters, stock_data_testing_set)
+
     predicted_portfolio, predicted_signals = generate_predicted_portfolio(
         initial_capital, parameters, stock_data_testing_set, my_classifier)
     predicted_portfolio.save_to_disk(path_to_portfolio)
 
-    if 0:
-        plot_portfolios(
-            my_classifier,
-            predicted_portfolio,
-            reference_portfolio,
-            reference_signals,
-            predicted_signals)
+    # if 0:
+    #     plot_portfolios(
+    #         my_classifier,
+    #         predicted_portfolio,
+    #         reference_portfolio,
+    #         reference_signals,
+    #         predicted_signals)
 
 
 def plot_portfolios(my_classifier: TradingClassifier,

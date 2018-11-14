@@ -10,6 +10,7 @@ from src.containers.stock_data import StockData
 from src.containers.time_windows import TimeWindow
 from src.feature_extraction.technical_indicator import TechnicalIndicator
 from src.mixins.save_load_mixin import DillSaveLoadMixin, JsonSaveMixin
+from src.type_aliases import Path
 
 fudge_factor = 1000
 
@@ -29,8 +30,8 @@ class TradingClassifier:
         self._training_time_window = training_time_window
         self._predictors = np.ndarray
         self._labels = np.ndarray
-        self._dill_save_load = DillSaveLoadMixin
-        self._json_save = JsonSaveMixin
+        self._dill_save_load = DillSaveLoadMixin()
+        self._json_save = JsonSaveMixin()
 
     @property
     def sklearn_classifier(self):
@@ -78,12 +79,14 @@ class TradingClassifier:
         if len(self._stock_data_live.candles) >= self._maximum_lag:
             self._is_candles_requirement_satisfied = True
 
-    def save_to_disk(self, path_to_file: str):
-        self._dill_save_load.save_to_disk(path_to_file)
-        self._json_save.save_to_disk(path_to_file)
+    def save_to_disk(self, path_to_file: Path):
+        self._dill_save_load.save_to_disk(self,path_to_file)
+        self._json_save.save_to_disk(self,path_to_file)
 
-    def load_from_disk(self, path_to_file: str):
-        self._dill_save_load.load_from_disk(path_to_file)
+    @staticmethod
+    def load_from_disk(path_to_file: Path):
+        obj = DillSaveLoadMixin.load_from_disk(path_to_file)
+        return obj
 
     def __str__(self):
         return "Trading Pair: {}, Technical Indicators: {}".format(self._stock_data_live.security,

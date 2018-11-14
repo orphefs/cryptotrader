@@ -8,12 +8,13 @@ import pandas as pd
 from src import definitions
 from src.backtesting_logic.logic import Buy, Sell, Hold
 from src.containers.data_point import PricePoint
-from src.mixins.save_load_mixin import DillSaveLoadMixin
+from src.mixins.save_load_mixin import DillSaveLoadMixin, JsonSaveMixin
+from src.type_aliases import Path
 
 percentage = float
 
 
-class Portfolio(DillSaveLoadMixin):
+class Portfolio:
     def __init__(self, initial_capital: float, trade_amount: int):
         self._fees = 0.001  # 0.1% on binance
         self._trade_amount = trade_amount
@@ -26,6 +27,9 @@ class Portfolio(DillSaveLoadMixin):
         self._portfolio_df = pd.DataFrame(columns=['order_expenditure', 'cumulative_order_expenditure',
                                                    'remaining_capital'])
         self._point_stats = {}
+        self._dill_save_load = DillSaveLoadMixin()
+        self._json_save = JsonSaveMixin()
+
 
     @property
     def portfolio_df(self):
@@ -107,3 +111,12 @@ class Portfolio(DillSaveLoadMixin):
     def __str__(self):
         return "Trade Amount: {}, \n" \
                "Initial Capital: {}".format(self._trade_amount, self._initial_capital)
+
+    def save_to_disk(self, path_to_file: Path):
+        self._dill_save_load.save_to_disk(self,path_to_file)
+        self._json_save.save_to_disk(self,path_to_file)
+
+    @staticmethod
+    def load_from_disk(path_to_file: Path):
+        obj = DillSaveLoadMixin.load_from_disk(path_to_file)
+        return obj
