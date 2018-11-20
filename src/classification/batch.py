@@ -3,6 +3,7 @@ import os
 from datetime import datetime
 from typing import Set, List
 
+from src.helpers import generate_hash
 from src.classification.trading_classifier import TradingClassifier
 from src.classification.train_classifier import train_classifier, run_trained_classifier
 from src.containers.candle import Candle
@@ -11,7 +12,6 @@ from src.definitions import DATA_DIR
 from src.feature_extraction.technical_indicator import TechnicalIndicator, PPOTechnicalIndicator, \
     AutoCorrelationTechnicalIndicator
 from src.type_aliases import Hash, Path
-import simplejson as json
 
 
 def generate_time_windows() -> List[TimeWindow]:
@@ -74,14 +74,6 @@ def run_batch():
     return training_hashes, testing_hashes
 
 
-
-def generate_session_hash(*args) -> Hash:
-    training_hash = hashlib.md5()
-    for token in args:
-        training_hash.update(str(token).encode("utf-8"))
-    return training_hash.hexdigest()
-
-
 def batch_train(training_time_windows: List[TimeWindow],
                 trading_pair: str,
                 number_of_training_runs: int,
@@ -90,7 +82,7 @@ def batch_train(training_time_windows: List[TimeWindow],
     hashes = []
     for training_time_window in training_time_windows:
         for i in range(0, number_of_training_runs):
-            training_session_hash = generate_session_hash(training_time_window, trading_pair, i)
+            training_session_hash = generate_hash(training_time_window, trading_pair, i)
             path_to_classifier = os.path.join(DATA_DIR, "classifier_{}.dill".format(training_session_hash))
             train_classifier(trading_pair=trading_pair,
                              training_time_window=training_time_window,
@@ -111,7 +103,7 @@ def batch_test(testing_time_windows: List[TimeWindow],
     for testing_time_window in testing_time_windows:
         if not training_time_window.__is_overlap__(testing_time_window):
             for i in range(0, number_of_testing_runs):
-                testing_session_hash = generate_session_hash(testing_time_window, trading_pair, i)
+                testing_session_hash = generate_hash(testing_time_window, trading_pair, i)
                 path_to_portfolio = os.path.join(DATA_DIR, "portfolio_{}.dill".format(testing_session_hash))
                 run_trained_classifier(trading_pair=trading_pair,
                                        trade_amount=trade_amount,
@@ -125,8 +117,6 @@ def batch_test(testing_time_windows: List[TimeWindow],
     return set(hashes)
 
 
-def generate_hash():
-    pass
 
 
 if __name__ == '__main__':

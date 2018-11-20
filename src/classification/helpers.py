@@ -1,4 +1,5 @@
 import logging
+import warnings
 from collections import defaultdict
 from typing import DefaultDict, List
 
@@ -46,6 +47,9 @@ def get_training_labels(stock_data: StockData):
 def update_indicators(candle: Candle, training_data: DefaultDict,
                       list_of_technical_indicators: List[TechnicalIndicator]):
     for indicator in list_of_technical_indicators:
+        if indicator.technical_indicator_name is None:
+            warnings.warn("You must explicitly specify a unique name for the technical indicator "
+                          "(property technical_indicator_name)", NoUniqueNameforCompoundTechnicalIndicatorWarning)
         indicator.update(candle)
         indicator_key = str(indicator)
         training_data[indicator_key].append(indicator.result)
@@ -66,3 +70,7 @@ def timeshift_predictions(labels: pd.Series) -> pd.Series:
     ser = pd.Series(np.roll(labels, -1))
     ser.index += 1
     return ser
+
+
+class NoUniqueNameforCompoundTechnicalIndicatorWarning(UserWarning):
+    pass

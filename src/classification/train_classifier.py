@@ -1,6 +1,7 @@
 import hashlib
 import logging
 import os
+import random
 from datetime import timedelta, datetime
 from typing import List, Union
 
@@ -20,7 +21,7 @@ from src.containers.candle import Candle
 from src.containers.portfolio import Portfolio
 from src.containers.stock_data import StockData
 from src.containers.time_windows import TimeWindow
-from src.definitions import DATA_DIR
+from src.definitions import DATA_DIR, TEST_DATA_DIR
 from src.feature_extraction.technical_indicator import AutoCorrelationTechnicalIndicator, \
     PPOTechnicalIndicator, TechnicalIndicator
 from src.live_logic.parameters import LiveParameters
@@ -54,40 +55,18 @@ def train_classifier(trading_pair: str,
                      technical_indicators: List[TechnicalIndicator],
                      path_to_classifier: Path,
                      ) -> Hash:
-    trading_pair = "NEOBTC"
-    training_time_window = TimeWindow(
-        start_time=datetime(2018, 9, 1),
-        end_time=datetime(2018, 9, 2)
-    )
-    technical_indicators = [
-        AutoCorrelationTechnicalIndicator(Candle.get_volume, 4),
-        AutoCorrelationTechnicalIndicator(Candle.get_close_price, 1),
-        AutoCorrelationTechnicalIndicator(Candle.get_close_price, 2),
-        PPOTechnicalIndicator(Candle.get_close_price, 5, 1),
-        PPOTechnicalIndicator(Candle.get_close_price, 10, 4),
-        PPOTechnicalIndicator(Candle.get_close_price, 20, 1),
-        # PPOTechnicalIndicator(Candle.get_close_price, 20, 5),
-        # PPOTechnicalIndicator(Candle.get_close_price, 20, 10),
-        PPOTechnicalIndicator(Candle.get_close_price, 30, 10),
-        PPOTechnicalIndicator(Candle.get_number_of_trades, 5, 1),
-        PPOTechnicalIndicator(Candle.get_number_of_trades, 10, 2),
-        PPOTechnicalIndicator(Candle.get_number_of_trades, 15, 3),
-        # PPOTechnicalIndicator(Candle.get_number_of_trades, 20, 1) / PPOTechnicalIndicator(Candle.get_volume, 20, 5),
-        PPOTechnicalIndicator(Candle.get_volume, 5, 1),
-    ]
-
     stock_data_training_set = load_stock_data(training_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
 
-    sklearn_classifier = RandomForestClassifier(max_depth=1,
-                                                n_estimators=1000,
-                                                criterion="gini",
-                                                class_weight="balanced",
-                                                random_state=15345625)
+    sklearn_classifier = RandomForestClassifier(max_depth=2,
+                                                # n_estimators=1000,
+                                                # criterion="gini",
+                                                # class_weight="balanced",
+                                                random_state=random.seed(1234))
 
     # sklearn_classifier = SVC(gamma="auto")
     training_ratio = 0.5  # this is not enabled
     my_classifier = TradingClassifier(trading_pair, technical_indicators,
-                                      sklearn_classifier, training_time_window,training_ratio)
+                                      sklearn_classifier, training_time_window, training_ratio)
     my_classifier.train(stock_data_training_set)
     # my_classifier.save_to_disk(os.path.join(definitions.TEST_DATA_DIR, "classifier.dill"))
     my_classifier.save_to_disk(path_to_classifier)
@@ -154,8 +133,30 @@ if __name__ == "__main__":
         level=logging.DEBUG,
     )
 
-    # main()
-    run_trained_classifier(trading_pair="NEOBTC",
-                           trade_amount=100,
-                           path_to_stock_data="/home/orphefs/Documents/Code/autotrader/autotrader/data/local_data_01_Oct,_2018_02_Oct,_2018_NEOBTC_1m.dill",
-                           path_to_portfolio="/home/orphefs/Documents/Code/autotrader/autotrader/data/offline_portfolio.dill")
+    train_classifier(trading_pair="NEOBTC",
+                     training_time_window=TimeWindow(
+                         start_time=datetime(2018, 9, 1),
+                         end_time=datetime(2018, 9, 2)
+                     ),
+                     technical_indicators=[
+                         AutoCorrelationTechnicalIndicator(Candle.get_volume, 4),
+                         AutoCorrelationTechnicalIndicator(Candle.get_close_price, 1),
+                         AutoCorrelationTechnicalIndicator(Candle.get_close_price, 2),
+                         PPOTechnicalIndicator(Candle.get_close_price, 5, 1),
+                         PPOTechnicalIndicator(Candle.get_close_price, 10, 4),
+                         PPOTechnicalIndicator(Candle.get_close_price, 20, 1),
+                         # PPOTechnicalIndicator(Candle.get_close_price, 20, 5),
+                         # PPOTechnicalIndicator(Candle.get_close_price, 20, 10),
+                         PPOTechnicalIndicator(Candle.get_close_price, 30, 10),
+                         PPOTechnicalIndicator(Candle.get_number_of_trades, 5, 1),
+                         PPOTechnicalIndicator(Candle.get_number_of_trades, 10, 2),
+                         PPOTechnicalIndicator(Candle.get_number_of_trades, 15, 3),
+                         # PPOTechnicalIndicator(Candle.get_number_of_trades, 20, 1) / PPOTechnicalIndicator(Candle.get_volume, 20, 5),
+                         PPOTechnicalIndicator(Candle.get_volume, 5, 1),
+                     ],
+                     path_to_classifier=os.path.join(TEST_DATA_DIR, "classifier.dill"))
+    if 0:
+        run_trained_classifier(trading_pair="NEOBTC",
+                               trade_amount=100,
+                               path_to_stock_data="/home/orphefs/Documents/Code/autotrader/autotrader/data/local_data_01_Oct,_2018_02_Oct,_2018_NEOBTC_1m.dill",
+                               path_to_portfolio="/home/orphefs/Documents/Code/autotrader/autotrader/data/offline_portfolio.dill")

@@ -58,7 +58,9 @@ class TradingClassifier:
     def predict(self, stock_data: StockData):
         '''Return Buy/Sell/Hold prediction for a stock dataset.
         stock_data.candles must be of length at least self._maximum_lag'''
-        testing_data = extract_indicators_from_stock_data(stock_data, self._list_of_technical_indicators)
+        testing_data = extract_indicators_from_stock_data(stock_data,
+                                                          self._list_of_technical_indicators)
+        # print(testing_data)
         predictors, _ = convert_to_pandas(predictors=testing_data, labels=None)
         predictors *= fudge_factor
         # TODO: Implement trading based on probabilities

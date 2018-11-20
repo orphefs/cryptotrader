@@ -31,6 +31,17 @@ class TechnicalIndicator(ABC, OperatorOverloadsMixin):
         self._compute_callback = Callable
         self._feature_getter_callback = feature_getter_callback
         self._result = float
+        self._technical_indicator_name = "{}_{}_{}".format(type(self).__name__,
+                                                           self._feature_getter_callback.__name__,
+                                                           self._lags)
+
+    @property
+    def technical_indicator_name(self):
+        return self._technical_indicator_name
+
+    @technical_indicator_name.setter
+    def technical_indicator_name(self, name: str):
+        self._technical_indicator_name = name
 
     @property
     def lags(self):
@@ -49,9 +60,7 @@ class TechnicalIndicator(ABC, OperatorOverloadsMixin):
         raise NotImplementedError
 
     def __str__(self):
-        return "{}_{}_{}".format(type(self).__name__,
-                                 self._feature_getter_callback.__name__,
-                                 self._lags)
+        return self.technical_indicator_name
 
 
 class CompoundTechnicalIndicator(OperatorOverloadsMixin):
@@ -64,6 +73,15 @@ class CompoundTechnicalIndicator(OperatorOverloadsMixin):
         self._operator_callback = operator_callback
         self._lags = max([self._technical_indicator_1.lags,
                           self._technical_indicator_2.lags])
+        self._technical_indicator_name = None
+
+    @property
+    def technical_indicator_name(self):
+        return self._technical_indicator_name
+
+    @technical_indicator_name.setter
+    def technical_indicator_name(self, name: str):
+        self._technical_indicator_name = name
 
     @property
     def lags(self):
@@ -82,6 +100,12 @@ class CompoundTechnicalIndicator(OperatorOverloadsMixin):
         else:
             self._result = self._operator_callback(self._technical_indicator_1.result,
                                                    self._technical_indicator_2.result)
+
+    def set_technical_indicator_name(self, technical_indicator_name: str):
+        self._technical_indicator_name = technical_indicator_name
+
+    def __str__(self):
+        return self._technical_indicator_name
 
 
 class MovingAverageTechnicalIndicator(TechnicalIndicator):
@@ -155,9 +179,33 @@ class PriceTechnicalIndicator(TechnicalIndicator):
 
 
 def PPOTechnicalIndicator(feature_getter_callback: Callable, slow_ma_lag: int, fast_ma_lag: int):
-    return (MovingAverageTechnicalIndicator(feature_getter_callback, fast_ma_lag) -
-            MovingAverageTechnicalIndicator(feature_getter_callback, slow_ma_lag)) / MovingAverageTechnicalIndicator(
+    obj = (MovingAverageTechnicalIndicator(feature_getter_callback, fast_ma_lag) -
+           MovingAverageTechnicalIndicator(feature_getter_callback, slow_ma_lag)) / MovingAverageTechnicalIndicator(
         feature_getter_callback, slow_ma_lag)
+    obj.technical_indicator_name = "PPOTechnicalIndicator_{}_{}_{}".format(feature_getter_callback.__name__,
+                                                                             slow_ma_lag,
+                                                                             fast_ma_lag)
+    return obj
+
+
+# class PPOTechnicalIndicator(CompoundTechnicalIndicator):
+#     def __init__(self, feature_getter_callback: Callable, slow_ma_lag: int, fast_ma_lag: int, technical_indicator_1,
+#                  technical_indicator_2, operator_callback: Callable):
+#         super().__init__(technical_indicator_1, technical_indicator_2, operator_callback)
+#         self._feature_getter_callback = feature_getter_callback
+#         self._slow_ma_lag = slow_ma_lag
+#         self._fast_ma_lag = fast_ma_lag
+#         self._obj = (MovingAverageTechnicalIndicator(feature_getter_callback, fast_ma_lag) -
+#             MovingAverageTechnicalIndicator(feature_getter_callback, slow_ma_lag)) / MovingAverageTechnicalIndicator(
+#         feature_getter_callback, slow_ma_lag)
+#
+#     def __call__(self):
+#         return self._obj
+#
+#     def __str__(self):
+#         return "PPOTechnicalIndicator_{}_{}_{}".format(self._feature_getter_callback.__name__,
+#                                                            self._slow_ma_lag,
+#                                                        self._fast_ma_lag)
 
 
 # class OnBalanceVolumeTechnicalIndicator(TechnicalIndicator):
@@ -182,12 +230,11 @@ def PPOTechnicalIndicator(feature_getter_callback: Callable, slow_ma_lag: int, f
 
 if __name__ == "__main__":
 
-
     compound_maverage = (
-                            MovingAverageTechnicalIndicator(Candle.get_close_price,
-                                                            10) - AutoCorrelationTechnicalIndicator(
-                                Candle.get_close_price, 10)) / MovingAverageTechnicalIndicator(Candle.get_close_price,
-                                                                                               10)
+                                MovingAverageTechnicalIndicator(Candle.get_close_price,
+                                                                10) - AutoCorrelationTechnicalIndicator(
+                            Candle.get_close_price, 10)) / MovingAverageTechnicalIndicator(Candle.get_close_price,
+                                                                                           10)
 
     stock_data = load_from_disk(
         os.path.join(definitions.DATA_DIR, "local_data_15_Jan,_2018_01_Mar,_2018_XRPBTC.dill"))

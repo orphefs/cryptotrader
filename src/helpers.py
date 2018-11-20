@@ -1,10 +1,12 @@
 # function computes SMA and EMA based on period fed to it
+import hashlib
 from datetime import timedelta
 from typing import List, Callable
 
 from src.containers.candle import Candle
 from src.containers.time_series import TimeSeries
 from src.containers.stock_data import StockData
+from src.type_aliases import Hash
 
 
 def simple_moving_average(SMA, EMA, p, closing_prices, closing_price_averaging_period):
@@ -49,3 +51,10 @@ def is_time_difference_larger_than_threshold(current_candle: Candle, previous_ca
 
 def get_capital_from_account(capital_security: str) -> float:
     return 5.0
+
+
+def generate_hash(*args) -> Hash:
+    training_hash = hashlib.md5()
+    for token in args:
+        training_hash.update(str(token).encode("utf-8"))
+    return training_hash.hexdigest()

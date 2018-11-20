@@ -22,17 +22,6 @@ def load_stock_data() -> StockData:
     return stock_data
 
 
-def test_repeatability_of_classifier_predictions():
 
-    stock_data = load_stock_data()
-
-    predicted_values = []
-    for i in range(10):
-        classifier = []
-        classifier = load_classifier()
-        result = classifier.predict(stock_data)
-        print(result)
-        predicted_values.append(result)
-
-    assert 9 == sum([is_equal(previous_answer, next_answer) for previous_answer, next_answer in
-                         zip(predicted_values[0:], predicted_values[1:])])
+def test_convert_to_pandas():
+    pass
