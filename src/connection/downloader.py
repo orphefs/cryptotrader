@@ -1,3 +1,4 @@
+import logging
 import os
 from datetime import datetime, timedelta
 from typing import List, Tuple
@@ -15,6 +16,7 @@ from src.containers.time_series import TimeSeries
 from src.containers.time_windows import TimeWindow, Date
 from src.connection.connection_handling import retry_on_network_error
 from src.type_aliases import Security
+
 
 
 def calculate_sampling_rate_of_stock_data(stock_data: StockData) -> float:
@@ -83,15 +85,16 @@ def load_stock_data(time_window: TimeWindow, security: str, api_interval_callbac
     if os.path.isfile(path_to_file):
         stock_data = load_from_disk(path_to_file)
     else:
+        logging.info("Downloading stock data for {} from {} to {}".format(security, time_window.start_datetime, time_window.end_datetime))
         start = datetime.now()
         # extended_time_window = copy.deepcopy(
         #     time_window).increment_end_time_by_one_day().decrement_start_time_by_one_day()
         candles = download_backtesting_data(time_window, security, api_interval_callback)
         # candles = finetune_time_window(candles, time_window)
         stop = datetime.now()
-        print("Elapsed download time: {}".format(stop - start))
-        for candle in candles:
-            print("{}\n".format(candle))
+        logging.info("Elapsed download time: {}".format(stop - start))
+        # for candle in candles:
+        #     print("{}\n".format(candle))
         stock_data = StockData(candles, security)
         save_to_disk(stock_data, path_to_file)
     return stock_data
@@ -102,7 +105,6 @@ def download_test_data():
     time_window = TimeWindow(start_time=datetime(2018, 5, 20, 6, 00),
                              end_time=datetime(2018, 5, 21, 8, 00))
     candles = download_backtesting_data(time_window, security, Client.KLINE_INTERVAL_1MINUTE)[-5:]
-    print(candles)
     stock_data = StockData(candles, security)
     save_to_disk(stock_data, os.path.join(definitions.DATA_DIR, "test_data.dill"))
 

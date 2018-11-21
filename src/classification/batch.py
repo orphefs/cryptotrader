@@ -14,6 +14,13 @@ from src.feature_extraction.technical_indicator import TechnicalIndicator, PPOTe
 from src.type_aliases import Hash, Path
 import numpy as np
 from random import randint
+import logging
+
+logging.basicConfig(
+        filename=os.path.join(DATA_DIR, "batch_runner.log"), filemode='w',
+        # stream=sys.stdout,
+        level=logging.DEBUG,
+    )
 
 
 def generate_sample_time_windows() -> List[TimeWindow]:
