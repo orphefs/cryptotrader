@@ -1,12 +1,13 @@
 import os
 from collections import defaultdict
-from typing import Union
+from typing import Union, Optional
 
 import logging
 import pandas as pd
 
 from src import definitions
 from src.backtesting_logic.logic import Buy, Sell, Hold
+from src.classification.trading_classifier import TradingClassifier
 from src.containers.data_point import PricePoint
 from src.mixins.save_load_mixin import DillSaveLoadMixin, JsonSaveMixin
 from src.type_aliases import Path
@@ -15,9 +16,10 @@ percentage = float
 
 
 class Portfolio:
-    def __init__(self, initial_capital: float, trade_amount: int):
+    def __init__(self, initial_capital: float, trade_amount: int, classifier: Optional[TradingClassifier] = None):
         self._fees = 0.001  # 0.1% on binance
         self._trade_amount = trade_amount
+        self._classifier = classifier
         self._signals = []
         self._capital = []
         self._initial_capital = initial_capital
@@ -30,6 +32,10 @@ class Portfolio:
         self._dill_save_load = DillSaveLoadMixin()
         self._json_save = JsonSaveMixin()
 
+
+    @property
+    def classifier(self):
+        return self._classifier
 
     @property
     def portfolio_df(self):
