@@ -12,7 +12,7 @@ from src.feature_extraction.technical_indicator import TechnicalIndicator
 from src.mixins.save_load_mixin import DillSaveLoadMixin, JsonSaveMixin
 from src.type_aliases import Path
 
-fudge_factor = 1000
+fudge_factor = 1000 # scaling factor to avoid inputting really tiny values to the classifier (may cause instabilities)
 
 
 class TradingClassifier:
@@ -60,7 +60,6 @@ class TradingClassifier:
         stock_data.candles must be of length at least self._maximum_lag'''
         testing_data = extract_indicators_from_stock_data(stock_data,
                                                           self._list_of_technical_indicators)
-        # print(testing_data)
         predictors, _ = convert_to_pandas(predictors=testing_data, labels=None)
         predictors *= fudge_factor
         # TODO: Implement trading based on probabilities
@@ -73,7 +72,6 @@ class TradingClassifier:
         predictors, _ = convert_to_pandas(predictors=testing_data, labels=None)
         predictors *= fudge_factor
         predicted_values = self._sklearn_classifier.predict(predictors)
-        # print(self._sklearn_classifier.predict_proba(predictors))
         return predicted_values
 
     def append_new_candle(self, candle: Candle):
