@@ -12,14 +12,29 @@ from src.definitions import DATA_DIR
 from src.feature_extraction.technical_indicator import TechnicalIndicator, PPOTechnicalIndicator, \
     AutoCorrelationTechnicalIndicator
 from src.type_aliases import Hash, Path
+import numpy as np
+from random import randint
 
 
-def generate_time_windows() -> List[TimeWindow]:
+def generate_sample_time_windows() -> List[TimeWindow]:
     return [
         TimeWindow(datetime(2018, 5, 5), datetime(2018, 5, 6)),
         TimeWindow(datetime(2018, 5, 7), datetime(2018, 5, 8)),
         TimeWindow(datetime(2018, 5, 10), datetime(2018, 5, 11)),
     ]
+
+
+def generate_time_windows(number_of_time_windows: int) -> List[TimeWindow]:
+    time_windows = []
+    for i in range(0, number_of_time_windows):
+        duration_days = randint(1, 5)
+        start_day = randint(1, 19)
+        end_day = start_day + duration_days
+        time_windows.append(TimeWindow(
+            start_time=datetime(2018, 6, start_day),
+            end_time=datetime(2018, 6, end_day))
+        )
+    return time_windows
 
 
 def generate_path_to_portfolio(testing_hash: str,
@@ -77,8 +92,8 @@ def batch_test(testing_time_windows: List[TimeWindow],
 def run_batch():
     trading_pair = "NEOBTC"
     trade_amount = 50
-    training_time_windows = generate_time_windows()
-    testing_time_windows = generate_time_windows()
+    training_time_windows = generate_time_windows(10)
+    testing_time_windows = generate_time_windows(10)
     training_hashes = batch_train(
         training_time_windows=training_time_windows,
         trading_pair=trading_pair,
