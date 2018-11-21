@@ -2,6 +2,7 @@ import os
 from importlib import reload
 from typing import Tuple, List
 import logging
+import pytest
 
 from src.analysis_tools.generate_run_statistics import cleanup_signals
 from src.containers.portfolio import Portfolio
@@ -57,12 +58,9 @@ def compare(offline_portfolio: Portfolio, backtest_portfolio: Portfolio):
     assert compare_lists(offline_signals, backtest_signals)
 
 
-def main():
+def test_compare_runs():
     path_to_offline_portfolio_df, path_to_backtest_portfolio_df = run()
     offline_portfolio, backtest_portfolio = load_portfolio(
         path_to_offline_portfolio_df, path_to_backtest_portfolio_df)
     compare(offline_portfolio, backtest_portfolio)
 
-
-if __name__ == '__main__':
-    main()
