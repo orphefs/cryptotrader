@@ -31,49 +31,6 @@ def generate_path_to_portfolio(testing_hash: str,
     return os.path.join(DATA_DIR, "portfolio_{}".format(m.hexdigest()))
 
 
-def run_batch():
-    trading_pair = "NEOBTC"
-    trade_amount = 50
-    training_time_windows = generate_time_windows()
-    testing_time_windows = generate_time_windows()
-    training_hashes = batch_train(
-        training_time_windows=training_time_windows,
-        trading_pair=trading_pair,
-        number_of_training_runs=1,
-        technical_indicators=[
-            AutoCorrelationTechnicalIndicator(Candle.get_volume, 4),
-            AutoCorrelationTechnicalIndicator(Candle.get_close_price, 1),
-            AutoCorrelationTechnicalIndicator(Candle.get_close_price, 2),
-            PPOTechnicalIndicator(Candle.get_close_price, 5, 1),
-            PPOTechnicalIndicator(Candle.get_close_price, 10, 4),
-            PPOTechnicalIndicator(Candle.get_close_price, 20, 1),
-            # PPOTechnicalIndicator(Candle.get_close_price, 20, 5),
-            # PPOTechnicalIndicator(Candle.get_close_price, 20, 10),
-            PPOTechnicalIndicator(Candle.get_close_price, 30, 10),
-            PPOTechnicalIndicator(Candle.get_number_of_trades, 5, 1),
-            PPOTechnicalIndicator(Candle.get_number_of_trades, 10, 2),
-            PPOTechnicalIndicator(Candle.get_number_of_trades, 15, 3),
-            # PPOTechnicalIndicator(Candle.get_number_of_trades, 20, 1) / PPOTechnicalIndicator(Candle.get_volume, 20, 5),
-            PPOTechnicalIndicator(Candle.get_volume, 5, 1),
-        ])
-    testing_hashes = []
-    for training_hash in training_hashes:
-        path_to_classifier = os.path.join(DATA_DIR, "classifier_{}.dill".format(training_hash))
-        print(path_to_classifier)
-        classifier = TradingClassifier.load_from_disk(path_to_classifier)
-        print(type(classifier))
-        testing_hashes += batch_test(
-            testing_time_windows=testing_time_windows,
-            trading_pair=trading_pair,
-            trade_amount=trade_amount,
-            number_of_testing_runs=1,
-            classifier=classifier
-
-        )
-
-    return training_hashes, testing_hashes
-
-
 def batch_train(training_time_windows: List[TimeWindow],
                 trading_pair: str,
                 number_of_training_runs: int,
@@ -117,6 +74,44 @@ def batch_test(testing_time_windows: List[TimeWindow],
     return set(hashes)
 
 
+def run_batch():
+    trading_pair = "NEOBTC"
+    trade_amount = 50
+    training_time_windows = generate_time_windows()
+    testing_time_windows = generate_time_windows()
+    training_hashes = batch_train(
+        training_time_windows=training_time_windows,
+        trading_pair=trading_pair,
+        number_of_training_runs=1,
+        technical_indicators=[
+            AutoCorrelationTechnicalIndicator(Candle.get_volume, 4),
+            AutoCorrelationTechnicalIndicator(Candle.get_close_price, 1),
+            AutoCorrelationTechnicalIndicator(Candle.get_close_price, 2),
+            PPOTechnicalIndicator(Candle.get_close_price, 5, 1),
+            PPOTechnicalIndicator(Candle.get_close_price, 10, 4),
+            PPOTechnicalIndicator(Candle.get_close_price, 20, 1),
+            PPOTechnicalIndicator(Candle.get_close_price, 30, 10),
+            PPOTechnicalIndicator(Candle.get_number_of_trades, 5, 1),
+            PPOTechnicalIndicator(Candle.get_number_of_trades, 10, 2),
+            PPOTechnicalIndicator(Candle.get_number_of_trades, 15, 3),
+            PPOTechnicalIndicator(Candle.get_volume, 5, 1),
+        ])
+    testing_hashes = []
+    for training_hash in training_hashes:
+        path_to_classifier = os.path.join(DATA_DIR, "classifier_{}.dill".format(training_hash))
+        print(path_to_classifier)
+        classifier = TradingClassifier.load_from_disk(path_to_classifier)
+        print(type(classifier))
+        testing_hashes += batch_test(
+            testing_time_windows=testing_time_windows,
+            trading_pair=trading_pair,
+            trade_amount=trade_amount,
+            number_of_testing_runs=2,
+            classifier=classifier
+
+        )
+
+    return training_hashes, testing_hashes
 
 
 if __name__ == '__main__':
