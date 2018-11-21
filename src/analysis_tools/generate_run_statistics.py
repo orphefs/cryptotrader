@@ -8,6 +8,7 @@ import numpy as np
 
 from src.backtesting_logic.logic import Sell, Buy, Hold
 from src.containers.portfolio import Portfolio
+from src.containers.time_windows import TimeWindow
 from src.definitions import DATA_DIR
 from src.analysis_tools.run_metadata import FullPaths
 
@@ -105,13 +106,16 @@ def compute_all_statistics(path_to_portfolio_df_dill: str):
     percentage_gains = calculate_percentage_gains(portfolio, order_pairs)
     index_performance = calculate_index_performance(order_pairs)
     net = compute_profits_and_losses(order_pairs)
-    return order_pairs, percentage_gains, index_performance
+    classifier_time_window = portfolio.classifier.training_time_window
+    return order_pairs, percentage_gains, index_performance, classifier_time_window
 
 
 def display_and_plot(order_pairs: List[Tuple[Union[Buy,Sell]]],
                      percentage_gains: PercentageGains,
                      index_performance: IndexPerformance,
+                     classifier_time_window: TimeWindow,
                      ):
+    print("Classifier training period: {}".format(classifier_time_window))
     print(display_timeframe(order_pairs))
     print(percentage_gains)
     print(index_performance)
@@ -125,5 +129,5 @@ if __name__ == '__main__':
                         help="input .dill", action=FullPaths)
     args = parser.parse_args()
     print("Input from {}".format(args.input_filename))
-    order_pairs, percentage_gains, index_performance = compute_all_statistics(args.input_filename)
-    display_and_plot(order_pairs, percentage_gains, index_performance)
+    order_pairs, percentage_gains, index_performance, classifier_time_window = compute_all_statistics(args.input_filename)
+    display_and_plot(order_pairs, percentage_gains, index_performance, classifier_time_window)
