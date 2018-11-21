@@ -75,7 +75,7 @@ def batch_test(testing_time_windows: List[TimeWindow],
     for testing_time_window in testing_time_windows:
         if not training_time_window.__is_overlap__(testing_time_window):
             for i in range(0, number_of_testing_runs):
-                testing_session_hash = generate_hash(testing_time_window, trading_pair, i)
+                testing_session_hash = generate_hash(training_time_window, testing_time_window, trading_pair, i)
                 path_to_portfolio = os.path.join(DATA_DIR, "portfolio_{}.dill".format(testing_session_hash))
                 run_trained_classifier(trading_pair=trading_pair,
                                        trade_amount=trade_amount,
