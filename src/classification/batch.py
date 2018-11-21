@@ -84,6 +84,7 @@ def batch_test(testing_time_windows: List[TimeWindow],
             for i in range(0, number_of_testing_runs):
                 testing_session_hash = generate_hash(training_time_window, testing_time_window, trading_pair, i)
                 path_to_portfolio = os.path.join(DATA_DIR, "portfolio_{}.dill".format(testing_session_hash))
+                logging.info("Saving portfolio to {}".format(path_to_portfolio))
                 run_trained_classifier(trading_pair=trading_pair,
                                        trade_amount=trade_amount,
                                        testing_data=testing_time_window,
