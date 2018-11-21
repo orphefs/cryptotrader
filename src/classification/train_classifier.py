@@ -58,10 +58,10 @@ def train_classifier(trading_pair: str,
                      ) -> Hash:
     stock_data_training_set = load_stock_data(training_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
 
-    sklearn_classifier = RandomForestClassifier(max_depth=2,
-                                                # n_estimators=1000,
+    sklearn_classifier = RandomForestClassifier(max_depth=5,
+                                                n_estimators=10,
                                                 # criterion="gini",
-                                                # class_weight="balanced",
+                                                class_weight="balanced",
                                                 random_state=random.seed(1234))
 
     # sklearn_classifier = SVC(gamma="auto")
