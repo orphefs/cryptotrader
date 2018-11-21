@@ -32,7 +32,8 @@ from src.type_aliases import Path, Hash
 def generate_predicted_portfolio(initial_capital: int, parameters: LiveParameters,
                                  stock_data_testing_set: StockData, classifier: TradingClassifier):
     predicted_portfolio = Portfolio(initial_capital=initial_capital,
-                                    trade_amount=parameters.trade_amount)
+                                    trade_amount=parameters.trade_amount,
+                                    classifier=classifier)
 
     classifier, predicted_portfolio, predicted_signals = generate_all_signals_at_once(stock_data_testing_set,
                                                                                       classifier,
@@ -154,7 +155,7 @@ if __name__ == "__main__":
                          # PPOTechnicalIndicator(Candle.get_number_of_trades, 20, 1) / PPOTechnicalIndicator(Candle.get_volume, 20, 5),
                          PPOTechnicalIndicator(Candle.get_volume, 5, 1),
                      ],
-                     path_to_classifier=os.path.join(TEST_DATA_DIR, "classifier.dill"))
+                     path_to_classifier=os.path.join(DATA_DIR, "classifier.dill"))
     if 0:
         run_trained_classifier(trading_pair="NEOBTC",
                                trade_amount=100,
