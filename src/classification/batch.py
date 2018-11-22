@@ -118,8 +118,8 @@ def batch_test(testing_time_windows: List[TimeWindow],
 def run_batch():
     trading_pair = "NEOBTC"
     trade_amount = 50
-    training_time_windows = generate_sample_time_windows()
-    testing_time_windows = generate_sample_time_windows()
+    training_time_windows = generate_time_windows(10)
+    testing_time_windows = generate_time_windows(10)
     training_hashes = batch_train(
         training_time_windows=training_time_windows,
         trading_pair=trading_pair,
