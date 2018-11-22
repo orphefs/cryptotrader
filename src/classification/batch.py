@@ -156,7 +156,7 @@ def run_batch():
 
 
 if __name__ == '__main__':
-    # training_hashes, testing_hashes = run_batch()
-    # print(training_hashes)
-    # print(testing_hashes)
-    [print(w) for w in generate_time_windows(15)]
+    training_hashes, testing_hashes = run_batch()
+    print(training_hashes)
+    print(testing_hashes)
+    # [print(w) for w in generate_time_windows(15)]
