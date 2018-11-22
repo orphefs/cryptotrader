@@ -36,7 +36,7 @@ class TimeWindow(object):
         return self
 
     def __str__(self):
-        return str(self._start_time) + str(self._end_time)
+        return str(self._start_time) + " " + str(self._end_time)
 
     def __is_overlap__(self, other):
         return ((other.start_datetime <= self.start_datetime < other.end_datetime) or
