@@ -1,3 +1,4 @@
+import copy
 import hashlib
 import logging
 import os
@@ -31,9 +32,11 @@ from src.type_aliases import Path, Hash
 
 def generate_predicted_portfolio(initial_capital: int, parameters: LiveParameters,
                                  stock_data_testing_set: StockData, classifier: TradingClassifier):
+    my_classifier = copy.copy(classifier)
+    my_classifier.erase_classifier_from_memory()
     predicted_portfolio = Portfolio(initial_capital=initial_capital,
                                     trade_amount=parameters.trade_amount,
-                                    classifier=classifier)
+                                    classifier=my_classifier)
 
     classifier, predicted_portfolio, predicted_signals = generate_all_signals_at_once(stock_data_testing_set,
                                                                                       classifier,
@@ -69,7 +72,6 @@ def train_classifier(trading_pair: str,
     my_classifier = TradingClassifier(trading_pair, technical_indicators,
                                       sklearn_classifier, training_time_window, training_ratio)
     my_classifier.train(stock_data_training_set)
-    # my_classifier.save_to_disk(os.path.join(definitions.TEST_DATA_DIR, "classifier.dill"))
     my_classifier.save_to_disk(path_to_classifier)
 
 
@@ -103,14 +105,6 @@ def run_trained_classifier(trading_pair: str,
     predicted_portfolio, predicted_signals = generate_predicted_portfolio(
         initial_capital, parameters, stock_data_testing_set, my_classifier)
     predicted_portfolio.save_to_disk(path_to_portfolio)
-
-    # if 0:
-    #     plot_portfolios(
-    #         my_classifier,
-    #         predicted_portfolio,
-    #         reference_portfolio,
-    #         reference_signals,
-    #         predicted_signals)
 
 
 def plot_portfolios(my_classifier: TradingClassifier,

@@ -37,6 +37,9 @@ class TradingClassifier:
     def sklearn_classifier(self):
         return self._sklearn_classifier
 
+    def erase_classifier_from_memory(self):
+        delattr(self, "_sklearn_classifier")
+
     @property
     def training_time_window(self):
         return self._training_time_window
