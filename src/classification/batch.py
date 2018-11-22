@@ -3,6 +3,7 @@ import os
 from datetime import datetime
 from typing import Set, List
 
+from src.datetime_helpers import datetime_to_nth_day, nth_day_to_datetime
 from src.helpers import generate_hash
 from src.classification.trading_classifier import TradingClassifier
 from src.classification.train_classifier import train_classifier, run_trained_classifier
@@ -25,9 +26,9 @@ logging.basicConfig(
 
 def generate_sample_time_windows() -> List[TimeWindow]:
     return [
-        TimeWindow(datetime(2018, 5, 5), datetime(2018, 5, 6)),
-        TimeWindow(datetime(2018, 5, 7), datetime(2018, 5, 8)),
-        TimeWindow(datetime(2018, 5, 10), datetime(2018, 5, 11)),
+        TimeWindow(datetime(2018, 5, 5), datetime(2018, 5, 10)),
+        TimeWindow(datetime(2018, 5, 11), datetime(2018, 5, 16)),
+        TimeWindow(datetime(2018, 5, 17), datetime(2018, 5, 22)),
     ]
 
 
@@ -45,14 +46,18 @@ def generate_sample_time_windows_2() -> List[TimeWindow]:
 
 
 def generate_time_windows(number_of_time_windows: int) -> List[TimeWindow]:
+    year = 2018
     time_windows = []
+    min_start_date = datetime(year, 4, 1)
+    max_end_date = datetime(year, 10, 1)
     for i in range(0, number_of_time_windows):
-        duration_days = randint(1, 5)
-        start_day = randint(1, 19)
+        duration_days = randint(1, 7)
+        start_day = randint(datetime_to_nth_day(min_start_date),
+                            datetime_to_nth_day(max_end_date))
         end_day = start_day + duration_days
         time_windows.append(TimeWindow(
-            start_time=datetime(2018, 6, start_day),
-            end_time=datetime(2018, 6, end_day))
+            start_time=nth_day_to_datetime(start_day, year),
+            end_time=nth_day_to_datetime(end_day, year))
         )
     return time_windows
 
@@ -113,8 +118,8 @@ def batch_test(testing_time_windows: List[TimeWindow],
 def run_batch():
     trading_pair = "NEOBTC"
     trade_amount = 50
-    training_time_windows = generate_sample_time_windows_2()
-    testing_time_windows = generate_sample_time_windows_2()
+    training_time_windows = generate_sample_time_windows()
+    testing_time_windows = generate_sample_time_windows()
     training_hashes = batch_train(
         training_time_windows=training_time_windows,
         trading_pair=trading_pair,
@@ -151,6 +156,7 @@ def run_batch():
 
 
 if __name__ == '__main__':
-    training_hashes, testing_hashes = run_batch()
-    print(training_hashes)
-    print(testing_hashes)
+    # training_hashes, testing_hashes = run_batch()
+    # print(training_hashes)
+    # print(testing_hashes)
+    [print(w) for w in generate_time_windows(15)]
