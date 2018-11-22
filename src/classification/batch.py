@@ -17,10 +17,10 @@ from random import randint
 import logging
 
 logging.basicConfig(
-        filename=os.path.join(DATA_DIR, "batch_runner.log"), filemode='w',
-        # stream=sys.stdout,
-        level=logging.DEBUG,
-    )
+    filename=os.path.join(DATA_DIR, "batch_runner.log"), filemode='w',
+    # stream=sys.stdout,
+    level=logging.INFO,
+)
 
 
 def generate_sample_time_windows() -> List[TimeWindow]:
@@ -28,6 +28,19 @@ def generate_sample_time_windows() -> List[TimeWindow]:
         TimeWindow(datetime(2018, 5, 5), datetime(2018, 5, 6)),
         TimeWindow(datetime(2018, 5, 7), datetime(2018, 5, 8)),
         TimeWindow(datetime(2018, 5, 10), datetime(2018, 5, 11)),
+    ]
+
+
+def generate_sample_time_windows_2() -> List[TimeWindow]:
+    return [
+        TimeWindow(datetime(2018, 5, 1), datetime(2018, 5, 2)),
+        TimeWindow(datetime(2018, 5, 3), datetime(2018, 5, 5)),
+        TimeWindow(datetime(2018, 5, 7), datetime(2018, 5, 11)),
+        TimeWindow(datetime(2018, 5, 12), datetime(2018, 5, 17)),
+        TimeWindow(datetime(2018, 5, 18), datetime(2018, 5, 25)),
+        TimeWindow(datetime(2018, 5, 26), datetime(2018, 6, 4)),
+        TimeWindow(datetime(2018, 6, 5), datetime(2018, 6, 15)),
+        TimeWindow(datetime(2018, 6, 16), datetime(2018, 6, 28)),
     ]
 
 
@@ -100,8 +113,8 @@ def batch_test(testing_time_windows: List[TimeWindow],
 def run_batch():
     trading_pair = "NEOBTC"
     trade_amount = 50
-    training_time_windows = generate_time_windows(10)
-    testing_time_windows = generate_time_windows(10)
+    training_time_windows = generate_sample_time_windows_2()
+    testing_time_windows = generate_sample_time_windows_2()
     training_hashes = batch_train(
         training_time_windows=training_time_windows,
         trading_pair=trading_pair,
@@ -129,7 +142,7 @@ def run_batch():
             testing_time_windows=testing_time_windows,
             trading_pair=trading_pair,
             trade_amount=trade_amount,
-            number_of_testing_runs=2,
+            number_of_testing_runs=1,
             classifier=classifier
 
         )
