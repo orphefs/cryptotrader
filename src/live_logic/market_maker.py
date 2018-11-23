@@ -101,11 +101,11 @@ class MarketMaker:
             quantity=self._quantity)
         return order
 
-# if __name__ == '__main__':
-#     client = Client("VWwsv93z4UHRoJEOkye1oZeqRtYPiaEXqzeG9fem2guMNKKU1tUDTTta9Nm4JZ3x",
-#                     "L8C3ws3xkxX2AUravH41kfDezrHin2LarC1K8MDnmGM51dRBZwqDpvTOVZ1Qztap")
-#     mm = MarketMaker(client, "TRXBNB", 500)
-#     order = mm.place_buy_order()
-#     print(order)
-#     print(client.get_all_orders(symbol="TRXBNB"))
-#     print(client.get_orderbook_ticker(symbol="TRXBNB"))
+if __name__ == '__main__':
+    client = Client("VWwsv93z4UHRoJEOkye1oZeqRtYPiaEXqzeG9fem2guMNKKU1tUDTTta9Nm4JZ3x",
+                    "L8C3ws3xkxX2AUravH41kfDezrHin2LarC1K8MDnmGM51dRBZwqDpvTOVZ1Qztap")
+    mm = MarketMaker(client, "TRXBNB", 500)
+    order = mm.place_buy_order()
+    print(order)
+    print(client.get_all_orders(symbol="TRXBNB"))
+    print(client.get_orderbook_ticker(symbol="TRXBNB"))
