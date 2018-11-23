@@ -17,7 +17,7 @@ from src.containers.time_windows import TimeWindow
 from src.containers.trade_helper import generate_trading_signal_from_prediction
 from src.definitions import update_interval_mappings
 from src.helpers import is_time_difference_larger_than_threshold, get_capital_from_account
-from src.live_logic.market_maker import MarketMaker
+from src.live_logic.market_maker import TestMarketMaker
 from src.live_logic.parameters import LiveParameters
 from src.mixins.save_load_mixin import DillSaveLoadMixin
 from src.type_aliases import Path
@@ -41,7 +41,8 @@ class Runner(DillSaveLoadMixin):
         self._previous_prediction = None
         self._previous_signal = Hold(0, None)
         self._iteration_number = None
-        self._client = Client("", "")
+        self._client = Client("SlVs0AIAk6BsU1l4L4xLIDGOhgJgsEqAFCpe9sI8ABbABxS40fCzxChxDFutURg4",
+                              "ryGbS7EIdoF0n1xvoE7k2PpecjP7wwwnZmvDjoYTUC1Pa8dl7ePO93rcApUaJkmP")
         self._kline_interval = Client.KLINE_INTERVAL_1MINUTE
         self._mock_data_start_time = mock_data_start_time
         self._mock_data_stop_time = mock_data_stop_time
@@ -62,7 +63,7 @@ class Runner(DillSaveLoadMixin):
         self._waiting_threshold = timedelta(seconds=update_interval_mappings[self._kline_interval].total_seconds() - 15)
 
         self._classifier = TradingClassifier.load_from_disk(os.path.join(definitions.DATA_DIR, "classifier.dill"))
-        self._market_maker = MarketMaker(self._client, self._trading_pair, self._trade_amount)
+        self._market_maker = TestMarketMaker(self._client, self._trading_pair, self._trade_amount)
 
     @property
     def portfolio(self):
@@ -146,7 +147,7 @@ class Runner(DillSaveLoadMixin):
                         logging.info("Hodling...")
                     else:
                         logging.info("Prediction for signal {}".format(self._current_signal))
-                        # order = market_maker.place_order(current_signal)
+                        order = self._market_maker.place_order(self._current_signal)
                         self._portfolio.update(self._current_signal)
                         self._portfolio.save_to_disk(self._path_to_portfolio)
                         self._previous_signal = self._current_signal
