@@ -140,7 +140,10 @@ class Runner(DillSaveLoadMixin):
                 logging.info("Registering candle: {}".format(self._current_candle))
                 # print(repr(self._classifier))
                 self._classifier.append_new_candle(self._current_candle)
-                prediction = self._classifier.predict_one(self._current_candle)
+                try:
+                    prediction = self._classifier.predict_one(self._current_candle)
+                except ValueError:
+                    prediction = None
 
                 logging.info("Prediction is: {} on iteration {}".format(prediction, self._iteration_number))
                 if prediction is not None:
