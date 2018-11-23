@@ -17,7 +17,7 @@ from src.containers.time_windows import TimeWindow
 from src.containers.trade_helper import generate_trading_signal_from_prediction
 from src.definitions import update_interval_mappings
 from src.helpers import is_time_difference_larger_than_threshold, get_capital_from_account
-from src.live_logic.market_maker import TestMarketMaker
+from src.live_logic.market_maker import TestMarketMaker, MarketMaker
 from src.live_logic.parameters import LiveParameters
 from src.mixins.save_load_mixin import DillSaveLoadMixin
 from src.type_aliases import Path
@@ -63,7 +63,7 @@ class Runner(DillSaveLoadMixin):
         self._waiting_threshold = timedelta(seconds=update_interval_mappings[self._kline_interval].total_seconds() - 15)
 
         self._classifier = TradingClassifier.load_from_disk(os.path.join(definitions.DATA_DIR, "classifier.dill"))
-        self._market_maker = TestMarketMaker(self._client, self._trading_pair, self._trade_amount)
+        self._market_maker = MarketMaker(self._client, self._trading_pair, self._trade_amount)
 
     @property
     def portfolio(self):
@@ -148,6 +148,7 @@ class Runner(DillSaveLoadMixin):
                     else:
                         logging.info("Prediction for signal {}".format(self._current_signal))
                         order = self._market_maker.place_order(self._current_signal)
+
                         self._portfolio.update(self._current_signal)
                         self._portfolio.save_to_disk(self._path_to_portfolio)
                         self._previous_signal = self._current_signal
