@@ -6,7 +6,7 @@ import pytest
 
 from src.analysis_tools.generate_run_statistics import cleanup_signals
 from src.containers.portfolio import Portfolio
-from src.definitions import DATA_DIR
+from src.definitions import DATA_DIR, TEST_DATA_DIR
 from src.run_backtest import run_backtest
 from src.run_offline import run_offline
 
@@ -15,10 +15,10 @@ def run():
     path_to_offline_portfolio, _ = run_offline(trading_pair="NEOBTC",
                                                trade_amount=100,
                                                path_to_stock_data=os.path.join(
-                                                   DATA_DIR, "test", "test_data.dill"),
+                                                   TEST_DATA_DIR, "test_data.dill"),
                                                path_to_classifier=os.path.join(
-                                                   DATA_DIR, "classifier.dill"),
-                                               path_to_log=os.path.join(DATA_DIR, "offline_run.log")
+                                                   TEST_DATA_DIR, "classifier.dill"),
+                                               path_to_log=os.path.join(TEST_DATA_DIR, "offline_run.log")
                                                )
 
     logging.shutdown()  # temporary workaround to reinit logging for next run's log
@@ -27,7 +27,8 @@ def run():
     path_to_backtest_portfolio, _ = run_backtest(trading_pair="NEOBTC",
                                                  trade_amount=100,
                                                  path_to_stock_data=os.path.join(
-                                                     DATA_DIR, "test", "test_data.dill"))
+                                                     TEST_DATA_DIR, "test_data.dill"),
+                                                 path_to_classifier= os.path.join(TEST_DATA_DIR, "classifier.dill"))
 
     return path_to_offline_portfolio, path_to_backtest_portfolio
 

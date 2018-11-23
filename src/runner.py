@@ -17,7 +17,7 @@ from src.containers.time_windows import TimeWindow
 from src.containers.trade_helper import generate_trading_signal_from_prediction
 from src.definitions import update_interval_mappings
 from src.helpers import is_time_difference_larger_than_threshold, get_capital_from_account
-from src.live_logic.market_maker import TestMarketMaker, MarketMaker
+from src.live_logic.market_maker import TestMarketMaker, MarketMaker, NoopMarketMaker
 from src.live_logic.parameters import LiveParameters
 from src.mixins.save_load_mixin import DillSaveLoadMixin
 from src.type_aliases import Path
@@ -28,7 +28,8 @@ class Runner(DillSaveLoadMixin):
                  mock_data_start_time: datetime,
                  mock_data_stop_time: datetime,
                  path_to_stock_data: str,
-                 path_to_portfolio: Path):
+                 path_to_portfolio: Path,
+                 path_to_classifier: Path):
         self._trading_pair = trading_pair
         self._trade_amount = trade_amount
         self._run_type = run_type
@@ -41,8 +42,8 @@ class Runner(DillSaveLoadMixin):
         self._previous_prediction = None
         self._previous_signal = Hold(0, None)
         self._iteration_number = None
-        self._client = Client("SlVs0AIAk6BsU1l4L4xLIDGOhgJgsEqAFCpe9sI8ABbABxS40fCzxChxDFutURg4",
-                              "ryGbS7EIdoF0n1xvoE7k2PpecjP7wwwnZmvDjoYTUC1Pa8dl7ePO93rcApUaJkmP")
+        self._client = Client("",
+                              "")
         self._kline_interval = Client.KLINE_INTERVAL_1MINUTE
         self._mock_data_start_time = mock_data_start_time
         self._mock_data_stop_time = mock_data_stop_time
@@ -62,8 +63,8 @@ class Runner(DillSaveLoadMixin):
                                     trade_amount=self._parameters.trade_amount)
         self._waiting_threshold = timedelta(seconds=update_interval_mappings[self._kline_interval].total_seconds() - 15)
 
-        self._classifier = TradingClassifier.load_from_disk(os.path.join(definitions.DATA_DIR, "classifier.dill"))
-        self._market_maker = MarketMaker(self._client, self._trading_pair, self._trade_amount)
+        self._classifier = TradingClassifier.load_from_disk(path_to_classifier)
+        self._market_maker = NoopMarketMaker(self._client, self._trading_pair, self._trade_amount)
 
     @property
     def portfolio(self):
@@ -85,7 +86,7 @@ class Runner(DillSaveLoadMixin):
         if self._run_type == "live":
             self._run_metadata.save_to_disk("run_metadata.dill")
 
-        self.save_to_disk("run.dill")
+        self.save_to_disk(self, "run.dill")
         self._portfolio.save_to_disk(self._path_to_portfolio)
 
     def _download_candle(self) -> Candle:
