@@ -31,7 +31,7 @@ class Runner(DillSaveLoadMixin):
                  path_to_stock_data: str,
                  path_to_portfolio: Path,
                  path_to_classifier: Path,
-                 market_maker = Optional[Union[NoopMarketMaker, TestMarketMaker, MarketMaker]]):
+                 market_maker=Optional[Union[NoopMarketMaker, TestMarketMaker, MarketMaker]]):
         self._trading_pair = trading_pair
         self._trade_amount = trade_amount
         self._run_type = run_type
@@ -44,8 +44,7 @@ class Runner(DillSaveLoadMixin):
         self._previous_prediction = None
         self._previous_signal = Hold(0, None)
         self._iteration_number = None
-        self._client = Client("",
-                              "")
+        self._client = Client("", "")  # this client does not need API key and is only used for downloading candles
         self._kline_interval = Client.KLINE_INTERVAL_1MINUTE
         self._mock_data_start_time = mock_data_start_time
         self._mock_data_stop_time = mock_data_stop_time
@@ -81,7 +80,7 @@ class Runner(DillSaveLoadMixin):
         self._start_time = datetime.now()
         self._run_metadata.start_time = self._start_time
         if self._run_type == "live":
-            self._run_metadata.save_to_disk("run_metadata.dill")
+            self._run_metadata.save_to_disk(self, "run_metadata.dill")
 
     def shutdown(self):
         """Should be called by the resource manager class"""
@@ -89,7 +88,7 @@ class Runner(DillSaveLoadMixin):
         self._run_metadata.stop_time = self._stop_time
         self._run_metadata.stop_candle = self._current_candle
         if self._run_type == "live":
-            self._run_metadata.save_to_disk("run_metadata.dill")
+            self._run_metadata.save_to_disk(self, "run_metadata.dill")
 
         self.save_to_disk(self, "run.dill")
         self._portfolio.save_to_disk(self._path_to_portfolio)
