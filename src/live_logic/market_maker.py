@@ -1,11 +1,12 @@
 import logging
-from typing import Union
+from typing import Union, Optional
 
 import binance
 from binance.client import Client
 from datetime import datetime
 
 from src.backtesting_logic.logic import Buy, Sell, Hold
+from src.type_aliases import BinanceOrder
 
 logger = logging.getLogger('cryptotrader_api')
 
@@ -16,11 +17,11 @@ class TestMarketMaker:
         self._trading_pair = trading_pair
         self._quantity = quantity
 
-    def place_order(self, signal: Union[Buy, Sell, Hold]):
+    def place_order(self, signal: Union[Buy, Sell, Hold]) -> Optional[BinanceOrder]:
         if isinstance(signal, Buy):
-            self.place_buy_order()
+            return self.place_buy_order()
         elif isinstance(signal, Sell):
-            self.place_sell_order()
+            return self.place_sell_order()
         else:
             pass
 
@@ -44,17 +45,18 @@ class TestMarketMaker:
             quantity=self._quantity)
         return order
 
+
 class MarketMaker:
     def __init__(self, client: binance.client.Client, trading_pair: str, quantity: float):
         self._client = client
         self._trading_pair = trading_pair
         self._quantity = quantity
 
-    def place_order(self, signal: Union[Buy, Sell, Hold]):
+    def place_order(self, signal: Union[Buy, Sell, Hold]) -> Optional[BinanceOrder]:
         if isinstance(signal, Buy):
-            self.place_buy_order()
+            return self.place_buy_order()
         elif isinstance(signal, Sell):
-            self.place_sell_order()
+            return self.place_sell_order()
         else:
             pass
 
