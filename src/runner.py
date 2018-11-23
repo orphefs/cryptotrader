@@ -2,6 +2,7 @@ import logging
 import os
 import time
 from datetime import datetime, timedelta
+from typing import Union, Optional
 
 from binance.client import Client
 
@@ -29,7 +30,8 @@ class Runner(DillSaveLoadMixin):
                  mock_data_stop_time: datetime,
                  path_to_stock_data: str,
                  path_to_portfolio: Path,
-                 path_to_classifier: Path):
+                 path_to_classifier: Path,
+                 market_maker = Optional[Union[NoopMarketMaker, TestMarketMaker, MarketMaker]]):
         self._trading_pair = trading_pair
         self._trade_amount = trade_amount
         self._run_type = run_type
@@ -64,7 +66,10 @@ class Runner(DillSaveLoadMixin):
         self._waiting_threshold = timedelta(seconds=update_interval_mappings[self._kline_interval].total_seconds() - 15)
 
         self._classifier = TradingClassifier.load_from_disk(path_to_classifier)
-        self._market_maker = NoopMarketMaker(self._client, self._trading_pair, self._trade_amount)
+        if market_maker is None:
+            self._market_maker = NoopMarketMaker(self._client, self._trading_pair, self._trade_amount)
+        else:
+            self._market_maker = market_maker
 
     @property
     def portfolio(self):
