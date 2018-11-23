@@ -128,10 +128,10 @@ if __name__ == "__main__":
         level=logging.DEBUG,
     )
 
-    train_classifier(trading_pair="NEOBTC",
+    train_classifier(trading_pair="XRPBNB",
                      training_time_window=TimeWindow(
-                         start_time=datetime(2018, 9, 1),
-                         end_time=datetime(2018, 9, 2)
+                         start_time=datetime(2018, 10, 1),
+                         end_time=datetime(2018, 10, 5)
                      ),
                      technical_indicators=[
                          AutoCorrelationTechnicalIndicator(Candle.get_volume, 4),
