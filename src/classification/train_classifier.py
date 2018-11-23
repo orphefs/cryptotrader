@@ -128,7 +128,7 @@ if __name__ == "__main__":
         level=logging.DEBUG,
     )
 
-    train_classifier(trading_pair="XRPBNB",
+    train_classifier(trading_pair="XRPETH",
                      training_time_window=TimeWindow(
                          start_time=datetime(2018, 10, 1),
                          end_time=datetime(2018, 10, 5)

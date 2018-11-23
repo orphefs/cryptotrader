@@ -40,7 +40,7 @@ def run_live(trading_pair: str, trade_amount: float,
 
 
 if __name__ == '__main__':
-    path_to_portfolio, path_to_log = run_live("XRPBNB",
+    path_to_portfolio, path_to_log = run_live("XRPETH",
                                               100,
                                               os.path.join(DATA_DIR, "live_run.log"),
                                               os.path.join(DATA_DIR, "live_portfolio.dill"))
