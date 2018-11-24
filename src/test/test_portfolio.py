@@ -7,7 +7,7 @@ import pytest
 from pandas._libs.tslib import Timestamp
 
 from src import definitions
-from src.analysis_tools.generate_run_statistics import cleanup_signals
+from src.analysis_tools.generate_run_statistics import cleanup_signals, generate_order_pairs
 from src.backtesting_logic.logic import Buy, Sell, Hold
 from src.connection.downloader import load_from_disk
 from src.containers.candle import Candle
@@ -36,22 +36,22 @@ def create_mock_signals_from_candles(candles: List[Candle]) -> List[Union[Buy, S
         if next_candle.get_close_price() > previous_candle.get_close_price():
             if isinstance(last_signal, Sell) or isinstance(last_signal, Hold) or last_signal is None:
                 current_signal = Buy(signal=-1,
-                                  price_point=PricePoint(
-                                      value=Price(previous_candle.get_close_price()),
-                                      date_time=previous_candle.get_close_time_as_datetime()))
+                                     price_point=PricePoint(
+                                         value=Price(previous_candle.get_close_price()),
+                                         date_time=previous_candle.get_close_time_as_datetime()))
                 last_signal = current_signal
             else:
                 current_signal = Hold(signal=0,
-                                   price_point=PricePoint(
-                                       value=Price(previous_candle.get_close_price()),
-                                       date_time=previous_candle.get_close_time_as_datetime()))
+                                      price_point=PricePoint(
+                                          value=Price(previous_candle.get_close_price()),
+                                          date_time=previous_candle.get_close_time_as_datetime()))
             signals.append(current_signal)
         else:
             if isinstance(last_signal, Buy) or isinstance(last_signal, Hold) or last_signal is None:
                 current_signal = Sell(signal=1,
-                                     price_point=PricePoint(
-                                         value=Price(previous_candle.get_close_price()),
-                                         date_time=previous_candle.get_close_time_as_datetime()))
+                                      price_point=PricePoint(
+                                          value=Price(previous_candle.get_close_price()),
+                                          date_time=previous_candle.get_close_time_as_datetime()))
                 last_signal = current_signal
             else:
                 current_signal = Hold(signal=0,
@@ -81,9 +81,17 @@ def test_cleanup_signals():
     candles = load_candle_data()
     signals = create_mock_signals_from_candles(candles)
     cleaned_up_signals = cleanup_signals(signals)
-    expected_signal_types = [Buy,
-                             Sell,
-                             Buy,
-                             Sell,
-                             Buy]
+    expected_signal_types = [Buy, Sell, Buy, Sell, Buy]
     assert compare_lists(expected_signal_types, [signal.type for signal in cleaned_up_signals])
+
+
+def test_generate_order_pairs():
+    candles = load_candle_data()
+    signals = create_mock_signals_from_candles(candles)
+    cleaned_up_signals = cleanup_signals(signals)
+    order_pairs = generate_order_pairs(cleaned_up_signals)
+    for order_pair in order_pairs:
+        print(order_pair)
+    expected_order_pairs = [(signals[2], signals[0]),
+                            (signals[6], signals[3]), ]
+    assert compare_lists(expected_order_pairs, order_pairs)
