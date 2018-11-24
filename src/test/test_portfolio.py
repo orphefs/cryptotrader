@@ -7,7 +7,7 @@ import pytest
 from pandas._libs.tslib import Timestamp
 
 from src import definitions
-from src.analysis_tools.generate_run_statistics import cleanup_signals, generate_order_pairs
+from src.analysis_tools.generate_run_statistics import cleanup_signals, generate_order_pairs, compute_profits_and_losses
 from src.backtesting_logic.logic import Buy, Sell, Hold
 from src.connection.downloader import load_from_disk
 from src.containers.candle import Candle
@@ -95,3 +95,17 @@ def test_generate_order_pairs():
     expected_order_pairs = [(signals[2], signals[0]),
                             (signals[6], signals[3]), ]
     assert compare_lists(expected_order_pairs, order_pairs)
+
+
+def test_compute_profits_and_losses():
+    candles = load_candle_data()
+    signals = create_mock_signals_from_candles(candles)
+    cleaned_up_signals = cleanup_signals(signals)
+    order_pairs = generate_order_pairs(cleaned_up_signals)
+    net = compute_profits_and_losses(order_pairs)
+    expected_result = [1.32e-06,  2.84e-06]
+    nett = []
+    for n in net:
+        nett.append(round(n,8))
+    assert compare_lists(expected_result, nett)
+
