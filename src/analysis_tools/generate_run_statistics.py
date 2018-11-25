@@ -86,11 +86,11 @@ def compute_testing_window(order_pairs: List[Tuple[Buy, Sell]]) -> TimeWindow:
     return TimeWindow(order_pairs[0][1].price_point.date_time, order_pairs[-1][1].price_point.date_time)
 
 
-def calculate_percentage_gains(portfolio: Portfolio, order_pairs: List[Tuple[Buy, Sell]]) -> PercentageGains:
+def calculate_percentage_gains(trade_amount: float, order_pairs: List[Tuple[Buy, Sell]]) -> PercentageGains:
     net = compute_profits_and_losses(order_pairs)
     total_profit = np.sum(net)
-    initial_investment = order_pairs[0][1].price_point.value * portfolio._trade_amount
-    gains = (total_profit * portfolio._trade_amount) / initial_investment
+    initial_investment = order_pairs[0][1].price_point.value * trade_amount
+    gains = (total_profit * trade_amount) / initial_investment
     return PercentageGains(gains=gains, elapsed_time=order_pairs[-1][1].price_point.date_time -
                                                      order_pairs[0][1].price_point.date_time)
 
@@ -107,10 +107,13 @@ def compute_all_statistics(path_to_portfolio_df_dill: str):
     signals = extract_signals_from_portfolio(portfolio)
     signals = cleanup_signals(signals)
     order_pairs = generate_order_pairs(signals)
-    percentage_gains = calculate_percentage_gains(portfolio, order_pairs)
+    percentage_gains = calculate_percentage_gains(portfolio.trade_amount, order_pairs)
     index_performance = calculate_index_performance(order_pairs)
     net = compute_profits_and_losses(order_pairs)
-    classifier_time_window = portfolio.classifier.training_time_window
+    try:
+        classifier_time_window = portfolio.classifier.training_time_window
+    except AttributeError:
+        classifier_time_window = None
     testing_time_window = compute_testing_window(order_pairs)
     return order_pairs, percentage_gains, index_performance, classifier_time_window, testing_time_window
 
