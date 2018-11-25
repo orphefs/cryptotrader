@@ -82,8 +82,20 @@ def display_timeframe(order_pairs: List[Tuple[Buy, Sell]]) -> str:
                                                       order_pairs[-1][1].price_point.date_time)
 
 
+def display_start_and_finish_prices(order_pairs: List[Tuple[Buy, Sell]]) -> str:
+    return "Trading pair start price: {}, Trading pair finish price: {}".format(order_pairs[0][1].price_point.value,
+                                                      order_pairs[-1][1].price_point.value)
+
+def display_total_number_of_orders(order_pairs: List[Tuple[Buy, Sell]]):
+    return "Total number of buy/sell orders: {}".format(len(order_pairs) * 2)
+
+
 def compute_testing_window(order_pairs: List[Tuple[Buy, Sell]]) -> TimeWindow:
     return TimeWindow(order_pairs[0][1].price_point.date_time, order_pairs[-1][1].price_point.date_time)
+
+def calculate_trading_fees(fees: float):
+    pass
+
 
 
 def calculate_percentage_gains(trade_amount: float, order_pairs: List[Tuple[Buy, Sell]]) -> PercentageGains:
@@ -125,6 +137,8 @@ def display_and_plot(order_pairs: List[Tuple[Union[Buy, Sell]]],
                      ):
     print("Classifier training period: {}".format(classifier_time_window))
     print(display_timeframe(order_pairs))
+    print(display_start_and_finish_prices(order_pairs))
+    print(display_total_number_of_orders(order_pairs))
     print(percentage_gains)
     print(index_performance)
 
