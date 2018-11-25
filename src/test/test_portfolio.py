@@ -7,7 +7,8 @@ import pytest
 from pandas._libs.tslib import Timestamp
 
 from src import definitions
-from src.analysis_tools.generate_run_statistics import cleanup_signals, generate_order_pairs, compute_profits_and_losses
+from src.analysis_tools.generate_run_statistics import cleanup_signals, generate_order_pairs, \
+    compute_profits_and_losses, calculate_percentage_gains
 from src.backtesting_logic.logic import Buy, Sell, Hold
 from src.connection.downloader import load_from_disk
 from src.containers.candle import Candle
@@ -108,4 +109,15 @@ def test_compute_profits_and_losses():
     for n in net:
         nett.append(round(n,8))
     assert compare_lists(expected_result, nett)
+
+def test_calculate_percentage_gains():
+    candles = load_candle_data()
+    signals = create_mock_signals_from_candles(candles)
+    cleaned_up_signals = cleanup_signals(signals)
+    order_pairs = generate_order_pairs(cleaned_up_signals)
+    percentage_gains = calculate_percentage_gains(trade_amount=1, order_pairs=order_pairs)
+    assert float(percentage_gains.gains) == float(0.004297165523510581)
+
+
+
 
