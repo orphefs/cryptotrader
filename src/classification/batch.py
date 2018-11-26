@@ -1,7 +1,7 @@
 import hashlib
 import os
 from datetime import datetime
-from typing import Set, List
+from typing import Set, List, Union
 
 from src.datetime_helpers import datetime_to_nth_day, nth_day_to_datetime
 from src.helpers import generate_hash
@@ -12,7 +12,7 @@ from src.containers.time_windows import TimeWindow
 from src.definitions import DATA_DIR
 from src.feature_extraction.technical_indicator import TechnicalIndicator, PPOTechnicalIndicator, \
     AutoCorrelationTechnicalIndicator
-from src.type_aliases import Hash, Path
+from src.type_aliases import Hash, Path, BinanceClient, CobinhoodClient
 from src.containers.trading_pair import TradingPair
 import numpy as np
 from random import randint
@@ -49,8 +49,8 @@ def generate_sample_time_windows_2() -> List[TimeWindow]:
 def generate_time_windows(number_of_time_windows: int) -> List[TimeWindow]:
     year = 2018
     time_windows = []
-    min_start_date = datetime(year, 4, 1)
-    max_end_date = datetime(year, 10, 1)
+    min_start_date = datetime(year, 8, 1)
+    max_end_date = datetime(year, 11, 20)
     for i in range(0, number_of_time_windows):
         duration_days = randint(1, 7)
         start_day = randint(datetime_to_nth_day(min_start_date),
@@ -74,6 +74,7 @@ def generate_path_to_portfolio(testing_hash: str,
 
 def batch_train(training_time_windows: List[TimeWindow],
                 trading_pair: TradingPair,
+                client: Union[BinanceClient, CobinhoodClient],
                 number_of_training_runs: int,
                 technical_indicators: List[TechnicalIndicator],
                 ) -> Set[Hash]:
@@ -86,15 +87,17 @@ def batch_train(training_time_windows: List[TimeWindow],
                              training_time_window=training_time_window,
                              technical_indicators=technical_indicators,
                              path_to_classifier=path_to_classifier,
+                             client=client
                              )
             hashes.append(training_session_hash)
     return set(hashes)
 
 
 def batch_test(testing_time_windows: List[TimeWindow],
-               trading_pair: str,
+               trading_pair: TradingPair,
                trade_amount: float,
                number_of_testing_runs: int,
+               client: Union[BinanceClient, CobinhoodClient],
                classifier: TradingClassifier) -> Set[Hash]:
     training_time_window = classifier.training_time_window
     hashes = []
@@ -108,7 +111,8 @@ def batch_test(testing_time_windows: List[TimeWindow],
                                        trade_amount=trade_amount,
                                        testing_data=testing_time_window,
                                        classifier=classifier,
-                                       path_to_portfolio=path_to_portfolio
+                                       path_to_portfolio=path_to_portfolio,
+                                       client=client
 
                                        # TODO: define saveload mixin for portfolio class
                                        )
@@ -117,13 +121,15 @@ def batch_test(testing_time_windows: List[TimeWindow],
 
 
 def run_batch():
-    trading_pair = "XRPETH"
-    trade_amount = 100
-    training_time_windows = generate_time_windows(3)
-    testing_time_windows = generate_time_windows(3)
+    trading_pair = TradingPair("ETH", "BTC")
+    client = CobinhoodClient()
+    trade_amount = 1
+    training_time_windows = generate_time_windows(5)
+    testing_time_windows = generate_time_windows(5)
     training_hashes = batch_train(
         training_time_windows=training_time_windows,
         trading_pair=trading_pair,
+        client=client,
         number_of_training_runs=1,
         technical_indicators=[
             AutoCorrelationTechnicalIndicator(Candle.get_volume, 4),
@@ -133,9 +139,9 @@ def run_batch():
             PPOTechnicalIndicator(Candle.get_close_price, 10, 4),
             PPOTechnicalIndicator(Candle.get_close_price, 20, 1),
             PPOTechnicalIndicator(Candle.get_close_price, 30, 10),
-            PPOTechnicalIndicator(Candle.get_number_of_trades, 5, 1),
-            PPOTechnicalIndicator(Candle.get_number_of_trades, 10, 2),
-            PPOTechnicalIndicator(Candle.get_number_of_trades, 15, 3),
+            # PPOTechnicalIndicator(Candle.get_number_of_trades, 5, 1),
+            # PPOTechnicalIndicator(Candle.get_number_of_trades, 10, 2),
+            # PPOTechnicalIndicator(Candle.get_number_of_trades, 15, 3),
             PPOTechnicalIndicator(Candle.get_volume, 5, 1),
         ])
     testing_hashes = []
@@ -149,7 +155,8 @@ def run_batch():
             trading_pair=trading_pair,
             trade_amount=trade_amount,
             number_of_testing_runs=1,
-            classifier=classifier
+            classifier=classifier,
+            client=client
 
         )
 

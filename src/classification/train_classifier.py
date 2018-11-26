@@ -27,7 +27,7 @@ from src.feature_extraction.technical_indicator import AutoCorrelationTechnicalI
     PPOTechnicalIndicator, TechnicalIndicator
 from src.live_logic.parameters import LiveParameters
 from src.plotting.plot_candles import custom_plot
-from src.type_aliases import Path, Hash
+from src.type_aliases import Path, Hash, BinanceClient, CobinhoodClient
 from src.containers.trading_pair import TradingPair
 
 
@@ -56,11 +56,12 @@ def generate_reference_to_prediction_portfolio(initial_capital, parameters, stoc
 
 
 def train_classifier(trading_pair: TradingPair,
+                     client: Union[BinanceClient, CobinhoodClient],
                      training_time_window: TimeWindow,
                      technical_indicators: List[TechnicalIndicator],
                      path_to_classifier: Path,
                      ) -> Hash:
-    stock_data_training_set = load_stock_data(training_time_window, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
+    stock_data_training_set = load_stock_data(training_time_window, trading_pair, timedelta(minutes=1), client)
 
     sklearn_classifier = RandomForestClassifier(max_depth=5,
                                                 n_estimators=1000,
@@ -77,13 +78,15 @@ def train_classifier(trading_pair: TradingPair,
 
 
 def run_trained_classifier(trading_pair: TradingPair,
+                           client: Union[BinanceClient, CobinhoodClient],
                            trade_amount: float,
                            testing_data: Union[TimeWindow, StockData, Path],
                            classifier: Union[Path, TradingClassifier],
                            path_to_portfolio: Path, ):
     stock_data_testing_set = None
     if isinstance(testing_data, TimeWindow):
-        stock_data_testing_set = load_stock_data(testing_data, trading_pair, Client.KLINE_INTERVAL_1MINUTE)
+        stock_data_testing_set = load_stock_data(testing_data, trading_pair,
+                                                 timedelta(minutes=1), client)
     elif isinstance(testing_data, Path):
         stock_data_testing_set = load_from_disk(testing_data)
     elif isinstance(testing_data, StockData):
@@ -129,7 +132,8 @@ if __name__ == "__main__":
         level=logging.DEBUG,
     )
 
-    train_classifier(trading_pair="XRPETH",
+    train_classifier(trading_pair=TradingPair("COB", "ETH"),
+                     client=CobinhoodClient(),
                      training_time_window=TimeWindow(
                          start_time=datetime(2018, 10, 1),
                          end_time=datetime(2018, 10, 5)
@@ -144,15 +148,16 @@ if __name__ == "__main__":
                          # PPOTechnicalIndicator(Candle.get_close_price, 20, 5),
                          # PPOTechnicalIndicator(Candle.get_close_price, 20, 10),
                          PPOTechnicalIndicator(Candle.get_close_price, 30, 10),
-                         PPOTechnicalIndicator(Candle.get_number_of_trades, 5, 1),
-                         PPOTechnicalIndicator(Candle.get_number_of_trades, 10, 2),
-                         PPOTechnicalIndicator(Candle.get_number_of_trades, 15, 3),
+                         # PPOTechnicalIndicator(Candle.get_number_of_trades, 5, 1),
+                         # PPOTechnicalIndicator(Candle.get_number_of_trades, 10, 2),
+                         # PPOTechnicalIndicator(Candle.get_number_of_trades, 15, 3),
                          # PPOTechnicalIndicator(Candle.get_number_of_trades, 20, 1) / PPOTechnicalIndicator(Candle.get_volume, 20, 5),
                          PPOTechnicalIndicator(Candle.get_volume, 5, 1),
                      ],
                      path_to_classifier=os.path.join(DATA_DIR, "classifier.dill"))
     if 0:
         run_trained_classifier(trading_pair="NEOBTC",
+                               client=CobinhoodClient(),
                                trade_amount=100,
                                path_to_stock_data="/home/orphefs/Documents/Code/autotrader/autotrader/data/local_data_01_Oct,_2018_02_Oct,_2018_NEOBTC_1m.dill",
                                path_to_portfolio="/home/orphefs/Documents/Code/autotrader/autotrader/data/offline_portfolio.dill")

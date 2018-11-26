@@ -16,9 +16,10 @@ from src.type_aliases import Exchange, BinanceClient, CobinhoodClient
 from src.containers.trading_pair import TradingPair
 
 
-def _download_historical_data_from_binance(time_window: TimeWindow, trading_pair: TradingPair, api_interval_callback: str,
+def _download_historical_data_from_binance(time_window: TimeWindow, trading_pair: TradingPair, api_interval_callback: timedelta,
                                            client: BinanceClient) -> List[Candle]:
-    klines = client.get_historical_klines(str(trading_pair), api_interval_callback,
+    klines = client.get_historical_klines(trading_pair.as_string_for_binance(),
+                                          binance_sampling_rate_mappings[api_interval_callback.total_seconds()],
                                           Date(time_window.start_datetime).as_string(),
                                           Date(time_window.end_datetime).as_string())
 
@@ -26,13 +27,13 @@ def _download_historical_data_from_binance(time_window: TimeWindow, trading_pair
 
 
 def _download_historical_data_from_cobinhood(time_window: TimeWindow, trading_pair: TradingPair,
-                                             api_interval_callback: str,
+                                             api_interval_callback: timedelta,
                                              client: CobinhoodClient) -> \
         List[Candle]:
-    klines = client.chart.get_candles(trading_pair_id=trading_pair,
+    klines = client.chart.get_candles(trading_pair_id=trading_pair.as_string_for_cobinhood(),
                                       start_time=round(time_window.start_datetime.timestamp() * 1000),
                                       end_time=round(time_window.end_datetime.timestamp() * 1000),
-                                      timeframe=cobinhood_sampling_rate_mappings[api_interval_callback],
+                                      timeframe=cobinhood_sampling_rate_mappings[api_interval_callback.total_seconds()],
                                       )
     if "error" in klines:
         raise DownloadingError("{}".format(klines["error"]["error_code"]))
@@ -48,12 +49,11 @@ def _download_historical_data_from_exchange(time_window: TimeWindow, trading_pai
     if isinstance(client, BinanceClient):
 
         return _download_historical_data_from_binance(time_window, trading_pair,
-                                                      binance_sampling_rate_mappings[api_interval_callback.seconds],
+                                                      api_interval_callback,
                                                       client)
     elif isinstance(client, CobinhoodClient):
         return _download_historical_data_from_cobinhood(time_window, trading_pair,
-                                                        cobinhood_sampling_rate_mappings[
-                                                            api_interval_callback.seconds],
+                                                        api_interval_callback,
                                                         client)
     else:
         raise DownloadingError("Invalid client object.")

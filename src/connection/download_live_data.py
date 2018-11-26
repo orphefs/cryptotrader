@@ -11,32 +11,30 @@ from src.type_aliases import Exchange, BinanceClient, CobinhoodClient
 
 
 def _download_live_data_from_binance(trading_pair: TradingPair, api_interval_callback: timedelta,
-                                     client: BinanceClient) -> List[Candle]:
+                                     client: BinanceClient) -> Candle:
     klines = client.get_historical_klines(trading_pair.as_string_for_binance(),
                                           binance_sampling_rate_mappings[
                                               api_interval_callback.total_seconds()],
                                           "30 minutes ago GMT")
-    return Candle.from_list_of_klines(klines, Exchange.BINANCE)
+    return Candle.from_list_of_klines(klines, Exchange.BINANCE)[-1]
 
 
 def _download_live_data_from_cobinhood(trading_pair: TradingPair, api_interval_callback: timedelta,
-                                       client: CobinhoodClient) -> List[Candle]:
-    klines = client.chart.get_candles(trading_pair_id=trading_pair,
-                                      start_time=round(datetime.now(timezone.utc).timestamp() * 1000),
-                                      end_time=round(datetime.now(timezone.utc).timestamp() * 1000),
-                                      timeframe=cobinhood_sampling_rate_mappings[
-                                          api_interval_callback.total_seconds()],
+                                       client: CobinhoodClient) -> Candle:
+    klines = client.chart.get_candles(trading_pair_id=trading_pair.as_string_for_cobinhood(),
+                                      start_time=round((datetime.now(timezone.utc).timestamp() - 100) * 1000),
+                                      end_time=round((datetime.now(timezone.utc).timestamp() + 100) * 1000),
                                       )
     if "error" in klines:
         raise DownloadingError("{}".format(klines["error"]["error_code"]))
     else:
         pass
 
-    return Candle.from_list_of_klines(klines["result"]["candles"], Exchange.COBINHOOD)
+    return Candle.from_list_of_klines(klines["result"]["candles"], Exchange.COBINHOOD)[-1]
 
 
 def _download_live_data_from_exchange(trading_pair: TradingPair, api_interval_callback: timedelta,
-                                      client: Union[BinanceClient, CobinhoodClient]) -> List[Candle]:
+                                      client: Union[BinanceClient, CobinhoodClient]) -> Candle:
     if isinstance(client, BinanceClient):
 
         return _download_live_data_from_binance(trading_pair, api_interval_callback, client)
@@ -49,7 +47,7 @@ def _download_live_data_from_exchange(trading_pair: TradingPair, api_interval_ca
 @retry_on_network_error
 def download_live_data(client: Union[BinanceClient, CobinhoodClient], trading_pair: TradingPair,
                        api_interval_callback: timedelta, lags: int) -> Candle:
-    candle = _download_live_data_from_exchange(trading_pair, api_interval_callback, client)[-1]
+    candle = _download_live_data_from_exchange(trading_pair, api_interval_callback, client)
     print(candle)
     if isinstance(candle, list):
         raise DownloadingError("Only one candle is needed for the live run downloader")
