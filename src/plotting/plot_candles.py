@@ -121,7 +121,7 @@ def plot_candlesticks(ax: Axes, data: StockData):
     ax.xaxis_date()
     ax.autoscale_view()
     plt.setp(plt.gca().get_xticklabels(), rotation=45, horizontalalignment='right')
-    ax.set_title(data.security)
+    ax.set_title(data.trading_pair)
 
 
 def custom_plot(portfolio, strategy, title=None):

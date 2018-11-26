@@ -12,17 +12,17 @@ class DownloadingError(RuntimeError):
     pass
 
 
-def _generate_file_name(time_window: TimeWindow, security: TradingPair, api_interval_callback: str) -> str:
+def _generate_file_name(time_window: TimeWindow, trading_pair: TradingPair, api_interval_callback: str) -> str:
     return ('local_data_' + Date(time_window.start_datetime).as_string().replace(" ", "_") + '_' +
             Date(time_window.end_datetime).as_string().replace(" ",
                                                                "_") + '_' + str(
-                security) + '_' + api_interval_callback + ".dill").replace(
+                trading_pair) + '_' + api_interval_callback + ".dill").replace(
         " ", "_")
 
 
 def _serve_windowed_stock_data(data: StockData, iteration: int, window_start: int) -> Tuple[int, StockData]:
     iteration += 1
-    return iteration, StockData(data.candles[iteration - window_start:iteration], data.security)
+    return iteration, StockData(data.candles[iteration - window_start:iteration], data.trading_pair)
 
 
 def _calculate_sampling_rate_of_stock_data(stock_data: StockData) -> float:

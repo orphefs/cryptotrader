@@ -22,7 +22,7 @@ class TradingClassifier:
                  sklearn_classifier: RandomForestClassifier,
                  training_time_window: TimeWindow,
                  training_ratio: float):
-        self._stock_data_live = StockData(candles=[], security=trading_pair)
+        self._stock_data_live = StockData(candles=[], trading_pair=trading_pair)
         self._list_of_technical_indicators = list_of_technical_indicators
         self._maximum_lag = max([ti.lags for ti in list_of_technical_indicators])
         self._is_candles_requirement_satisfied = False
@@ -93,5 +93,5 @@ class TradingClassifier:
         return obj
 
     def __str__(self):
-        return "Trading Pair: {}, Technical Indicators: {}".format(self._stock_data_live.security,
+        return "Trading Pair: {}, Technical Indicators: {}".format(self._stock_data_live.trading_pair,
                                                                    self._list_of_technical_indicators)

@@ -50,7 +50,7 @@ def is_time_difference_larger_than_threshold(current_candle: Candle, previous_ca
     return time_getter_callback(current_candle) - time_getter_callback(previous_candle) > threshold
 
 
-def get_capital_from_account(security: TradingPair) -> float:
+def get_capital_from_account(trading_pair: TradingPair) -> float:
     return 5.0
 
 

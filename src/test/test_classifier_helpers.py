@@ -31,7 +31,7 @@ def load_candle_data() -> List[Candle]:
 
 def create_mock_signals_from_candles(candles: List[Candle]) -> List[Union[Buy, Sell]]:
     return generate_trading_signals_from_array(signals=predictions,
-                                               stock_data=StockData(candles=candles, security=TradingPair("XRP", "ETH")))
+                                               stock_data=StockData(candles=candles, trading_pair=TradingPair("XRP", "ETH")))
 
 
 def initialize_signals() -> List[Union[Buy, Sell]]:

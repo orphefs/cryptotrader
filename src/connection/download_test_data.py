@@ -12,22 +12,22 @@ from src.containers.trading_pair import TradingPair
 
 
 def _download_test_data_from_cobinhood():
-    security = TradingPair("COB", "ETH")
+    trading_pair = TradingPair("COB", "ETH")
     time_window = TimeWindow(start_time=datetime(2018, 5, 20, 6, 00),
                              end_time=datetime(2018, 5, 21, 8, 00))
-    candles = _download_historical_data_from_cobinhood(time_window, security, "1m")
+    candles = _download_historical_data_from_cobinhood(time_window, trading_pair, "1m")
     print(candles)
-    stock_data = StockData(candles, security)
+    stock_data = StockData(candles, trading_pair)
     save_to_disk(stock_data, os.path.join(definitions.DATA_DIR, "sample_data.dill"))
 
 
 def _download_test_data_from_binance():
-    security = TradingPair("NEO", "BTC")
+    trading_pair = TradingPair("NEO", "BTC")
     time_window = TimeWindow(start_time=datetime(2018, 5, 20, 6, 00),
                              end_time=datetime(2018, 5, 21, 8, 00))
-    candles = _download_historical_data_from_binance(time_window, security, KLINE_INTERVAL_1MINUTE)[0:50]
+    candles = _download_historical_data_from_binance(time_window, trading_pair, KLINE_INTERVAL_1MINUTE)[0:50]
     print(candles)
-    stock_data = StockData(candles, security)
+    stock_data = StockData(candles, trading_pair)
     save_to_disk(stock_data, os.path.join(definitions.TEST_DATA_DIR, "test_data_long.dill"))
 
 

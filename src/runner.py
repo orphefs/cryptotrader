@@ -61,7 +61,7 @@ class Runner(DillSaveLoadMixin):
                                           # sleep_time=update_interval_mappings[self._kline_interval].total_seconds(),
                                           sleep_time=2,
                                           )
-        self._portfolio = Portfolio(initial_capital=get_capital_from_account(security=self._trading_pair),
+        self._portfolio = Portfolio(initial_capital=get_capital_from_account(trading_pair=self._trading_pair),
                                     trade_amount=self._parameters.trade_amount)
         self._waiting_threshold = timedelta(seconds=self._sampling_period.total_seconds() - 15)
 

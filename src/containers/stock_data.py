@@ -7,9 +7,9 @@ from src.containers.trading_pair import TradingPair
 
 
 class StockData(object):
-    def __init__(self, candles: List[Candle], security: TradingPair):
+    def __init__(self, candles: List[Candle], trading_pair: TradingPair):
         self._candles = candles
-        self._security = security
+        self._trading_pair = trading_pair
 
     @property
     def candles(self):
@@ -19,8 +19,8 @@ class StockData(object):
         self._candles.append(candle)
 
     @property
-    def security(self):
-        return self._security
+    def trading_pair(self):
+        return self._trading_pair
 
     def __len__(self):
         return len(self._candles)
