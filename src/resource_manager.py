@@ -4,6 +4,7 @@ from typing import Union, Optional
 from src.live_logic.market_maker import NoopMarketMaker, TestMarketMaker, MarketMaker
 from src.runner import Runner
 from src.type_aliases import Path
+from src.containers.trading_pair import TradingPair
 
 
 class TooManyArgumentsError(ValueError):
@@ -11,7 +12,7 @@ class TooManyArgumentsError(ValueError):
 
 
 class runner:
-    def __init__(self, trading_pair: str,
+    def __init__(self, trading_pair: TradingPair,
                  trade_amount: float,
                  run_type: str,
                  mock_data_start_time: datetime = None,

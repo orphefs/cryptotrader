@@ -5,9 +5,10 @@ from typing import Tuple
 from src.definitions import DATA_DIR
 from src.resource_manager import runner
 from src.type_aliases import Path
+from src.containers.trading_pair import TradingPair
 
 
-def run_backtest(trading_pair: str, trade_amount: float, path_to_stock_data: Path,
+def run_backtest(trading_pair: TradingPair, trade_amount: float, path_to_stock_data: Path,
                  path_to_log: Path = os.path.join(DATA_DIR, "backtest_run.log"),
                  path_to_portfolio: Path = os.path.join(DATA_DIR, "backtest_portfolio.dill"),
                  path_to_classifier: Path = os.path.join(DATA_DIR, "classifier.dill")) -> Tuple[Path, Path]:
@@ -34,7 +35,7 @@ def run_backtest(trading_pair: str, trade_amount: float, path_to_stock_data: Pat
 
 
 if __name__ == '__main__':
-    path_to_portfolio, path_to_log = run_backtest("NEOBTC",
+    path_to_portfolio, path_to_log = run_backtest(TradingPair("NEO", "BTC"),
                                                   100,
                                                   os.path.join(DATA_DIR, "test", "test_data.dill"),
                                                   os.path.join(DATA_DIR, "backtest_run.log"),

@@ -14,6 +14,7 @@ from src.containers.data_point import PricePoint, Price
 from src.containers.stock_data import StockData
 from src.containers.trade_helper import generate_trading_signals_from_array
 from src.helpers import is_equal
+from src.containers.trading_pair import TradingPair
 
 predictions = [-1, -1, 1, 1, -1]
 answers = [Buy,
@@ -31,7 +32,7 @@ def load_candle_data() -> List[Candle]:
 
 def create_mock_signals_from_candles(candles: List[Candle]) -> List[Union[Buy, Sell]]:
     return generate_trading_signals_from_array(signals=predictions,
-                                               stock_data=StockData(candles=candles, security="TEST"))
+                                               stock_data=StockData(candles=candles, security=TradingPair("XRP", "ETH")))
 
 
 def initialize_signals() -> List[Union[Buy, Sell]]:

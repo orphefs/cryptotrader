@@ -22,10 +22,11 @@ from src.live_logic.market_maker import TestMarketMaker, MarketMaker, NoopMarket
 from src.live_logic.parameters import LiveParameters
 from src.mixins.save_load_mixin import DillSaveLoadMixin
 from src.type_aliases import Path
+from src.containers.trading_pair import TradingPair
 
 
 class Runner(DillSaveLoadMixin):
-    def __init__(self, trading_pair: str, trade_amount: float, run_type: str,
+    def __init__(self, trading_pair: TradingPair, trade_amount: float, run_type: str,
                  mock_data_start_time: datetime,
                  mock_data_stop_time: datetime,
                  path_to_stock_data: str,
@@ -60,7 +61,7 @@ class Runner(DillSaveLoadMixin):
             # sleep_time=update_interval_mappings[self._kline_interval].total_seconds(),
             sleep_time=2,
         )
-        self._portfolio = Portfolio(initial_capital=get_capital_from_account(capital_security=None),
+        self._portfolio = Portfolio(initial_capital=get_capital_from_account(security=self._trading_pair),
                                     trade_amount=self._parameters.trade_amount)
         self._waiting_threshold = timedelta(seconds=update_interval_mappings[self._kline_interval].total_seconds() - 15)
 

@@ -13,6 +13,7 @@ from src.definitions import DATA_DIR
 from src.feature_extraction.technical_indicator import TechnicalIndicator, PPOTechnicalIndicator, \
     AutoCorrelationTechnicalIndicator
 from src.type_aliases import Hash, Path
+from src.containers.trading_pair import TradingPair
 import numpy as np
 from random import randint
 import logging
@@ -63,7 +64,7 @@ def generate_time_windows(number_of_time_windows: int) -> List[TimeWindow]:
 
 
 def generate_path_to_portfolio(testing_hash: str,
-                               trading_pair: str,
+                               trading_pair: TradingPair,
                                trade_amount: float,
                                ) -> Path:
     m = hashlib.md5()
@@ -72,7 +73,7 @@ def generate_path_to_portfolio(testing_hash: str,
 
 
 def batch_train(training_time_windows: List[TimeWindow],
-                trading_pair: str,
+                trading_pair: TradingPair,
                 number_of_training_runs: int,
                 technical_indicators: List[TechnicalIndicator],
                 ) -> Set[Hash]:

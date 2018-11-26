@@ -5,9 +5,10 @@ from typing import Tuple
 from src.classification.train_classifier import run_trained_classifier
 from src.definitions import DATA_DIR
 from src.type_aliases import Path
+from src.containers.trading_pair import TradingPair
 
 
-def run_offline(trading_pair: str, trade_amount: float, path_to_stock_data: Path,
+def run_offline(trading_pair: TradingPair, trade_amount: float, path_to_stock_data: Path,
                 path_to_log: Path = os.path.join(DATA_DIR, "offline_run.log"),
                 path_to_classifier: Path = os.path.join(DATA_DIR, "classifier.dill"),
                 path_to_portfolio: Path = os.path.join(DATA_DIR, "offline_portfolio.dill")) -> Tuple[Path, Path]:

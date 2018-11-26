@@ -6,6 +6,7 @@ from src import definitions
 from src.analysis_tools.run_metadata import RunMetaData
 from src.definitions import DATA_DIR
 from src.resource_manager import runner
+from src.containers.trading_pair import TradingPair
 
 
 def run_mock():
@@ -22,7 +23,7 @@ def run_mock():
     if run_metadata.stop_time is None:
         run_metadata.stop_time = datetime.now()
 
-    with runner(trading_pair="XRPBTC",
+    with runner(trading_pair=TradingPair("XRP", "BTC"),
                 trade_amount=100,
                 run_type="mock",
                 mock_data_start_time=run_metadata.start_time,

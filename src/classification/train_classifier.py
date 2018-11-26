@@ -28,6 +28,7 @@ from src.feature_extraction.technical_indicator import AutoCorrelationTechnicalI
 from src.live_logic.parameters import LiveParameters
 from src.plotting.plot_candles import custom_plot
 from src.type_aliases import Path, Hash
+from src.containers.trading_pair import TradingPair
 
 
 def generate_predicted_portfolio(initial_capital: int, parameters: LiveParameters,
@@ -54,7 +55,7 @@ def generate_reference_to_prediction_portfolio(initial_capital, parameters, stoc
     return predicted_portfolio, predicted_signals, reference_portfolio, training_signals
 
 
-def train_classifier(trading_pair: str,
+def train_classifier(trading_pair: TradingPair,
                      training_time_window: TimeWindow,
                      technical_indicators: List[TechnicalIndicator],
                      path_to_classifier: Path,
@@ -75,7 +76,7 @@ def train_classifier(trading_pair: str,
     my_classifier.save_to_disk(path_to_classifier)
 
 
-def run_trained_classifier(trading_pair: str,
+def run_trained_classifier(trading_pair: TradingPair,
                            trade_amount: float,
                            testing_data: Union[TimeWindow, StockData, Path],
                            classifier: Union[Path, TradingClassifier],

@@ -9,9 +9,10 @@ from src.definitions import DATA_DIR
 from src.live_logic.market_maker import MarketMaker, TestMarketMaker
 from src.resource_manager import runner
 from src.type_aliases import Path
+from src.containers.trading_pair import TradingPair
 
 
-def run_live(trading_pair: str, trade_amount: float,
+def run_live(trading_pair: TradingPair, trade_amount: float,
              path_to_log: Path = os.path.join(DATA_DIR, "live_run.log"),
              path_to_portfolio: Path = os.path.join(DATA_DIR, "live_portfolio.dill"),
              ) -> Tuple[Path, Path]:
@@ -40,7 +41,7 @@ def run_live(trading_pair: str, trade_amount: float,
 
 
 if __name__ == '__main__':
-    path_to_portfolio, path_to_log = run_live("XRPETH",
+    path_to_portfolio, path_to_log = run_live(TradingPair("XRP", "ETH"),
                                               100,
                                               os.path.join(DATA_DIR, "live_run.log"),
                                               os.path.join(DATA_DIR, "live_portfolio.dill"))

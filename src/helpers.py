@@ -7,6 +7,7 @@ from src.containers.candle import Candle
 from src.containers.time_series import TimeSeries
 from src.containers.stock_data import StockData
 from src.type_aliases import Hash
+from src.containers.trading_pair import TradingPair
 
 
 def simple_moving_average(SMA, EMA, p, closing_prices, closing_price_averaging_period):
@@ -49,7 +50,7 @@ def is_time_difference_larger_than_threshold(current_candle: Candle, previous_ca
     return time_getter_callback(current_candle) - time_getter_callback(previous_candle) > threshold
 
 
-def get_capital_from_account(capital_security: str) -> float:
+def get_capital_from_account(security: TradingPair) -> float:
     return 5.0
 
 

@@ -7,12 +7,13 @@ from datetime import datetime
 
 from src.backtesting_logic.logic import Buy, Sell, Hold
 from src.type_aliases import BinanceOrder
+from src.containers.trading_pair import TradingPair
 
 logger = logging.getLogger('cryptotrader_api')
 
 
 class NoopMarketMaker:
-    def __init__(self, client: binance.client.Client, trading_pair: str, quantity: float):
+    def __init__(self, client: binance.client.Client, trading_pair: TradingPair, quantity: float):
         self._client = client
         self._trading_pair = trading_pair
         self._quantity = quantity
@@ -33,7 +34,7 @@ class NoopMarketMaker:
 
 
 class TestMarketMaker:
-    def __init__(self, client: binance.client.Client, trading_pair: str, quantity: float):
+    def __init__(self, client: binance.client.Client, trading_pair: TradingPair, quantity: float):
         self._client = client
         self._trading_pair = trading_pair
         self._quantity = quantity
@@ -68,7 +69,7 @@ class TestMarketMaker:
 
 
 class MarketMaker:
-    def __init__(self, client: binance.client.Client, trading_pair: str, quantity: float):
+    def __init__(self, client: binance.client.Client, trading_pair: TradingPair, quantity: float):
         self._client = client
         self._trading_pair = trading_pair
         self._quantity = quantity
@@ -104,8 +105,8 @@ class MarketMaker:
 if __name__ == '__main__':
     client = Client("VWwsv93z4UHRoJEOkye1oZeqRtYPiaEXqzeG9fem2guMNKKU1tUDTTta9Nm4JZ3x",
                     "L8C3ws3xkxX2AUravH41kfDezrHin2LarC1K8MDnmGM51dRBZwqDpvTOVZ1Qztap")
-    mm = MarketMaker(client, "TRXBNB", 500)
+    mm = MarketMaker(client, TradingPair("NEO", "BTC"), 500)
     order = mm.place_buy_order()
     print(order)
-    print(client.get_all_orders(symbol="TRXBNB"))
-    print(client.get_orderbook_ticker(symbol="TRXBNB"))
+    print(client.get_all_orders(symbol=str(TradingPair("NEO", "BTC"))))
+    print(client.get_orderbook_ticker(symbol=str(TradingPair("NEO", "BTC"))))

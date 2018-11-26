@@ -1,4 +1,4 @@
-from typing import List, Any
+from typing import List, Any, Optional
 import numpy as np
 from datetime import datetime
 
@@ -78,7 +78,7 @@ class Volume(object):
 
 
 class Candle(object):
-    def __init__(self, price: Price, volume: Volume, time: Time):
+    def __init__(self, price: Optional[Price], volume: Optional[Volume], time: Time):
         self._price = price
         self._volume = volume
         self._time = time
@@ -150,7 +150,7 @@ class Candle(object):
         )
 
     @staticmethod
-    def from_list_of_klines(klines: List, source: Exchange):
+    def from_list_of_klines(klines: List, source: Exchange = Exchange.BINANCE):
         if source.name is "BINANCE":
             return [Candle.from_binance_kline(kline) for kline in klines]
         elif source.name is "COBINHOOD":

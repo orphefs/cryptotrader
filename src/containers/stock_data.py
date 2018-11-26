@@ -1,11 +1,11 @@
 from typing import List
 
 from src.containers.candle import Candle
-from src.type_aliases import Security
+from src.containers.trading_pair import TradingPair
 
 
 class StockData(object):
-    def __init__(self, candles: List[Candle], security: Security):
+    def __init__(self, candles: List[Candle], security: TradingPair):
         self._candles = candles
         self._security = security
 

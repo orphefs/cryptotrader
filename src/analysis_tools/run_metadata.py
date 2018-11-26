@@ -6,10 +6,11 @@ from argparse import ArgumentParser
 from src.containers.candle import Candle
 from src.definitions import DATA_DIR
 from src.mixins.save_load_mixin import DillSaveLoadMixin
+from src.containers.trading_pair import TradingPair
 
 
 class RunMetaData(DillSaveLoadMixin):
-    def __init__(self, trading_pair: str = None,
+    def __init__(self, trading_pair: TradingPair = None,
                  trade_amount: float = None,
                  run_type: str = None,
                  start_time: datetime = None,
@@ -54,7 +55,7 @@ class RunMetaData(DillSaveLoadMixin):
         return self._stop_candle
 
     @trading_pair.setter
-    def trading_pair(self, trading_pair: str):
+    def trading_pair(self, trading_pair: TradingPair):
         self._trading_pair = trading_pair
 
     @trade_amount.setter

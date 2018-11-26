@@ -9,13 +9,14 @@ from src.containers.portfolio import Portfolio
 from src.definitions import DATA_DIR, TEST_DATA_DIR
 from src.run_backtest import run_backtest
 from src.run_offline import run_offline
+from src.containers.trading_pair import TradingPair
 
 
 def run():
-    path_to_offline_portfolio, _ = run_offline(trading_pair="NEOBTC",
+    path_to_offline_portfolio, _ = run_offline(trading_pair=TradingPair("NEO", "BTC"),
                                                trade_amount=100,
                                                path_to_stock_data=os.path.join(
-                                                   TEST_DATA_DIR, "test_data.dill"),
+                                                   TEST_DATA_DIR, "test_data_long.dill"),
                                                path_to_classifier=os.path.join(
                                                    TEST_DATA_DIR, "classifier.dill"),
                                                path_to_log=os.path.join(TEST_DATA_DIR, "offline_run.log")
@@ -24,10 +25,10 @@ def run():
     logging.shutdown()  # temporary workaround to reinit logging for next run's log
     reload(logging)
 
-    path_to_backtest_portfolio, _ = run_backtest(trading_pair="NEOBTC",
+    path_to_backtest_portfolio, _ = run_backtest(trading_pair=TradingPair("NEO", "BTC"),
                                                  trade_amount=100,
                                                  path_to_stock_data=os.path.join(
-                                                     TEST_DATA_DIR, "test_data.dill"),
+                                                     TEST_DATA_DIR, "test_data_long.dill"),
                                                  path_to_classifier= os.path.join(TEST_DATA_DIR, "classifier.dill"))
 
     return path_to_offline_portfolio, path_to_backtest_portfolio
@@ -48,6 +49,9 @@ def compare_lists(a: List, b: List):
 
 
 def compare(offline_portfolio: Portfolio, backtest_portfolio: Portfolio):
+    for signal in offline_portfolio.signals:
+        print(signal)
+
     offline_signals = cleanup_signals(offline_portfolio.signals)
     backtest_signals = cleanup_signals(backtest_portfolio.signals)
 

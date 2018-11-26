@@ -1,11 +1,11 @@
 from argparse import ArgumentParser
-from typing import List
+from typing import List, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.axes import Axes
 
-from src.backtesting_logic.logic import _TradingSignal
+from src.backtesting_logic.logic import _TradingSignal, Buy, Sell, Hold
 from src.containers.candle import Candle, Price
 from src.containers.portfolio import Portfolio
 from src.containers.time import Time, MilliSeconds
@@ -14,7 +14,7 @@ from src.analysis_tools.generate_run_statistics import compute_all_statistics
 from src.analysis_tools.run_metadata import FullPaths
 
 
-def convert_signals_to_backtest_candles(signals: List[_TradingSignal]) -> List[Candle]:
+def convert_signals_to_backtest_candles(signals: List[Union[Buy, Sell, Hold]]) -> List[Candle]:
     return [Candle(price=Price(
         open_price=None,
         high_price=None,

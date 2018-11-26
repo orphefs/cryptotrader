@@ -11,12 +11,13 @@ from src.containers.time_windows import TimeWindow
 from src.feature_extraction.technical_indicator import TechnicalIndicator
 from src.mixins.save_load_mixin import DillSaveLoadMixin, JsonSaveMixin
 from src.type_aliases import Path
+from src.containers.trading_pair import TradingPair
 
 fudge_factor = 1000 # scaling factor to avoid inputting really tiny values to the classifier (may cause instabilities)
 
 
 class TradingClassifier:
-    def __init__(self, trading_pair: str,
+    def __init__(self, trading_pair: TradingPair,
                  list_of_technical_indicators: List[TechnicalIndicator],
                  sklearn_classifier: RandomForestClassifier,
                  training_time_window: TimeWindow,
