@@ -22,7 +22,7 @@ from src.helpers import is_time_difference_larger_than_threshold, get_capital_fr
 from src.live_logic.market_maker import TestMarketMaker, MarketMaker, NoopMarketMaker
 from src.live_logic.parameters import LiveParameters
 from src.mixins.save_load_mixin import DillSaveLoadMixin
-from src.type_aliases import Path
+from src.type_aliases import Path, BinanceClient, CobinhoodClient
 from src.containers.trading_pair import TradingPair
 
 
@@ -33,6 +33,7 @@ class Runner(DillSaveLoadMixin):
                  path_to_stock_data: str,
                  path_to_portfolio: Path,
                  path_to_classifier: Path,
+                 client: Optional[Union[BinanceClient, CobinhoodClient]],
                  market_maker=Optional[Union[NoopMarketMaker, TestMarketMaker, MarketMaker]]):
         self._trading_pair = trading_pair
         self._trade_amount = trade_amount
@@ -46,7 +47,10 @@ class Runner(DillSaveLoadMixin):
         self._previous_prediction = None
         self._previous_signal = Hold(0, None)
         self._iteration_number = None
-        self._client = Client("", "")  # this client does not need API key and is only used for downloading candles
+        if client is None:
+            self._client = BinanceClient("","") # this client does not need API key and is only used for downloading candles
+        else:
+            self._client = client
         self._sampling_period = timedelta(minutes=1)
         self._mock_data_start_time = mock_data_start_time
         self._mock_data_stop_time = mock_data_stop_time

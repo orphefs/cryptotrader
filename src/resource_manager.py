@@ -3,7 +3,7 @@ from typing import Union, Optional
 
 from src.live_logic.market_maker import NoopMarketMaker, TestMarketMaker, MarketMaker
 from src.runner import Runner
-from src.type_aliases import Path
+from src.type_aliases import Path, BinanceClient, CobinhoodClient
 from src.containers.trading_pair import TradingPair
 
 
@@ -20,6 +20,7 @@ class runner:
                  path_to_stock_data: Path = None,
                  path_to_portfolio: Path = None,
                  path_to_classifier: Path = None,
+                 client: Union[BinanceClient, CobinhoodClient] = None,
                  market_maker: Optional[Union[NoopMarketMaker, TestMarketMaker, MarketMaker]] = None
                  ):
         if (mock_data_start_time and mock_data_stop_time) and path_to_stock_data:
@@ -28,6 +29,7 @@ class runner:
         self._runner = Runner(trading_pair, trade_amount, run_type,
                               mock_data_start_time, mock_data_stop_time,
                               path_to_stock_data, path_to_portfolio, path_to_classifier,
+                              client,
                               market_maker)
 
     def __enter__(self):

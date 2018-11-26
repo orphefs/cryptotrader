@@ -3,8 +3,6 @@ import os
 from datetime import timedelta, datetime
 from typing import Optional, Union
 
-from binance.client import Client as BinanceClient
-from cobinhood_api import Cobinhood as CobinhoodClient
 
 from src import definitions
 from src.connection.download_historical_data import _download_historical_data_from_exchange
@@ -12,6 +10,7 @@ from src.connection.helpers import _generate_file_name
 from src.containers.stock_data import StockData, save_to_disk, load_from_disk
 from src.containers.time_windows import TimeWindow
 from src.containers.trading_pair import TradingPair
+from src.type_aliases import BinanceClient, CobinhoodClient
 
 
 def load_stock_data(time_window: TimeWindow, trading_pair: TradingPair,

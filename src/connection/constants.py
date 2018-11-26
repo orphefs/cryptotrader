@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from binance.client import Client as BinanceClient
+from src.type_aliases import BinanceClient
 
 binance_sampling_rate_mappings = {
     timedelta(minutes=1).total_seconds(): BinanceClient.KLINE_INTERVAL_1MINUTE,

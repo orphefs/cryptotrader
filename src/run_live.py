@@ -33,6 +33,7 @@ def run_live(trading_pair: TradingPair, trade_amount: float,
                 run_type="live",
                 path_to_portfolio=path_to_portfolio,
                 path_to_classifier=os.path.join(DATA_DIR, "classifier.dill"),
+                client=client,
                 market_maker=market_maker,
                 ) as lr:
         lr.run()

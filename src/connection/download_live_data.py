@@ -1,15 +1,13 @@
 from datetime import timedelta, datetime, timezone
 from typing import List, Union
 
-from binance.client import Client as BinanceClient
-from cobinhood_api import Cobinhood as CobinhoodClient
 
 from src.connection.connection_handling import retry_on_network_error
 from src.connection.constants import binance_sampling_rate_mappings, cobinhood_sampling_rate_mappings
 from src.connection.helpers import DownloadingError
 from src.containers.candle import Candle
 from src.containers.trading_pair import TradingPair
-from src.type_aliases import Exchange
+from src.type_aliases import Exchange, BinanceClient, CobinhoodClient
 
 
 def _download_live_data_from_binance(trading_pair: TradingPair, api_interval_callback: timedelta,
