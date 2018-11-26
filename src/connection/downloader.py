@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from typing import List, Tuple
 
 import dill
+from cobinhood_api import Cobinhood
 
 dill.dill._reverse_typemap['ClassType'] = type
 
@@ -15,8 +16,7 @@ from src.containers.stock_data import StockData
 from src.containers.time_series import TimeSeries
 from src.containers.time_windows import TimeWindow, Date
 from src.connection.connection_handling import retry_on_network_error
-from src.type_aliases import Security
-
+from src.type_aliases import Security, Exchange
 
 
 def calculate_sampling_rate_of_stock_data(stock_data: StockData) -> float:
@@ -33,13 +33,34 @@ def finetune_time_window(candles: List[Candle], time_window: TimeWindow):
     return new_candles
 
 
-def download_backtesting_data(time_window: TimeWindow, security: Security, api_interval_callback: str) -> List[Candle]:
+def download_backtesting_data_from_binance(time_window: TimeWindow, security: Security, api_interval_callback: str) -> \
+List[Candle]:
     client = Client("", "")
     klines = client.get_historical_klines(security, api_interval_callback,
                                           Date(time_window.start_datetime).as_string(),
                                           Date(time_window.end_datetime).as_string())
 
-    return Candle.from_list_of_klines(klines)
+    return Candle.from_list_of_klines(klines, Exchange.BINANCE)
+
+
+class DownloadingError(RuntimeError):
+    pass
+
+
+def download_backtesting_data_from_cobinhood(time_window: TimeWindow, security: Security, api_interval_callback: str) -> \
+List[Candle]:
+    client = Cobinhood()
+    klines = client.chart.get_candles(trading_pair_id=security,
+                                      start_time=round(time_window.start_datetime.timestamp() * 1000),
+                                      end_time=round(time_window.end_datetime.timestamp() * 1000),
+                                      timeframe=api_interval_callback,
+                                      )
+    if "error" in klines:
+        raise DownloadingError("{}".format(klines["error"]["error_code"]))
+    else:
+        pass
+
+    return Candle.from_list_of_klines(klines["result"]["candles"], Exchange.COBINHOOD)
 
 
 # TODO: handle case of missing data due to broken connection
@@ -85,11 +106,12 @@ def load_stock_data(time_window: TimeWindow, security: str, api_interval_callbac
     if os.path.isfile(path_to_file):
         stock_data = load_from_disk(path_to_file)
     else:
-        logging.info("Downloading stock data for {} from {} to {}".format(security, time_window.start_datetime, time_window.end_datetime))
+        logging.info("Downloading stock data for {} from {} to {}".format(security, time_window.start_datetime,
+                                                                          time_window.end_datetime))
         start = datetime.now()
         # extended_time_window = copy.deepcopy(
         #     time_window).increment_end_time_by_one_day().decrement_start_time_by_one_day()
-        candles = download_backtesting_data(time_window, security, api_interval_callback)
+        candles = download_backtesting_data_from_binance(time_window, security, api_interval_callback)
         # candles = finetune_time_window(candles, time_window)
         stop = datetime.now()
         logging.info("Elapsed download time: {}".format(stop - start))
@@ -101,12 +123,13 @@ def load_stock_data(time_window: TimeWindow, security: str, api_interval_callbac
 
 
 def download_test_data():
-    security = "NEOBTC"
+    security = "COB-ETH"
     time_window = TimeWindow(start_time=datetime(2018, 5, 20, 6, 00),
                              end_time=datetime(2018, 5, 21, 8, 00))
-    candles = download_backtesting_data(time_window, security, Client.KLINE_INTERVAL_1MINUTE)[-5:]
+    candles = download_backtesting_data_from_cobinhood(time_window, security, "1m")
+    print(candles)
     stock_data = StockData(candles, security)
-    save_to_disk(stock_data, os.path.join(definitions.DATA_DIR, "test_data.dill"))
+    save_to_disk(stock_data, os.path.join(definitions.DATA_DIR, "test_data_2836.dill"))
 
 
 if __name__ == '__main__':

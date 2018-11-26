@@ -3,6 +3,7 @@ import numpy as np
 from datetime import datetime
 
 from src.containers.time import Time, MilliSeconds
+from src.type_aliases import Exchange
 
 
 class Price(object):
@@ -143,14 +144,19 @@ class Candle(object):
                 number_of_trades=np.nan,
             ),
             time=Time(
-                open_time=np.nan,
+                open_time=MilliSeconds(None),
                 close_time=MilliSeconds(int(kline["timestamp"])),
             ),
         )
 
     @staticmethod
-    def from_list_of_klines(klines: List):
-        return [Candle.from_binance_kline(kline) for kline in klines]
+    def from_list_of_klines(klines: List, source: Exchange):
+        if source.name is "BINANCE":
+            return [Candle.from_binance_kline(kline) for kline in klines]
+        elif source.name is "COBINHOOD":
+            return [Candle.from_cobinhood_kline(kline) for kline in klines]
+        else:
+            raise ValueError("You need to specify the source (Exchange) from which to download the data.")
 
 
 def instantiate_1970_candle():

@@ -1,15 +1,19 @@
 import datetime
+from typing import Optional
 
 
 class MilliSeconds(object):
-    def __init__(self, time: int):
+    def __init__(self, time: Optional[int]):
         self._time = time
 
     def as_epoch_time(self) -> int:
         return self._time
 
-    def as_datetime(self) -> datetime.datetime:
-        return datetime.datetime.fromtimestamp(self._time / 1000)
+    def as_datetime(self) -> Optional[datetime.datetime]:
+        if self._time is None:
+            return None
+        else:
+            return datetime.datetime.fromtimestamp(self._time / 1000)
 
 
 class Time(object):
