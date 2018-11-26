@@ -17,10 +17,10 @@ from src.backtesting_logic.logic import _TradingSignal
 from src.classification.classifier_helpers import compute_confusion_matrix, \
     generate_reference_portfolio, generate_all_signals_at_once
 from src.classification.trading_classifier import TradingClassifier
-from src.connection.downloader import load_stock_data, load_from_disk
+from src.connection.load_stock_data import load_stock_data
 from src.containers.candle import Candle
 from src.containers.portfolio import Portfolio
-from src.containers.stock_data import StockData
+from src.containers.stock_data import StockData, load_from_disk
 from src.containers.time_windows import TimeWindow
 from src.definitions import DATA_DIR, TEST_DATA_DIR
 from src.feature_extraction.technical_indicator import AutoCorrelationTechnicalIndicator, \

@@ -7,7 +7,7 @@ from typing import Callable
 import numpy as np
 
 from src import definitions
-from src.connection.downloader import load_from_disk
+from src.containers.stock_data import load_from_disk
 from src.containers.candle import Candle
 from src.externals.rolling_statistics.python.rolling_stats import RollingMean
 

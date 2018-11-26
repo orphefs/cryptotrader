@@ -8,7 +8,7 @@ from pandas._libs.tslib import Timestamp
 
 from src import definitions
 from src.backtesting_logic.logic import Buy
-from src.connection.downloader import load_from_disk
+from src.containers.stock_data import load_from_disk
 from src.containers.candle import Candle
 from src.containers.data_point import PricePoint, Price
 from src.containers.portfolio import Portfolio

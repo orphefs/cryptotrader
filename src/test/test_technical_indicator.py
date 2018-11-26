@@ -4,7 +4,7 @@ from typing import List, Callable
 import pytest
 
 from src import definitions
-from src.connection.downloader import load_from_disk
+from src.containers.stock_data import load_from_disk
 from src.containers.candle import Candle
 from src.feature_extraction.technical_indicator import TechnicalIndicator, AutoCorrelationTechnicalIndicator
 from src.helpers import is_equal

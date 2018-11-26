@@ -4,8 +4,7 @@ import numpy as np
 import pytest
 
 from src.classification.trading_classifier import TradingClassifier
-from src.connection.downloader import load_from_disk
-from src.containers.stock_data import StockData
+from src.containers.stock_data import StockData, load_from_disk
 from src.definitions import TEST_DATA_DIR
 from src.helpers import is_equal
 

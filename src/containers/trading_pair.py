@@ -13,3 +13,9 @@ class TradingPair:
 
     def __str__(self):
         return "{}{}".format(self._from_security, self._to_security)
+
+    def as_string_for_binance(self) -> str:
+        return "{}{}".format(self._from_security, self._to_security)
+
+    def as_string_for_cobinhood(self) -> str:
+        return "{}-{}".format(self._from_security, self._to_security)

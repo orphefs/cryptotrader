@@ -8,10 +8,9 @@ import pytest
 from src import definitions
 from src.backtesting_logic.logic import Buy, Sell, Hold
 from src.classification.classifier_helpers import replace_repeating_signals_with_holds
-from src.connection.downloader import load_from_disk
 from src.containers.candle import Candle
 from src.containers.data_point import PricePoint, Price
-from src.containers.stock_data import StockData
+from src.containers.stock_data import StockData, load_from_disk
 from src.containers.trade_helper import generate_trading_signals_from_array
 from src.helpers import is_equal
 from src.containers.trading_pair import TradingPair

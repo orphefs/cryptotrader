@@ -10,10 +10,11 @@ from src import definitions
 from src.analysis_tools.run_metadata import RunMetaData
 from src.backtesting_logic.logic import Hold
 from src.classification.trading_classifier import TradingClassifier
-from src.connection.downloader import download_live_data, load_stock_data, load_from_disk
+from src.connection.load_stock_data import load_stock_data
+from src.connection.download_live_data import download_live_data
 from src.containers.candle import instantiate_1970_candle, Candle
 from src.containers.portfolio import Portfolio
-from src.containers.stock_data import StockData
+from src.containers.stock_data import StockData, load_from_disk
 from src.containers.time_windows import TimeWindow
 from src.containers.trade_helper import generate_trading_signal_from_prediction
 from src.definitions import update_interval_mappings
@@ -46,7 +47,7 @@ class Runner(DillSaveLoadMixin):
         self._previous_signal = Hold(0, None)
         self._iteration_number = None
         self._client = Client("", "")  # this client does not need API key and is only used for downloading candles
-        self._kline_interval = Client.KLINE_INTERVAL_1MINUTE
+        self._sampling_period = timedelta(minutes=1)
         self._mock_data_start_time = mock_data_start_time
         self._mock_data_stop_time = mock_data_stop_time
         self._path_to_stock_data = path_to_stock_data
@@ -55,15 +56,14 @@ class Runner(DillSaveLoadMixin):
         self._run_metadata = RunMetaData(trading_pair=self._trading_pair,
                                          trade_amount=self._trade_amount,
                                          run_type=self._run_type)
-        self._parameters = LiveParameters(
-            update_period=timedelta(hours=1),
-            trade_amount=self._trade_amount,
-            # sleep_time=update_interval_mappings[self._kline_interval].total_seconds(),
-            sleep_time=2,
-        )
+        self._parameters = LiveParameters(update_period=timedelta(hours=1),
+                                          trade_amount=self._trade_amount,
+                                          # sleep_time=update_interval_mappings[self._kline_interval].total_seconds(),
+                                          sleep_time=2,
+                                          )
         self._portfolio = Portfolio(initial_capital=get_capital_from_account(security=self._trading_pair),
                                     trade_amount=self._parameters.trade_amount)
-        self._waiting_threshold = timedelta(seconds=update_interval_mappings[self._kline_interval].total_seconds() - 15)
+        self._waiting_threshold = timedelta(seconds=self._sampling_period.total_seconds() - 15)
 
         self._classifier = TradingClassifier.load_from_disk(path_to_classifier)
         if market_maker is None:
@@ -96,7 +96,7 @@ class Runner(DillSaveLoadMixin):
 
     def _download_candle(self) -> Candle:
         if self._run_type == "live":
-            return download_live_data(self._client, self._trading_pair, self._kline_interval, 30)[-1]
+            return download_live_data(self._client, self._trading_pair, self._sampling_period, 30)
         elif self._run_type == "mock":
             return self._mock_download_candle_for_current_iteration()
 
@@ -104,7 +104,7 @@ class Runner(DillSaveLoadMixin):
         if self._mock_data_start_time and self._mock_data_stop_time:
             self._stock_data = load_stock_data(TimeWindow(start_time=self._mock_data_start_time,
                                                           end_time=self._mock_data_stop_time),
-                                               self._trading_pair, self._kline_interval)
+                                               self._trading_pair, self._sampling_period)
         elif self._path_to_stock_data:
             self._stock_data = load_from_disk(self._path_to_stock_data)
 

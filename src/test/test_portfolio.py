@@ -10,7 +10,7 @@ from src import definitions
 from src.analysis_tools.generate_run_statistics import cleanup_signals, generate_order_pairs, \
     compute_profits_and_losses, calculate_percentage_gains
 from src.backtesting_logic.logic import Buy, Sell, Hold
-from src.connection.downloader import load_from_disk
+from src.containers.stock_data import load_from_disk
 from src.containers.candle import Candle
 from src.containers.data_point import PricePoint, Price
 from src.containers.portfolio import Portfolio
