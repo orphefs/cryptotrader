@@ -132,14 +132,14 @@ if __name__ == "__main__":
         level=logging.DEBUG,
     )
     trading_pair = TradingPair("ETH", "BTC")
-    # client = CobinhoodClient()
-    client = BinanceClient("","")
+    client = CobinhoodClient()
+    # client = BinanceClient("","")
 
     train_classifier(trading_pair=trading_pair,
                      client=client,
                      training_time_window=TimeWindow(
-                         start_time=datetime(2018, 10, 4),
-                         end_time=datetime(2018, 10, 5)
+                         start_time=datetime(2018, 11, 19),
+                         end_time=datetime(2018, 11, 25)
                      ),
                      technical_indicators=[
                          AutoCorrelationTechnicalIndicator(Candle.get_close_price, 1),
@@ -155,10 +155,10 @@ if __name__ == "__main__":
                          PPOTechnicalIndicator(Candle.get_close_price, 60, 40),
                      ],
                      path_to_classifier=os.path.join(DATA_DIR, "classifier.dill"))
-    if 1:
+    if 0:
         run_trained_classifier(trading_pair=trading_pair,
                                client=client,
                                trade_amount=100,
-                               testing_data=TimeWindow(datetime(2018, 10, 6), datetime(2018, 10, 7)),
+                               testing_data=TimeWindow(datetime(2018, 11, 25), datetime(2018, 11,26)),
                                path_to_portfolio=os.path.join(DATA_DIR, "offline_portfolio.dill"),
                                classifier=os.path.join(DATA_DIR, "classifier.dill"))

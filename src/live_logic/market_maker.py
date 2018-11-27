@@ -46,9 +46,9 @@ class TestMarketMaker:
             pass
 
     def place_buy_order(self):
+        logger.info(
+            "Placing Buy market order on {} for {} {}".format(datetime.now(), self._trading_pair, self._quantity))
         if isinstance(self._client, BinanceClient):
-            logger.info(
-                "Placing Buy market order on {} for {} {}".format(datetime.now(), self._trading_pair, self._quantity))
             order = self._client.create_test_order(
                 symbol=self._trading_pair,
                 side=BinanceClient.SIDE_BUY,
@@ -56,12 +56,12 @@ class TestMarketMaker:
                 quantity=self._quantity)
             return order
         elif isinstance(self._client, CobinhoodClient):
-            raise NotImplementedError
+            print("Cobinhood Test Buy Order...")
 
     def place_sell_order(self):
+        logger.info(
+            "Placing Sell market order on {} for {} {}".format(datetime.now(), self._trading_pair, self._quantity))
         if isinstance(self._client, BinanceClient):
-            logger.info(
-                "Placing Sell market order on {} for {} {}".format(datetime.now(), self._trading_pair, self._quantity))
             order = self._client.create_test_order(
                 symbol=self._trading_pair,
                 side=BinanceClient.SIDE_SELL,
@@ -69,7 +69,28 @@ class TestMarketMaker:
                 quantity=self._quantity)
             return order
         elif isinstance(self._client, CobinhoodClient):
-            raise NotImplementedError
+            print("Cobinhood Test Sell Order...")
+
+
+def _create_cobinhood_order_dict(trading_pair: TradingPair, order_type: str, quantity: float) -> dict:
+    return {
+        "trading_pair_id": "{}".format(trading_pair.as_string_for_cobinhood()),
+        "side": "{}".format(order_type),
+        "type": "market",
+        # "price": "0",
+        "size": "{}".format(quantity)
+    }
+
+
+class OrderError(RuntimeError):
+    pass
+
+
+def raise_order_exception_if_error(order: dict):
+    if "error" in order:
+        raise OrderError("{}".format(order["error"]["error_code"]))
+    else:
+        pass
 
 
 class MarketMaker:
@@ -87,9 +108,9 @@ class MarketMaker:
             pass
 
     def place_buy_order(self):
+        logger.info(
+            "Placing Buy market order on {} for {} {}".format(datetime.now(), self._trading_pair, self._quantity))
         if isinstance(self._client, BinanceClient):
-            logger.info(
-                "Placing Buy market order on {} for {} {}".format(datetime.now(), self._trading_pair, self._quantity))
             order = self._client.order_market_buy(
                 symbol=self._trading_pair,
                 side=BinanceClient.SIDE_BUY,
@@ -97,12 +118,19 @@ class MarketMaker:
                 quantity=self._quantity)
             return order
         elif isinstance(self._client, CobinhoodClient):
-            raise NotImplementedError
+            order = self._client.trading.post_orders(
+                _create_cobinhood_order_dict(trading_pair=self._trading_pair,
+                                             order_type="bid",
+                                             quantity=self._quantity)
+            )
+            raise_order_exception_if_error(order)
+            print(order)
+            return order
 
     def place_sell_order(self):
+        logger.info(
+            "Placing Sell market order on {} for {} {}".format(datetime.now(), self._trading_pair, self._quantity))
         if isinstance(self._client, BinanceClient):
-            logger.info(
-                "Placing Sell market order on {} for {} {}".format(datetime.now(), self._trading_pair, self._quantity))
             order = self._client.order_market_sell(
                 symbol=self._trading_pair,
                 side=BinanceClient.SIDE_SELL,
@@ -110,12 +138,19 @@ class MarketMaker:
                 quantity=self._quantity)
             return order
         elif isinstance(self._client, CobinhoodClient):
-            raise NotImplementedError
+            order = self._client.trading.post_orders(
+                _create_cobinhood_order_dict(trading_pair=self._trading_pair,
+                                             order_type="ask",
+                                             quantity=self._quantity)
+            )
+            raise_order_exception_if_error(order)
+            print(order)
+            return order
 
 
 if __name__ == '__main__':
     client = BinanceClient("VWwsv93z4UHRoJEOkye1oZeqRtYPiaEXqzeG9fem2guMNKKU1tUDTTta9Nm4JZ3x",
-                    "L8C3ws3xkxX2AUravH41kfDezrHin2LarC1K8MDnmGM51dRBZwqDpvTOVZ1Qztap")
+                           "L8C3ws3xkxX2AUravH41kfDezrHin2LarC1K8MDnmGM51dRBZwqDpvTOVZ1Qztap")
     mm = MarketMaker(client, TradingPair("NEO", "BTC"), 500)
     order = mm.place_buy_order()
     print(order)

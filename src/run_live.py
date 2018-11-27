@@ -34,7 +34,7 @@ def run_live(trading_pair: TradingPair, trade_amount: float,
                              "wXajozgTo.V2:4df57bcdf6191fb4423d8726d45849c34f10d6749809009"
                              "70978da0c441a42a6")
 
-    market_maker = TestMarketMaker(client, trading_pair, trade_amount)
+    market_maker = MarketMaker(client, trading_pair, trade_amount)
 
     with runner(trading_pair=trading_pair,
                 trade_amount=trade_amount,
@@ -50,7 +50,7 @@ def run_live(trading_pair: TradingPair, trade_amount: float,
 
 
 if __name__ == '__main__':
-    path_to_portfolio, path_to_log = run_live(TradingPair("COB", "ETH"),
+    path_to_portfolio, path_to_log = run_live(TradingPair("ETH", "BTC"),
                                               1,
                                               os.path.join(DATA_DIR, "live_run.log"),
                                               os.path.join(DATA_DIR, "live_portfolio.dill"))

@@ -48,7 +48,7 @@ def _download_live_data_from_exchange(trading_pair: TradingPair, sampling_period
 def download_live_data(client: Union[BinanceClient, CobinhoodClient], trading_pair: TradingPair,
                        sampling_period: timedelta, lags: int) -> Candle:
     candle = _download_live_data_from_exchange(trading_pair, sampling_period, client)
-    print(candle)
+
     if isinstance(candle, list):
         raise DownloadingError("Only one candle is needed for the live run downloader")
     return candle
