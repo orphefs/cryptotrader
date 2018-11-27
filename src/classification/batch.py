@@ -3,6 +3,7 @@ import os
 from datetime import datetime
 from typing import Set, List, Union
 
+from src.analysis_tools.analyze_batch_run import analyze_batch_run
 from src.datetime_helpers import datetime_to_nth_day, nth_day_to_datetime
 from src.helpers import generate_hash
 from src.classification.trading_classifier import TradingClassifier
@@ -121,28 +122,36 @@ def batch_test(testing_time_windows: List[TimeWindow],
 
 
 def run_batch():
-    trading_pair = TradingPair("ETH", "BTC")
+    trading_pair = TradingPair("NEO", "BTC")
+    # client = BinanceClient("","")
     client = CobinhoodClient()
-    trade_amount = 1
-    training_time_windows = generate_time_windows(5)
-    testing_time_windows = generate_time_windows(5)
+    trade_amount = 50
+    training_time_windows = generate_sample_time_windows_2()
+    testing_time_windows = generate_sample_time_windows_2()
     training_hashes = batch_train(
         training_time_windows=training_time_windows,
         trading_pair=trading_pair,
         client=client,
         number_of_training_runs=1,
         technical_indicators=[
-            AutoCorrelationTechnicalIndicator(Candle.get_volume, 4),
+            # AutoCorrelationTechnicalIndicator(Candle.get_volume, 4),
             AutoCorrelationTechnicalIndicator(Candle.get_close_price, 1),
             AutoCorrelationTechnicalIndicator(Candle.get_close_price, 2),
+            AutoCorrelationTechnicalIndicator(Candle.get_close_price, 3),
+            AutoCorrelationTechnicalIndicator(Candle.get_close_price, 4),
             PPOTechnicalIndicator(Candle.get_close_price, 5, 1),
             PPOTechnicalIndicator(Candle.get_close_price, 10, 4),
             PPOTechnicalIndicator(Candle.get_close_price, 20, 1),
             PPOTechnicalIndicator(Candle.get_close_price, 30, 10),
+            PPOTechnicalIndicator(Candle.get_close_price, 40, 20),
+            PPOTechnicalIndicator(Candle.get_close_price, 50, 30),
+            PPOTechnicalIndicator(Candle.get_close_price, 60, 40),
             # PPOTechnicalIndicator(Candle.get_number_of_trades, 5, 1),
             # PPOTechnicalIndicator(Candle.get_number_of_trades, 10, 2),
             # PPOTechnicalIndicator(Candle.get_number_of_trades, 15, 3),
-            PPOTechnicalIndicator(Candle.get_volume, 5, 1),
+            # PPOTechnicalIndicator(Candle.get_volume, 5, 1),
+            # PPOTechnicalIndicator(Candle.get_volume, 10, 5),
+            # PPOTechnicalIndicator(Candle.get_volume, 20, 10),
         ])
     testing_hashes = []
     for training_hash in training_hashes:
@@ -167,4 +176,5 @@ if __name__ == '__main__':
     training_hashes, testing_hashes = run_batch()
     print(training_hashes)
     print(testing_hashes)
+    analyze_batch_run()
     # [print(w) for w in generate_time_windows(15)]

@@ -18,6 +18,7 @@ def scan_folder(path_to_folder: Path) -> List[Path]:
 def assemble_dataframe(paths_to_portfolios: List[Path]) -> pd.DataFrame:
     d = defaultdict(list)
     for path_to_portfolio in paths_to_portfolios:
+        print("Analyzing portfolio {}".format(path_to_portfolio))
         order_pairs, percentage_gains, index_performance, \
         classifier_time_window, testing_time_window = compute_all_statistics(path_to_portfolio)
         d["training_time_start"].append(classifier_time_window.start_datetime)
@@ -36,7 +37,7 @@ def assemble_dataframe(paths_to_portfolios: List[Path]) -> pd.DataFrame:
     return pd.DataFrame(d)
 
 
-def main():
+def analyze_batch_run():
     paths_to_portfolios = scan_folder(DATA_DIR)
     df = assemble_dataframe(paths_to_portfolios)
     df.to_pickle(os.path.join(DATA_DIR, "batch_results.pkl"))
@@ -44,4 +45,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    analyze_batch_run()

@@ -14,10 +14,10 @@ from src.type_aliases import BinanceClient, CobinhoodClient
 
 
 def load_stock_data(time_window: TimeWindow, trading_pair: TradingPair,
-                    api_interval_callback: timedelta,
+                    sampling_period: timedelta,
                     client: Optional[Union[BinanceClient, CobinhoodClient]]) -> StockData:
     path_to_file = os.path.join(definitions.DATA_DIR,
-                                _generate_file_name(time_window, trading_pair, str(api_interval_callback)))
+                                _generate_file_name(time_window, trading_pair, str(sampling_period)))
     if client is None:
         client = BinanceClient("", "")
     if os.path.isfile(path_to_file):
@@ -28,8 +28,8 @@ def load_stock_data(time_window: TimeWindow, trading_pair: TradingPair,
         start = datetime.now()
         # extended_time_window = copy.deepcopy(
         #     time_window).increment_end_time_by_one_day().decrement_start_time_by_one_day()
-        candles = _download_historical_data_from_exchange(time_window, trading_pair, api_interval_callback, client)
-        # candles = _finetune_time_window(candles, time_window)
+        candles = _download_historical_data_from_exchange(time_window, trading_pair, sampling_period, client)
+        # candles = finetune_time_window(candles, time_window)
         stop = datetime.now()
         logging.info("Elapsed download time: {}".format(stop - start))
         # for candle in candles:

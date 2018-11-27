@@ -12,11 +12,11 @@ class DownloadingError(RuntimeError):
     pass
 
 
-def _generate_file_name(time_window: TimeWindow, trading_pair: TradingPair, api_interval_callback: str) -> str:
+def _generate_file_name(time_window: TimeWindow, trading_pair: TradingPair, sampling_period: str) -> str:
     return ('local_data_' + Date(time_window.start_datetime).as_string().replace(" ", "_") + '_' +
             Date(time_window.end_datetime).as_string().replace(" ",
                                                                "_") + '_' + str(
-                trading_pair) + '_' + api_interval_callback + ".dill").replace(
+                trading_pair) + '_' + sampling_period + ".dill").replace(
         " ", "_")
 
 
@@ -30,10 +30,10 @@ def _calculate_sampling_rate_of_stock_data(stock_data: StockData) -> float:
                       y=[candle.get_close_price() for candle in stock_data.candles]).sampling_rate
 
 
-def _finetune_time_window(candles: List[Candle], time_window: TimeWindow):
+def finetune_time_window(candles: List[Candle], time_window: TimeWindow):
     new_candles = [candle for candle in
                    candles if
-                   time_window.start_datetime - timedelta(minutes=1)
+                   time_window.start_datetime
                    <= candle.get_close_time_as_datetime() <
-                   time_window.end_datetime + timedelta(minutes=1)]
+                   time_window.end_datetime ]
     return new_candles
