@@ -17,7 +17,7 @@ def load_stock_data(time_window: TimeWindow, trading_pair: TradingPair,
                     sampling_period: timedelta,
                     client: Optional[Union[BinanceClient, CobinhoodClient]]) -> StockData:
     path_to_file = os.path.join(definitions.DATA_DIR,
-                                _generate_file_name(time_window, trading_pair, str(sampling_period)))
+                                _generate_file_name(time_window, trading_pair, str(sampling_period), str(type(client))))
     if client is None:
         client = BinanceClient("", "")
     if os.path.isfile(path_to_file):

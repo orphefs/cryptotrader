@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Set, List, Union
 
 from src.analysis_tools.analyze_batch_run import analyze_batch_run
+from src.connection.helpers import clear_downloaded_stock_data
 from src.datetime_helpers import datetime_to_nth_day, nth_day_to_datetime
 from src.helpers import generate_hash
 from src.classification.trading_classifier import TradingClassifier
@@ -122,11 +123,12 @@ def batch_test(testing_time_windows: List[TimeWindow],
 
 
 def run_batch():
-    trading_pair = TradingPair("NEO", "BTC")
-    # client = BinanceClient("","")
-    client = CobinhoodClient()
+    clear_downloaded_stock_data()
+    trading_pair = TradingPair("ETH", "BTC")
+    client = BinanceClient("", "")
+    # client = CobinhoodClient()
     trade_amount = 50
-    training_time_windows = generate_sample_time_windows_2()
+    training_time_windows = generate_sample_time_windows()
     testing_time_windows = generate_sample_time_windows_2()
     training_hashes = batch_train(
         training_time_windows=training_time_windows,

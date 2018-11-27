@@ -28,6 +28,6 @@ def test_exact_amount():
         m.get('https://api.binance.com/api/v1/klines?interval=1m&limit=500&startTime=1519892400000&symbol=BNBBTC', json=second_res)
         client.get_historical_klines(
             symbol="BNBBTC",
-            interval=timedelta(minutes=1),
+            interval=Client.KLINE_INTERVAL_1MINUTE,
             start_str="1st March 2018"
         )

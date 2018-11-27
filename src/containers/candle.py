@@ -150,7 +150,7 @@ class Candle(object):
         )
 
     @staticmethod
-    def from_list_of_klines(klines: List, source: Exchange = Exchange.BINANCE):
+    def from_list_of_klines(klines: List, source: Exchange):
         if source.name is "BINANCE":
             return [Candle.from_binance_kline(kline) for kline in klines]
         elif source.name is "COBINHOOD":

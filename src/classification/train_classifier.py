@@ -131,33 +131,34 @@ if __name__ == "__main__":
         # stream=sys.stdout,
         level=logging.DEBUG,
     )
+    trading_pair = TradingPair("ETH", "BTC")
+    # client = CobinhoodClient()
+    client = BinanceClient("","")
 
-    train_classifier(trading_pair=TradingPair("COB", "ETH"),
-                     client=CobinhoodClient(),
+    train_classifier(trading_pair=trading_pair,
+                     client=client,
                      training_time_window=TimeWindow(
-                         start_time=datetime(2018, 10, 1),
+                         start_time=datetime(2018, 10, 4),
                          end_time=datetime(2018, 10, 5)
                      ),
                      technical_indicators=[
-                         AutoCorrelationTechnicalIndicator(Candle.get_volume, 4),
                          AutoCorrelationTechnicalIndicator(Candle.get_close_price, 1),
                          AutoCorrelationTechnicalIndicator(Candle.get_close_price, 2),
+                         AutoCorrelationTechnicalIndicator(Candle.get_close_price, 3),
+                         AutoCorrelationTechnicalIndicator(Candle.get_close_price, 4),
                          PPOTechnicalIndicator(Candle.get_close_price, 5, 1),
                          PPOTechnicalIndicator(Candle.get_close_price, 10, 4),
                          PPOTechnicalIndicator(Candle.get_close_price, 20, 1),
-                         # PPOTechnicalIndicator(Candle.get_close_price, 20, 5),
-                         # PPOTechnicalIndicator(Candle.get_close_price, 20, 10),
                          PPOTechnicalIndicator(Candle.get_close_price, 30, 10),
-                         # PPOTechnicalIndicator(Candle.get_number_of_trades, 5, 1),
-                         # PPOTechnicalIndicator(Candle.get_number_of_trades, 10, 2),
-                         # PPOTechnicalIndicator(Candle.get_number_of_trades, 15, 3),
-                         # PPOTechnicalIndicator(Candle.get_number_of_trades, 20, 1) / PPOTechnicalIndicator(Candle.get_volume, 20, 5),
-                         PPOTechnicalIndicator(Candle.get_volume, 5, 1),
+                         PPOTechnicalIndicator(Candle.get_close_price, 40, 20),
+                         PPOTechnicalIndicator(Candle.get_close_price, 50, 30),
+                         PPOTechnicalIndicator(Candle.get_close_price, 60, 40),
                      ],
                      path_to_classifier=os.path.join(DATA_DIR, "classifier.dill"))
-    if 0:
-        run_trained_classifier(trading_pair="NEOBTC",
-                               client=CobinhoodClient(),
+    if 1:
+        run_trained_classifier(trading_pair=trading_pair,
+                               client=client,
                                trade_amount=100,
-                               path_to_stock_data="/home/orphefs/Documents/Code/autotrader/autotrader/data/local_data_01_Oct,_2018_02_Oct,_2018_NEOBTC_1m.dill",
-                               path_to_portfolio="/home/orphefs/Documents/Code/autotrader/autotrader/data/offline_portfolio.dill")
+                               testing_data=TimeWindow(datetime(2018, 10, 6), datetime(2018, 10, 7)),
+                               path_to_portfolio=os.path.join(DATA_DIR, "offline_portfolio.dill"),
+                               classifier=os.path.join(DATA_DIR, "classifier.dill"))
