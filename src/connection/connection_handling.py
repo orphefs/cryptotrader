@@ -4,6 +4,8 @@ from typing import Callable
 
 import requests
 
+from src.connection.helpers import DownloadingError
+
 
 class NetworkError(RuntimeError):
     pass
@@ -13,7 +15,9 @@ def retry_on_network_error(func: Callable):
     retry_on_exceptions = (
         requests.exceptions.Timeout,
         requests.exceptions.ConnectionError,
-        requests.exceptions.HTTPError
+        requests.exceptions.HTTPError,
+        DownloadingError
+
     )
     max_retries = 3600
     timeout = 2
