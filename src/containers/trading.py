@@ -1,3 +1,4 @@
+from src.connection.cobinhood_helpers import load_cobinhood_api_token
 from src.containers.order import Order, Price, Size
 from src.containers.trading_pair import TradingPair
 from src.type_aliases import CobinhoodClient, BinanceClient
@@ -21,7 +22,7 @@ class Trading:
     def modify_order(self, order_id: OrderID, price: Price, size: Size):
         raise NotImplementedError
 
-    def get_orders(self, order_id: Optional[OrderID]) -> List[Order]:
+    def get_open_orders(self, order_id: Optional[OrderID]) -> List[Order]:
         raise NotImplementedError
 
     def cancel_order(self, order_id: OrderID):
@@ -58,21 +59,19 @@ class CobinhoodTrading(Trading):
         order.price = price
         order.size = size
         response = self._client.trading.put_orders(order_id=order.id,
-                                                 data=order.to_cobinhood_dict())
+                                                   data=order.to_cobinhood_dict())
         if response["success"]:
             return True
         else:
             raise CobinhoodError("Could not modify order. "
                                  "Reason: {}".format(response["error"]["error_code"]))
 
-    def get_orders(self, order_id: Optional[OrderID]) -> Union[Order, List[Order]]:
+    def get_open_orders(self, order_id: Optional[OrderID]=None) -> List[Optional[Order]]:
         response = self._client.trading.get_orders(order_id=order_id)
 
         if response["success"]:
-            if isinstance(response["result"]["order"], list):
-                return [Order.from_cobinhood_response(order) for order in response["result"]["order"]]
-            else:
-                return Order.from_cobinhood_response(response["result"]["order"][0])
+            if isinstance(response["result"]["orders"], list):
+                return [Order.from_cobinhood_response(order) for order in response["result"]["orders"]]
         else:
             raise CobinhoodError("There are no result in history to be fetched. "
                                  "Reason: {}".format(response["error"]["error_code"]))
@@ -106,3 +105,11 @@ class CobinhoodTrading(Trading):
     def get_trades(self) -> List[Trade]:
         raise NotImplementedError
 
+
+if __name__ == '__main__':
+    client = CobinhoodClient(API_TOKEN=load_cobinhood_api_token())
+    trader = CobinhoodTrading(client)
+    # orders = trader.get_order_history(trading_pair=TradingPair("ETH", "BTC"))
+    orders = trader.get_open_orders()
+    for order in orders:
+        print(order)

@@ -1,3 +1,4 @@
+from datetime import datetime
 from enum import Enum
 from typing import Optional
 
@@ -45,15 +46,15 @@ class Order(object):
                  type: OrderType,
                  side: Side,
                  size: Size,
-                 stop_price: Optional[StopPrice],
-                 source: Optional[Source],
-                 equivalent_price: Optional[EquivalentPrice],
-                 completed_at: Optional[MilliSeconds],
-                 timestamp: Optional[MilliSeconds],
-                 state: Optional[OrderState],
-                 trailing_distance: Optional[TrailingDistance],
-                 id: Optional[OrderID],
-                 filled: Optional[Filled],
+                 stop_price: Optional[StopPrice] = None,
+                 source: Optional[Source] = None,
+                 equivalent_price: Optional[EquivalentPrice] = None,
+                 completed_at: Optional[MilliSeconds] = None,
+                 timestamp: Optional[MilliSeconds] = None,
+                 state: Optional[OrderState] = None,
+                 trailing_distance: Optional[TrailingDistance] = None,
+                 id: Optional[OrderID] = None,
+                 filled: Optional[Filled] = None,
                  ):
         self.equivalent_price = equivalent_price
         self.trading_pair_id = trading_pair_id
@@ -79,23 +80,49 @@ class Order(object):
             "size": "{}".format(self.size),
         }
 
+    def __repr__(self):
+        return "Order(completed_at={}, " \
+               "equivalent_price={}, " \
+               "filled={}, " \
+               "id={}, " \
+               "price={}, " \
+               "side={}, " \
+               "size={}, " \
+               "source={}, " \
+               "state={}, " \
+               "timestamp={}, " \
+               "trading_pair_id={}, " \
+               "type={}, " \
+               ")".format(self.completed_at.as_datetime(),
+                          self.equivalent_price,
+                          self.filled,
+                          self.id,
+                          self.price,
+                          self.side,
+                          self.size,
+                          self.source,
+                          self.state,
+                          self.timestamp.as_epoch_time(),
+                          self.trading_pair_id,
+                          self.type,
+                          )
+
     @staticmethod
     def from_cobinhood_response(order: dict):
-        return Order(equivalent_price=EquivalentPrice(order["equivalent_price"]),
-                     trading_pair_id=TradingPair.from_cobinhood(order["trading_pair_id"]),
-                     stop_price=StopPrice(order["stop_price"]),
-                     completed_at=MilliSeconds(int(order["completed_at"])),
-                     timestamp=MilliSeconds(int(order["timestamp"])),
-                     price=Price(order["price"]),
-                     side=Side(order["side"]),
-                     source=Source(order["source"]),
-                     state=OrderState(order["state"]),
-                     trailing_distance=TrailingDistance(order["trailing_distance"]),
-                     type=OrderType(order["type"]),
-                     id=OrderID(order["id"]),
-                     filled=Filled(order["filled"]),
-                     size=Size(order["size"]),
-                     )
+        return Order(
+            completed_at=MilliSeconds.from_cobinhood_timestamp(order["completed_at"]),
+            equivalent_price=EquivalentPrice(order["eq_price"]),
+            filled=Filled(order["filled"]),
+            id=OrderID(order["id"]),
+            price=Price(order["price"]),
+            side=Side(order["side"]),
+            size=Size(order["size"]),
+            source=Source(order["source"]),
+            state=OrderState(order["state"]),
+            timestamp=MilliSeconds(int(order["timestamp"])),
+            trading_pair_id=TradingPair.from_cobinhood(order["trading_pair_id"]),
+            type=OrderType(order["type"]),
+        )
 
 
 """

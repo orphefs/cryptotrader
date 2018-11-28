@@ -15,6 +15,12 @@ class MilliSeconds(object):
         else:
             return datetime.datetime.fromtimestamp(self._time / 1000)
 
+    @staticmethod
+    def from_cobinhood_timestamp(timestamp: str):
+        return MilliSeconds(time=round(datetime.datetime.strptime(
+            timestamp, "%Y-%m-%dT%H:%M:%S.%fZ").timestamp() * 1000))
+
+
 
 class Time(object):
     def __init__(self, open_time: MilliSeconds, close_time: MilliSeconds):
