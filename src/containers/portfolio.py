@@ -16,7 +16,7 @@ percentage = float
 
 
 class Portfolio:
-    def __init__(self, initial_capital: float, trade_amount: int, classifier: Optional[TradingClassifier] = None):
+    def __init__(self, initial_capital: float, trade_amount: Union[int, float], classifier: Optional[TradingClassifier] = None):
         self._fees = 0.001  # 0.1% on binance
         self._trade_amount = trade_amount
         self._classifier = classifier

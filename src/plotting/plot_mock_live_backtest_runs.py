@@ -26,7 +26,7 @@ def convert_signals_to_backtest_candles(signals: List[Union[Buy, Sell, Hold]]) -
 
 
 def display_statistics(title: str, axis: Axes, path_to_live_portfolio_df_dill: str):
-    order_pairs, percentage_gains, index_performance = \
+    order_pairs, percentage_gains, index_performance, _,_ = \
         compute_all_statistics(path_to_live_portfolio_df_dill)
     axis.set_title("{}, {} \n  {}".format(title, percentage_gains, index_performance))
 
@@ -56,7 +56,7 @@ def main(path_to_live_portfolio_df_dill: str = None,
     if path_to_offline_portfolio_df_dill is not None:
         offline_portfolio_df = Portfolio.load_from_disk(path_to_offline_portfolio_df_dill)
         offline_signals = offline_portfolio_df.signals
-        plot_trading_signals(ax=ax[2], trading_signals=offline_signals, color='b', label="offline")
+        plot_trading_signals(ax=ax[0], trading_signals=offline_signals, color='b', label="offline")
         bs = [signal.price_point.date_time for signal in offline_signals]
         display_statistics("offline Run", ax[2], path_to_offline_portfolio_df_dill)
 

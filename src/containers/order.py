@@ -3,7 +3,7 @@ from typing import List, Dict
 from src.containers.time import MilliSeconds
 
 
-class Trade(object):
+class Order(object):
     def __init__(self, id: int, price: float, qty: float, time: MilliSeconds, is_buyer_maker: bool,
                  is_best_match: bool):
         self._id = id
@@ -39,7 +39,7 @@ class Trade(object):
 
     @staticmethod
     def from_trade(trade: Dict):
-        return Trade(
+        return Order(
             id=int(trade["id"]),
             price=float(trade["price"]),
             qty=float(trade["qty"]),
@@ -49,4 +49,4 @@ class Trade(object):
 
     @staticmethod
     def from_list_of_trades(trades: List[Dict]):
-        return [Trade.from_trade(trade) for trade in trades]
+        return [Order.from_trade(trade) for trade in trades]
