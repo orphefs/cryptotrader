@@ -19,3 +19,7 @@ class TradingPair:
 
     def as_string_for_cobinhood(self) -> str:
         return "{}-{}".format(self._from_security, self._to_security)
+
+    @staticmethod
+    def from_cobinhood(trading_pair_id: str):
+        return TradingPair(from_security=trading_pair_id.split("-")[0], to_security=trading_pair_id.split("-")[1])
