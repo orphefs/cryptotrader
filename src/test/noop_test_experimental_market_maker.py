@@ -48,9 +48,16 @@ def main():
     signals = generate_signals_from_classifier(stock_data, classifier)
     count = 0
     for signal in signals:
-        print("\n\n\n\n\n\n\n\n\n\n")
+        print("\n\n+++++++++++++++++++++++++++++++++++++\n"
+              "++++++++++++NEW SIGNAL+++++++++++++++++"
+              "+++++++++++++++++++++++++++++++++++++")
         print(signal)
-        order = mm.update(signal)
+        print("\n\n+++++++++++++++++++++++++++++++++++++\n"
+              "+++++++++++++++++++++++++++++++++++++++"
+              "+++++++++++++++++++++++++++++++++++++")
+        for i in range(0,30):
+            _ = mm.insert_signal(signal)
+
         count += 1
         if count > 20:
             break

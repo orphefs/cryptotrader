@@ -24,6 +24,7 @@ class _TradingSignal(object):
                (self.price_point == other.price_point)
 
 
+
 def generate_trading_signal(*args):
     return _TradingSignal(*args)
 

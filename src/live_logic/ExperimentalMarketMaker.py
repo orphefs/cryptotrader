@@ -4,6 +4,7 @@ from typing import Union, Optional, Type
 from datetime import datetime
 
 from src.backtesting_logic.logic import Buy, Sell, Hold
+from src.containers.data_point import PricePoint
 from src.containers.order import Order, OrderType, Size, Side, Price
 from src.containers.time import MilliSeconds
 from src.containers.trading import CobinhoodTrading, CobinhoodError, Trading
@@ -73,7 +74,7 @@ def _act_if_buy_signal_and_filled_ask_order(trader: CobinhoodTrading, signal: Bu
             type=OrderType("limit"),
             side=Side("bid"),
             size=Size(order.size),
-            timestamp=MilliSeconds(round(datetime.now().timestamp()*1000)),
+            timestamp=MilliSeconds(round(datetime.now().timestamp() * 1000)),
         ))
     except CobinhoodError as error:
         logger.debug(error)
@@ -97,6 +98,10 @@ def _act_if_sell_signal_and_filled_bid_order(trader: CobinhoodTrading, signal: S
         print(error)
 
 
+def _init_signal() -> Buy:
+    return Buy(-1, PricePoint(value=None, date_time=datetime.now()))
+
+
 class ExperimentalMarketMaker:
     def __init__(self,
                  trader: Union[CobinhoodTrading, MockTrading],
@@ -106,44 +111,69 @@ class ExperimentalMarketMaker:
         self._trader = trader
         self._trading_pair = trading_pair
         self._quantity = quantity
+        self._open_orders = []
+        self._current_signal = None
+        self._previous_signal = _init_signal()
 
     @property
     def trader(self):
         return self._trader
 
-    def update(self, signal: Union[Buy, Sell, Hold]) -> Optional[Order]:
-        order = None
-        orders = self._trader.get_open_orders()
-        if len(orders) > 1:
-            raise MarketMakerError("There should only be one open order at a time.")
-        if len(orders) == 1:  # order is not filled yet, still open
-            print("\n--------------Order was filled--------------\n")
-            order = orders[0]
-            if isinstance(signal, Buy):
-                if order.side.bid:  # buy order
-                    order = _act_if_buy_signal_and_bid_order(trader=self._trader, signal=signal, order=order)
-                elif order.side.ask:  # sell order
-                    order = _act_if_buy_signal_and_ask_order(trader=self._trader, signal=signal, order=order)
-            elif isinstance(signal, Sell):
-                if order.side.bid:  # buy order
-                    order = _act_if_sell_signal_and_bid_order(trader=self._trader, signal=signal, order=order)
-                elif order.side.ask:  # sell order
-                    order = _act_if_sell_signal_and_ask_order(trader=self._trader, signal=signal, order=order)
+    def insert_signal(self, signal: Union[Buy, Sell, Hold]):
+        self._current_signal = signal
+        if self._current_signal != self._previous_signal:  # if new incoming signal
+            self.update()
+        self._previous_signal = self._current_signal
 
-        elif len(orders) == 0:  # all orders filled, no open orders
-            print("\n--------------Order is still open --------------\n")
+    def _perform_order_limit_check(self):
+        if len(self._open_orders) > 1:
+            raise MarketMakerError("There should only be one open order at a time.")
+
+    def _check_for_open_orders(self):
+        self._open_orders = self._trader.get_open_orders()
+        self._perform_order_limit_check()
+        if len(self._open_orders) == 1:
+            self._open_order = self._open_orders[0]
+        else:
+            self._open_order = None
+
+    def update(self) -> Optional[Order]:
+        self._check_for_open_orders()
+
+        if self._open_order:
+
+            if isinstance(self._current_signal, Buy):
+                if self._open_order.side.bid:
+                    order = _act_if_buy_signal_and_bid_order(trader=self._trader, signal=self._current_signal,
+                                                             order=self._open_order)
+                elif self._open_order.side.ask:
+                    order = _act_if_buy_signal_and_ask_order(trader=self._trader, signal=self._current_signal,
+                                                             order=self._open_order)
+            elif isinstance(self._current_signal, Sell):
+                if self._open_order.side.bid:
+                    order = _act_if_sell_signal_and_bid_order(trader=self._trader, signal=self._current_signal,
+                                                              order=self._open_order)
+                elif self._open_order.side.ask:
+                    order = _act_if_sell_signal_and_ask_order(trader=self._trader, signal=self._current_signal,
+                                                              order=self._open_order)
+
+        else:
             order = self._trader.get_last_filled_order(trading_pair=self._trading_pair)
-            if isinstance(signal, Buy):
+            if isinstance(self._current_signal, Buy):
                 if order.side.bid:
-                    order = _act_if_buy_signal_and_filled_bid_order(trader=self._trader, signal=signal, order=order)
+                    order = _act_if_buy_signal_and_filled_bid_order(trader=self._trader, signal=self._current_signal,
+                                                                    order=order)
                 elif order.side.ask:
-                    order = _act_if_buy_signal_and_filled_ask_order(trader=self._trader, signal=signal, order=order)
-            elif isinstance(signal, Sell):
+                    order = _act_if_buy_signal_and_filled_ask_order(trader=self._trader, signal=self._current_signal,
+                                                                    order=order)
+            elif isinstance(self._current_signal, Sell):
                 if order.side.bid:
-                    order = _act_if_sell_signal_and_filled_bid_order(trader=self._trader, signal=signal, order=order)
+                    order = _act_if_sell_signal_and_filled_bid_order(trader=self._trader, signal=self._current_signal,
+                                                                     order=order)
                 elif order.side.ask:
-                    order = _act_if_sell_signal_and_filled_ask_order(trader=self._trader, signal=signal, order=order)
-        return order
+                    order = _act_if_sell_signal_and_filled_ask_order(trader=self._trader, signal=self._current_signal,
+                                                                     order=order)
+        return None
 
 
 if __name__ == '__main__':
