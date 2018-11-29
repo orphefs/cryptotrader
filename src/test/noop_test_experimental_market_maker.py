@@ -55,11 +55,11 @@ def main():
         print("\n\n+++++++++++++++++++++++++++++++++++++\n"
               "+++++++++++++++++++++++++++++++++++++++"
               "+++++++++++++++++++++++++++++++++++++")
-        for i in range(0,30):
+        for i in range(0,5):
             _ = mm.insert_signal(signal)
 
         count += 1
-        if count > 20:
+        if count > 10:
             break
 
     test_if_alternate_bid_ask_orders(mm.trader.filled_orders)
