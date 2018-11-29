@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Union, Tuple
 import numpy as np
 import pandas as pd
 from sklearn.metrics import confusion_matrix
@@ -50,6 +50,17 @@ def generate_signals_iteratively(stock_data: Union[Path, StockData], classifier:
     return predicted_signals
 
 
+def generate_signals_from_classifier(stock_data: Union[Path, StockData],
+                                     classifier: Union[Path, TradingClassifier]) -> List[Union[Buy, Sell]]:
+    if isinstance(classifier, Path):
+        classifier = TradingClassifier.load_from_disk(classifier)
+    if isinstance(stock_data, Path):
+        stock_data = load_from_disk(stock_data)
+    predictions = classifier.predict(stock_data)
+    predicted_signals = generate_trading_signals_from_array(predictions[:], stock_data)
+    return predicted_signals
+
+
 def replace_repeating_signals_with_holds(signals: List[Union[Buy, Sell]]) -> List[Union[Buy, Sell, Hold]]:
     cleaned_up_signals = []
     previous_signal = None
@@ -63,7 +74,8 @@ def replace_repeating_signals_with_holds(signals: List[Union[Buy, Sell]]) -> Lis
     return cleaned_up_signals
 
 
-def generate_all_signals_at_once(stock_data_testing_set, classifier, predicted_portfolio):
+def generate_all_signals_at_once(stock_data_testing_set, classifier, predicted_portfolio) -> Tuple[
+    TradingClassifier, Portfolio, List[Union[Buy, Sell, Hold]]]:
     predictions = classifier.predict(stock_data_testing_set)
     signals = generate_trading_signals_from_array(predictions[:], stock_data_testing_set)
     cleaned_up_signals = replace_repeating_signals_with_holds(signals[:])

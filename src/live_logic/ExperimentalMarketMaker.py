@@ -4,7 +4,8 @@ from typing import Union, Optional, Type
 from datetime import datetime
 
 from src.backtesting_logic.logic import Buy, Sell, Hold
-from src.containers.order import Order
+from src.containers.order import Order, OrderType, Size, Side, Price
+from src.containers.time import MilliSeconds
 from src.containers.trading import CobinhoodTrading, CobinhoodError, Trading
 from src.test.mock_client import MockClient
 from src.test.mock_trading import MockTrading
@@ -60,6 +61,42 @@ def _act_if_sell_signal_and_filled_ask_order(trader: CobinhoodTrading, signal: S
     pass
 
 
+def _instantiate_order() -> Order:
+    raise NotImplementedError
+
+
+def _act_if_buy_signal_and_filled_ask_order(trader: CobinhoodTrading, signal: Buy, order: Order) -> Order:
+    try:
+        return trader.place_order(Order(
+            trading_pair_id=order.trading_pair_id,
+            price=Price(signal.price_point.value),
+            type=OrderType("limit"),
+            side=Side("bid"),
+            size=Size(order.size),
+            timestamp=MilliSeconds(round(datetime.now().timestamp()*1000)),
+        ))
+    except CobinhoodError as error:
+        logger.debug(error)
+        print(error)
+
+
+def _act_if_sell_signal_and_filled_bid_order(trader: CobinhoodTrading, signal: Sell, order: Order) -> Order:
+    try:
+        return trader.place_order(Order(
+            trading_pair_id=order.trading_pair_id,
+            price=Price(signal.price_point.value),
+            type=OrderType("limit"),
+            side=Side("ask"),
+            size=Size(order.size),
+            timestamp=MilliSeconds(round(datetime.now().timestamp() * 1000)),
+
+        ))
+
+    except CobinhoodError as error:
+        logger.debug(error)
+        print(error)
+
+
 class ExperimentalMarketMaker:
     def __init__(self,
                  trader: Union[CobinhoodTrading, MockTrading],
@@ -91,9 +128,15 @@ class ExperimentalMarketMaker:
         elif len(orders) == 0:  # all orders filled, no open orders
             order = self._trader.get_last_filled_order(trading_pair=self._trading_pair)
             if isinstance(signal, Buy):
-                order = _act_if_buy_signal_and_filled_bid_order(trader=self._trader, signal=signal, order=order)
+                if order.side.bid:
+                    order = _act_if_buy_signal_and_filled_bid_order(trader=self._trader, signal=signal, order=order)
+                elif order.side.ask:
+                    order = _act_if_buy_signal_and_filled_ask_order(trader=self._trader, signal=signal, order=order)
             elif isinstance(signal, Sell):
-                order = _act_if_sell_signal_and_filled_ask_order(trader=self._trader, signal=signal, order=order)
+                if order.side.bid:
+                    order = _act_if_sell_signal_and_filled_bid_order(trader=self._trader, signal=signal, order=order)
+                elif order.side.ask:
+                    order = _act_if_sell_signal_and_filled_ask_order(trader=self._trader, signal=signal, order=order)
         return order
 
 

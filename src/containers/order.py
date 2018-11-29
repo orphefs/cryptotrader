@@ -59,6 +59,8 @@ class Order(object):
         self.equivalent_price = equivalent_price
         self.trading_pair_id = trading_pair_id
         self.stop_price = stop_price
+        if completed_at is not None:
+            self.completed_at = completed_at.as_datetime()
         self.completed_at = completed_at
         self.timestamp = timestamp
         self.price = price
@@ -93,7 +95,7 @@ class Order(object):
                "timestamp={}, " \
                "trading_pair_id={}, " \
                "type={}, " \
-               ")".format(self.completed_at.as_datetime(),
+               ")".format(self.completed_at,
                           self.equivalent_price,
                           self.filled,
                           self.id,

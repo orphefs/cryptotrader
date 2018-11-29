@@ -138,7 +138,7 @@ if __name__ == "__main__":
     train_classifier(trading_pair=trading_pair,
                      client=client,
                      training_time_window=TimeWindow(
-                         start_time=datetime(2018, 11, 19),
+                         start_time=datetime(2018, 11, 20),
                          end_time=datetime(2018, 11, 21)
                      ),
                      technical_indicators=[

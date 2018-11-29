@@ -20,6 +20,14 @@ class MilliSeconds(object):
         return MilliSeconds(time=round(datetime.datetime.strptime(
             timestamp, "%Y-%m-%dT%H:%M:%S.%fZ").timestamp() * 1000))
 
+    def __lt__(self, other):
+        return self.as_epoch_time() < other.as_epoch_time()
+
+    def __gt__(self, other):
+        return self.as_epoch_time() > other.as_epoch_time()
+
+    def __str__(self):
+        return str(self.as_datetime())
 
 
 class Time(object):

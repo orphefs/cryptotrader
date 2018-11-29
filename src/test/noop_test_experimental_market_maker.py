@@ -1,6 +1,6 @@
 from typing import Optional, List
 
-from src.classification.classifier_helpers import generate_signals_iteratively
+from src.classification.classifier_helpers import generate_signals_iteratively, generate_signals_from_classifier
 from src.classification.train_classifier import run_trained_classifier
 from src.connection.load_stock_data import load_stock_data
 from src.containers.order import Order, OrderID, Price, Size
@@ -41,7 +41,7 @@ def main():
     trader = MockTrading(client)
     mm = ExperimentalMarketMaker(trader, trading_pair, 0.02)
 
-    signals = generate_signals_iteratively(stock_data, classifier)
+    signals = generate_signals_from_classifier(stock_data, classifier)
     for signal in signals:
         print(signal)
         order = mm.update(signal)
