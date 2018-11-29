@@ -1,29 +1,38 @@
 from src.connection.cobinhood_helpers import load_cobinhood_api_token
 from src.containers.order import Order, Price, Size, OrderID
 from src.containers.trading_pair import TradingPair
+from src.test.mock_client import MockClient
 from src.type_aliases import CobinhoodClient, BinanceClient
 
 from typing import List, Optional, Union, Any
+
+class CobinhoodError(RuntimeError):
+    pass
 
 
 class Trade:
     pass
 
 
+
+
 class Trading:
-    def __init__(self, client: Union[CobinhoodClient, BinanceClient]):
+    def __init__(self, client: Union[CobinhoodClient, BinanceClient, MockClient]):
         self._client = client
 
-    def place_order(self, order: Order, ):
+    def place_order(self, order: Order, ) -> Order:
         raise NotImplementedError
 
-    def modify_order(self, order_id: OrderID, price: Price, size: Size):
+    def modify_order(self, order_id: OrderID, price: Price, size: Size) -> bool:
         raise NotImplementedError
 
-    def get_open_orders(self, order_id: Optional[OrderID]) -> List[Order]:
+    def get_open_orders(self, order_id: Optional[OrderID]) ->List[Optional[Order]]:
         raise NotImplementedError
 
-    def cancel_order(self, order_id: OrderID):
+    def cancel_order(self, order_id: OrderID) -> bool:
+        raise NotImplementedError
+
+    def get_last_filled_order(self, trading_pair: TradingPair) -> Order:
         raise NotImplementedError
 
     def get_order_history(self, trading_pair: TradingPair) -> List[Order]:
@@ -36,8 +45,7 @@ class Trading:
         raise NotImplementedError
 
 
-class CobinhoodError(RuntimeError):
-    pass
+
 
 
 class CobinhoodTrading(Trading):
