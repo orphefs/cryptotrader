@@ -145,6 +145,5 @@ if __name__ == '__main__':
                            "L8C3ws3xkxX2AUravH41kfDezrHin2LarC1K8MDnmGM51dRBZwqDpvTOVZ1Qztap")
     mm = ExperimentalMarketMaker(client, TradingPair("NEO", "BTC"), 500)
     order = mm.update()
-    print(order)
     print(client.get_all_orders(symbol=str(TradingPair("NEO", "BTC"))))
     print(client.get_orderbook_ticker(symbol=str(TradingPair("NEO", "BTC"))))

@@ -1,17 +1,20 @@
 import random
 from datetime import datetime
 from queue import Queue
-from typing import Optional, List, Any
+from typing import Optional, List, Any, Callable
 
 from src.containers.order import Order, OrderID, Price, Size
 from src.containers.time import MilliSeconds
 from src.containers.trading import Trading, Trade
 from src.containers.trading_pair import TradingPair
+from src.helpers import generate_hash
 from src.test.mock_client import MockClient
 
 
 def _find_order_by_id(orders: List[Order], order_id: OrderID) -> Optional[Order]:
-    return list(filter(lambda x: x.id == order_id, orders))[0]
+    order = list(filter(lambda x: x.id == order_id, orders))
+    if len(order) > 0:
+        return order[0]
 
 
 def _find_latest_order(orders: List[Order]) -> Optional[Order]:
@@ -27,17 +30,38 @@ def _find_oldest_order(orders: List[Order]) -> Optional[Order]:
 def _print_list(lst: List[Any]):
     for element in lst:
         print(element)
-    print("\n")
 
 
-def on_call(func):
+def on_call(func: Callable):
     def func_wrapper(*args, **kwargs):
-        print("Contents of filled orders: \n {}".format(_print_list(args[0]._filled_orders)))
-        print("Contents of open orders: \n {} \n".format(_print_list(args[0]._open_orders)))
+        list_of_funcs = ["place_order", "modify_order", "cancel_order", ]
+
+        if func.__name__ in list_of_funcs:
+            print("\n==============BEFORE==================\n")
+            print("Running function {}\n".format(func.__name__))
+            print("Contents of filled orders: \n ")
+            _print_list(args[0]._filled_orders)
+            print("\n")
+            print("Contents of open orders: \n")
+            _print_list(args[0]._open_orders)
+            print("\n")
+            print("\n=======================================\n")
+
         if random.choice([True, False]):
             args[0]._fill_orders()
-        func(*args, **kwargs)
-        return func(*args, **kwargs)
+        result = func(*args, **kwargs)
+
+        if func.__name__ in list_of_funcs:
+            print("\n===============AFTER==================\n")
+            print("Contents of filled orders: \n ")
+            _print_list(args[0]._filled_orders)
+            print("\n")
+            print("Contents of open orders: \n")
+            _print_list(args[0]._open_orders)
+            print("\n")
+            print("\n==========================================\n")
+
+        return result
 
     return func_wrapper
 
@@ -67,52 +91,65 @@ class MockTrading(Trading):
 
     def _fill_orders(self):
         if len(self._open_orders) > 0:
-            order = self._open_orders.pop(self._open_orders.index(
-                _find_oldest_order(self._open_orders)))
-            order.completed_at = MilliSeconds(round(datetime.now().timestamp()*1000))
-            self._filled_orders += order
+            oldest_order = _find_oldest_order(self._open_orders)
+            if oldest_order in self._open_orders:
+                self._open_orders.remove(oldest_order)
+                oldest_order.completed_at = MilliSeconds(round(datetime.now().timestamp() * 1000))
+                oldest_order.filled = oldest_order.size
+            self._filled_orders += [oldest_order]
 
     def _initialize_filled_orders(self):
         self._filled_orders = [Order.from_cobinhood_response(sample_order)]
 
     @on_call
     def place_order(self, order: Order, ) -> Order:
-        print("Place order {}".format(order))
+        # print("Place order {}".format(order))
+        order.id = generate_hash(order.timestamp, order.size, order.price, order.side)
         self._open_orders += [order]
         return order
 
     @on_call
     def modify_order(self, order_id: OrderID, price: Price, size: Size) -> bool:
-        found_order = _find_order_by_id(self._open_orders, order_id)
         order = _find_order_by_id(self._open_orders, order_id)
-        found_order.price = price
-        found_order.size = size
-        print("Modify order {} \n to \n {}".format(order, found_order))
+        if order is not None:
+            order.price = price
+            order.size = size
+            print("Modify order {} \n to \n {}".format(order, order))
+        else:
+            print("Order {} was already filled, so could not modify.".format(order_id))
         return True
 
     @on_call
     def get_open_orders(self, order_id: Optional[OrderID] = None) -> List[Optional[Order]]:
-        print("Current open orders: \n")
-        _print_list(self._open_orders)
+        # print("Current open orders: \n")
+        # _print_list(self._open_orders)
         return self._open_orders
 
     @on_call
     def cancel_order(self, order_id: OrderID) -> bool:
+        print("Cancelling order with order id {} \n".format(order_id))
         order = _find_order_by_id(self._open_orders, order_id)
-        self._open_orders.pop(self._open_orders.index(order))
-        print("Cancel order {}".format(order))
+        if order in self._open_orders:
+            self._open_orders.remove(order)
+
+        if order is not None:
+            print("Cancel order {} \n".format(order.id))
+        else:
+            order = _find_order_by_id(self._filled_orders, order_id)
+            if order is not None:
+                print("Order {} was already filled, so could not cancel.".format(order.id))
         return True
 
     @on_call
     def get_last_filled_order(self, trading_pair: TradingPair) -> Order:
         order = _find_latest_order(self._filled_orders)
-        print("Last filled order: {}".format(order))
+        # print("Last filled order: {} \n".format(order))
         return order
 
     @on_call
     def get_order_history(self, trading_pair: TradingPair) -> List[Order]:
-        print("Order history: \n")
-        _print_list(self._filled_orders)
+        # print("Order history: \n")
+        # _print_list(self._filled_orders)
         return self._filled_orders
 
     def get_orders_trades(self, order_id: OrderID):

@@ -128,5 +128,4 @@ if __name__ == '__main__':
     trader = CobinhoodTrading(client)
     # orders = trader.get_order_history(trading_pair=TradingPair("ETH", "BTC"))
     orders = trader.get_open_orders()
-    for order in orders:
-        print(order)
+

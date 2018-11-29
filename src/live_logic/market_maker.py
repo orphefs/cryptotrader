@@ -124,7 +124,6 @@ class MarketMaker:
                                              quantity=self._quantity)
             )
             raise_order_exception_if_error(order)
-            print(order)
             return order
 
     def place_sell_order(self):
@@ -144,7 +143,6 @@ class MarketMaker:
                                              quantity=self._quantity)
             )
             raise_order_exception_if_error(order)
-            print(order)
             return order
 
 
@@ -153,6 +151,5 @@ if __name__ == '__main__':
                            "L8C3ws3xkxX2AUravH41kfDezrHin2LarC1K8MDnmGM51dRBZwqDpvTOVZ1Qztap")
     mm = MarketMaker(client, TradingPair("NEO", "BTC"), 500)
     order = mm.place_buy_order()
-    print(order)
     print(client.get_all_orders(symbol=str(TradingPair("NEO", "BTC"))))
     print(client.get_orderbook_ticker(symbol=str(TradingPair("NEO", "BTC"))))

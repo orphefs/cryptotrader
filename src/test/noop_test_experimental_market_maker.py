@@ -43,6 +43,7 @@ def main():
 
     signals = generate_signals_from_classifier(stock_data, classifier)
     for signal in signals:
+        print("\n\n\n\n\n\n\n\n\n\n")
         print(signal)
         order = mm.update(signal)
 
