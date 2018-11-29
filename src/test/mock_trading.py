@@ -28,7 +28,7 @@ def _find_oldest_order(orders: List[Order]) -> Optional[Order]:
 
 
 def _print_list(lst: List[Any]):
-    for element in lst:
+    for element in sorted(lst, key=lambda x: x.timestamp):
         print(element)
 
 
@@ -89,6 +89,10 @@ class MockTrading(Trading):
         self._open_orders = []
         self._last_filled_order = None
 
+    @property
+    def filled_orders(self):
+        return self._filled_orders
+
     def _fill_orders(self):
         if len(self._open_orders) > 0:
             oldest_order = _find_oldest_order(self._open_orders)
@@ -103,8 +107,8 @@ class MockTrading(Trading):
 
     @on_call
     def place_order(self, order: Order, ) -> Order:
-        # print("Place order {}".format(order))
         order.id = generate_hash(order.timestamp, order.size, order.price, order.side)
+        print("Place order {}".format(order))
         self._open_orders += [order]
         return order
 

@@ -16,12 +16,16 @@ from src.type_aliases import CobinhoodClient
 import os
 
 
-def create_signals_from_time_series():
-    raise NotImplementedError
-
-
-def place_orders():
-    raise NotImplementedError
+def test_if_alternate_bid_ask_orders(orders: List[Order]):
+    orders = sorted(orders, key=lambda x: x.timestamp)
+    for previous_order, next_order in zip(orders[0:], orders[1:]):
+        if previous_order.side == next_order.side:
+            result = False
+            break
+        else:
+            result = True
+            continue
+    assert result
 
 
 def main():
@@ -42,11 +46,16 @@ def main():
     mm = ExperimentalMarketMaker(trader, trading_pair, 0.02)
 
     signals = generate_signals_from_classifier(stock_data, classifier)
+    count = 0
     for signal in signals:
         print("\n\n\n\n\n\n\n\n\n\n")
         print(signal)
         order = mm.update(signal)
+        count += 1
+        if count > 20:
+            break
 
+    test_if_alternate_bid_ask_orders(mm.trader.filled_orders)
 
 
 if __name__ == '__main__':

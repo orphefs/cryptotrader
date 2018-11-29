@@ -107,12 +107,17 @@ class ExperimentalMarketMaker:
         self._trading_pair = trading_pair
         self._quantity = quantity
 
+    @property
+    def trader(self):
+        return self._trader
+
     def update(self, signal: Union[Buy, Sell, Hold]) -> Optional[Order]:
         order = None
         orders = self._trader.get_open_orders()
         if len(orders) > 1:
             raise MarketMakerError("There should only be one open order at a time.")
         if len(orders) == 1:  # order is not filled yet, still open
+            print("\n--------------Order was filled--------------\n")
             order = orders[0]
             if isinstance(signal, Buy):
                 if order.side.bid:  # buy order
@@ -126,6 +131,7 @@ class ExperimentalMarketMaker:
                     order = _act_if_sell_signal_and_ask_order(trader=self._trader, signal=signal, order=order)
 
         elif len(orders) == 0:  # all orders filled, no open orders
+            print("\n--------------Order is still open --------------\n")
             order = self._trader.get_last_filled_order(trading_pair=self._trading_pair)
             if isinstance(signal, Buy):
                 if order.side.bid:
