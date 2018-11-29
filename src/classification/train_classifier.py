@@ -139,7 +139,7 @@ if __name__ == "__main__":
                      client=client,
                      training_time_window=TimeWindow(
                          start_time=datetime(2018, 11, 19),
-                         end_time=datetime(2018, 11, 25)
+                         end_time=datetime(2018, 11, 21)
                      ),
                      technical_indicators=[
                          AutoCorrelationTechnicalIndicator(Candle.get_close_price, 1),
@@ -154,7 +154,7 @@ if __name__ == "__main__":
                          PPOTechnicalIndicator(Candle.get_close_price, 50, 30),
                          PPOTechnicalIndicator(Candle.get_close_price, 60, 40),
                      ],
-                     path_to_classifier=os.path.join(DATA_DIR, "classifier.dill"))
+                     path_to_classifier=os.path.join(DATA_DIR, "classifier_for_test_data_3.dill"))
     if 0:
         run_trained_classifier(trading_pair=trading_pair,
                                client=client,

@@ -1,11 +1,13 @@
 import logging
-from typing import Union, Optional
+from typing import Union, Optional, Type
 
 from datetime import datetime
 
 from src.backtesting_logic.logic import Buy, Sell, Hold
 from src.containers.order import Order
-from src.containers.trading import CobinhoodTrading, CobinhoodError
+from src.containers.trading import CobinhoodTrading, CobinhoodError, Trading
+from src.test.mock_client import MockClient
+from src.test.mock_trading import MockTrading
 from src.type_aliases import CobinhoodClient, BinanceClient
 from src.containers.trading_pair import TradingPair
 
@@ -59,9 +61,12 @@ def _act_if_sell_signal_and_filled_ask_order(trader: CobinhoodTrading, signal: S
 
 
 class ExperimentalMarketMaker:
-    def __init__(self, client: Union[BinanceClient, CobinhoodClient], trading_pair: TradingPair, quantity: float):
-        self._client = client
-        self._trader = CobinhoodTrading(client)
+    def __init__(self,
+                 trader: Union[CobinhoodTrading, MockTrading],
+                 trading_pair: TradingPair,
+                 quantity: float
+                 ):
+        self._trader = trader
         self._trading_pair = trading_pair
         self._quantity = quantity
 
@@ -90,7 +95,6 @@ class ExperimentalMarketMaker:
             elif isinstance(signal, Sell):
                 order = _act_if_sell_signal_and_filled_ask_order(trader=self._trader, signal=signal, order=order)
         return order
-
 
 
 if __name__ == '__main__':

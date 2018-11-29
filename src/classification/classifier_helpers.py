@@ -7,8 +7,9 @@ from src.backtesting_logic.logic import Buy, Sell, Hold
 from src.classification.helpers import get_training_labels
 from src.classification.trading_classifier import TradingClassifier
 from src.containers.portfolio import Portfolio
-from src.containers.stock_data import StockData
+from src.containers.stock_data import StockData, load_from_disk
 from src.containers.trade_helper import generate_trading_signal_from_prediction, generate_trading_signals_from_array
+from src.type_aliases import Path
 
 
 def convert_signals_to_pandas(signals: List[Union[Buy, Sell, Hold]]) -> pd.DataFrame:
@@ -36,16 +37,17 @@ def generate_reference_portfolio(initial_capital, parameters, stock_data_testing
     return reference_portfolio, training_signals
 
 
-def generate_signals_iteratively(stock_data: StockData, classifier: TradingClassifier, predicted_portfolio: Portfolio):
+def generate_signals_iteratively(stock_data: Union[Path, StockData], classifier: Union[Path, TradingClassifier]):
+    if isinstance(classifier, Path):
+        classifier = TradingClassifier.load_from_disk(classifier)
+    if isinstance(stock_data, Path):
+        stock_data = load_from_disk(stock_data)
     predicted_signals = []
     for candle in stock_data.candles:
-        classifier.append_new_candle(candle)
         prediction = classifier.predict_one(candle)
         if prediction is not None:
-            signal = generate_trading_signal_from_prediction(prediction[0], candle)
-            predicted_portfolio.update(signal)
-            predicted_signals.append(signal)
-    return classifier, predicted_portfolio, predicted_signals
+            predicted_signals.append(generate_trading_signal_from_prediction(prediction[0], candle))
+    return predicted_signals
 
 
 def replace_repeating_signals_with_holds(signals: List[Union[Buy, Sell]]) -> List[Union[Buy, Sell, Hold]]:
