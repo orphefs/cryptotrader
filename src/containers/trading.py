@@ -1,9 +1,7 @@
 from src.connection.cobinhood_helpers import load_cobinhood_api_token
-from src.containers.order import Order, Price, Size
+from src.containers.order import Order, Price, Size, OrderID
 from src.containers.trading_pair import TradingPair
 from src.type_aliases import CobinhoodClient, BinanceClient
-
-OrderID = int
 
 from typing import List, Optional, Union, Any
 
@@ -66,7 +64,7 @@ class CobinhoodTrading(Trading):
             raise CobinhoodError("Could not modify order. "
                                  "Reason: {}".format(response["error"]["error_code"]))
 
-    def get_open_orders(self, order_id: Optional[OrderID]=None) -> List[Optional[Order]]:
+    def get_open_orders(self, order_id: Optional[OrderID] = None) -> List[Optional[Order]]:
         response = self._client.trading.get_orders(order_id=order_id)
 
         if response["success"]:
@@ -85,14 +83,25 @@ class CobinhoodTrading(Trading):
             raise CobinhoodError("Could not cancel order. "
                                  "Reason: {}".format(response["error"]["error_code"]))
 
-    def get_order_history(self, trading_pair: TradingPair) -> List[Order]:
+    def get_last_filled_order(self, trading_pair: TradingPair) -> Order:
+        response = self._client.trading.get_order_history(trading_pair_id=trading_pair.as_string_for_cobinhood(),
+                                                          limit=1, page=0)
+        if response["success"]:
+            return Order.from_cobinhood_response(response["result"]["orders"][0])
+        else:
+            raise CobinhoodError("Could not fetch latest order. "
+                                 "Reason: {}".format(response["error"]["error_code"]))
 
-        response = self._client.trading.get_order_history(limit=100)
+    def get_order_history(self, trading_pair: TradingPair) -> List[Order]:
+        response = self._client.trading.get_order_history(trading_pair_id=trading_pair.as_string_for_cobinhood(),
+                                                          limit=10)
         if response["success"]:
             pages = response["result"]["total_page"]
             orders = []
             for i in range(0, pages):
-                response = self._client.trading.get_order_history(limit=100, page=i)
+                response = self._client.trading.get_order_history(
+                    trading_pair_id=trading_pair.as_string_for_cobinhood(),
+                    limit=100, page=i)
                 orders += response["result"]["orders"]
             return [Order.from_cobinhood_response(order) for order in orders]
         else:
