@@ -10,6 +10,7 @@ from src.containers.time import MilliSeconds
 from src.containers.trading import CobinhoodTrading, CobinhoodError, Trading
 from src.test.mock_client import MockClient
 from src.test.mock_trading import MockTrading
+from src.test.mock_trading_helpers import print_function_name
 from src.type_aliases import CobinhoodClient, BinanceClient
 from src.containers.trading_pair import TradingPair
 
@@ -20,19 +21,13 @@ class MarketMakerError(RuntimeError):
     pass
 
 
-def display_func_name(func):
-    def func_wrapper(*args, **kwargs):
-        print("\n Entering function: {} \n".format(func.__name__))
-        return func(*args, **kwargs)
-
-    return func_wrapper
 
 
 def _instantiate_order() -> Order:
     raise NotImplementedError
 
 
-@display_func_name
+@print_function_name
 def _act_if_buy_signal_and_bid_order(trader: CobinhoodTrading, signal: Buy, order: Order, ) -> Order:
     try:
         if signal.price_point.value < order.price:
@@ -49,12 +44,12 @@ def _act_if_buy_signal_and_bid_order(trader: CobinhoodTrading, signal: Buy, orde
         print(error)
 
 
-@display_func_name
+@print_function_name
 def _act_if_sell_signal_and_ask_order(trader: CobinhoodTrading, signal: Sell, order: Order, ) -> Order:
     return _act_if_buy_signal_and_bid_order(trader=trader, signal=signal, order=order)
 
 
-@display_func_name
+@print_function_name
 def _act_if_sell_signal_and_bid_order(trader: CobinhoodTrading, signal: Sell, order: Order) -> Order:
     try:
         success = trader.cancel_order(order_id="{}".format(order.id))
@@ -65,22 +60,22 @@ def _act_if_sell_signal_and_bid_order(trader: CobinhoodTrading, signal: Sell, or
         print(error)
 
 
-@display_func_name
+@print_function_name
 def _act_if_buy_signal_and_ask_order(trader: CobinhoodTrading, signal: Buy, order: Order, ) -> Order:
     return _act_if_sell_signal_and_bid_order(trader=trader, signal=signal, order=order)
 
 
-@display_func_name
+@print_function_name
 def _act_if_buy_signal_and_filled_bid_order(trader: CobinhoodTrading, signal: Buy, order: Order) -> Order:
     pass
 
 
-@display_func_name
+@print_function_name
 def _act_if_sell_signal_and_filled_ask_order(trader: CobinhoodTrading, signal: Sell, order: Order) -> Order:
     pass
 
 
-@display_func_name
+@print_function_name
 def _act_if_buy_signal_and_filled_ask_order(trader: CobinhoodTrading, signal: Buy, order: Order) -> Order:
     try:
         return trader.place_order(Order(
@@ -96,7 +91,7 @@ def _act_if_buy_signal_and_filled_ask_order(trader: CobinhoodTrading, signal: Bu
         print(error)
 
 
-@display_func_name
+@print_function_name
 def _act_if_sell_signal_and_filled_bid_order(trader: CobinhoodTrading, signal: Sell, order: Order) -> Order:
     try:
         return trader.place_order(Order(
