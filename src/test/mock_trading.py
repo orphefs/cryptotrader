@@ -98,7 +98,9 @@ class MockTrading(Trading):
             oldest_order = _find_oldest_order(self._open_orders)
             if oldest_order in self._open_orders:
                 self._open_orders.remove(oldest_order)
-                oldest_order.completed_at = MilliSeconds(round(datetime.now().timestamp() * 1000))
+                now = round(datetime.now().timestamp() * 1000)
+                oldest_order.completed_at = MilliSeconds(now)
+                oldest_order.timestamp = MilliSeconds(now)
                 oldest_order.filled = oldest_order.size
             self._filled_orders += [oldest_order]
 
@@ -118,6 +120,7 @@ class MockTrading(Trading):
         if order is not None:
             order.price = price
             order.size = size
+            order.timestamp = datetime.now().timestamp()
             print("Modify order {} \n to \n {}".format(order, order))
         else:
             print("Order {} was already filled, so could not modify.".format(order_id))

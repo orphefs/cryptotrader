@@ -59,7 +59,7 @@ def main():
             _ = mm.insert_signal(signal)
 
         count += 1
-        if count > 10:
+        if count > 80:
             break
 
     test_if_alternate_bid_ask_orders(mm.trader.filled_orders)

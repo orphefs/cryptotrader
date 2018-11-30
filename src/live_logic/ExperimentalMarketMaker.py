@@ -174,21 +174,21 @@ class ExperimentalMarketMaker:
                                                               order=self._open_order)
 
         else:
-            order = self._trader.get_last_filled_order(trading_pair=self._trading_pair)
+            last_filled_order = self._trader.get_last_filled_order(trading_pair=self._trading_pair)
             if isinstance(self._current_signal, Buy):
-                if order.side is Side.bid:
+                if last_filled_order.side is Side.bid:
                     order = _act_if_buy_signal_and_filled_bid_order(trader=self._trader, signal=self._current_signal,
-                                                                    order=order)
-                elif order.side is Side.ask:
+                                                                    order=last_filled_order)
+                elif last_filled_order.side is Side.ask:
                     order = _act_if_buy_signal_and_filled_ask_order(trader=self._trader, signal=self._current_signal,
-                                                                    order=order)
+                                                                    order=last_filled_order)
             elif isinstance(self._current_signal, Sell):
-                if order.side is Side.bid:
+                if last_filled_order.side is Side.bid:
                     order = _act_if_sell_signal_and_filled_bid_order(trader=self._trader, signal=self._current_signal,
-                                                                     order=order)
-                elif order.side is Side.ask:
+                                                                     order=last_filled_order)
+                elif last_filled_order.side is Side.ask:
                     order = _act_if_sell_signal_and_filled_ask_order(trader=self._trader, signal=self._current_signal,
-                                                                     order=order)
+                                                                     order=last_filled_order)
         return None
 
 
