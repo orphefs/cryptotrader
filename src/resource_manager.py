@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Union, Optional
 
-from src.live_logic.market_maker import NoopMarketMaker, TestMarketMaker, MarketMaker
+from src.market_maker.market_maker import NoopMarketMaker, TestMarketMaker, MarketMaker
 from src.runner import Runner
 from src.type_aliases import Path, BinanceClient, CobinhoodClient
 from src.containers.trading_pair import TradingPair

@@ -1,12 +1,8 @@
 import logging
-import os
 import time
 from datetime import datetime, timedelta
 from typing import Union, Optional
 
-from binance.client import Client
-
-from src import definitions
 from src.analysis_tools.run_metadata import RunMetaData
 from src.backtesting_logic.logic import Hold
 from src.classification.trading_classifier import TradingClassifier
@@ -17,9 +13,8 @@ from src.containers.portfolio import Portfolio
 from src.containers.stock_data import StockData, load_from_disk
 from src.containers.time_windows import TimeWindow
 from src.containers.trade_helper import generate_trading_signal_from_prediction
-from src.definitions import update_interval_mappings
 from src.helpers import is_time_difference_larger_than_threshold, get_capital_from_account
-from src.live_logic.market_maker import TestMarketMaker, MarketMaker, NoopMarketMaker
+from src.market_maker.market_maker import TestMarketMaker, MarketMaker, NoopMarketMaker
 from src.live_logic.parameters import LiveParameters
 from src.mixins.save_load_mixin import DillSaveLoadMixin
 from src.type_aliases import Path, BinanceClient, CobinhoodClient

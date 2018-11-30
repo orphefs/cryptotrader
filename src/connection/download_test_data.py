@@ -18,7 +18,7 @@ def _download_test_data_from_cobinhood():
     client = CobinhoodClient()
     time_window = TimeWindow(start_time=datetime(2018, 10, 20, 6, 00),
                              end_time=datetime(2018, 10, 21, 8, 00))
-    candles = _download_historical_data_from_cobinhood(time_window, trading_pair,sampling_period, client)[0:100]
+    candles = _download_historical_data_from_cobinhood(time_window, trading_pair,sampling_period, client)[0:400]
     print(candles)
     stock_data = StockData(candles, trading_pair)
     save_to_disk(stock_data, os.path.join(definitions.TEST_DATA_DIR, "test_data_3.dill"))

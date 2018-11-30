@@ -1,10 +1,11 @@
 from src.connection.cobinhood_helpers import load_cobinhood_api_token
 from src.containers.order import Order, Price, Size, OrderID
 from src.containers.trading_pair import TradingPair
-from src.test.mock_client import MockClient
+from src.market_maker.mock_client import MockClient
 from src.type_aliases import CobinhoodClient, BinanceClient
 
-from typing import List, Optional, Union, Any
+from typing import List, Optional, Union
+
 
 class CobinhoodError(RuntimeError):
     pass

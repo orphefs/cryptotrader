@@ -2,13 +2,10 @@ import logging
 import os
 from typing import Tuple
 
-
-
-from src import definitions
 from src.definitions import DATA_DIR
-from src.live_logic.market_maker import MarketMaker, TestMarketMaker
+from src.market_maker.market_maker import MarketMaker
 from src.resource_manager import runner
-from src.type_aliases import Path, BinanceClient, CobinhoodClient
+from src.type_aliases import Path, CobinhoodClient
 from src.containers.trading_pair import TradingPair
 
 

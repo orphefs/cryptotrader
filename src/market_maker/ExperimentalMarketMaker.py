@@ -1,5 +1,5 @@
 import logging
-from typing import Union, Optional, Type
+from typing import Union, Optional
 
 from datetime import datetime
 
@@ -7,11 +7,11 @@ from src.backtesting_logic.logic import Buy, Sell, Hold
 from src.containers.data_point import PricePoint
 from src.containers.order import Order, OrderType, Size, Side, Price
 from src.containers.time import MilliSeconds
-from src.containers.trading import CobinhoodTrading, CobinhoodError, Trading
-from src.test.mock_client import MockClient
-from src.test.mock_trading import MockTrading
-from src.test.mock_trading_helpers import print_function_name
-from src.type_aliases import CobinhoodClient, BinanceClient
+from src.containers.trading import CobinhoodTrading, CobinhoodError
+from src.market_maker.config import PRINT_FUNCTION_INFO
+from src.market_maker.mock_trading import MockTrading
+from src.market_maker.mock_trading_helpers import print_function_name
+from src.type_aliases import BinanceClient
 from src.containers.trading_pair import TradingPair
 
 logger = logging.getLogger('cryptotrader_api')
@@ -19,8 +19,6 @@ logger = logging.getLogger('cryptotrader_api')
 
 class MarketMakerError(RuntimeError):
     pass
-
-
 
 
 def _instantiate_order() -> Order:
@@ -91,7 +89,7 @@ def _act_if_buy_signal_and_filled_ask_order(trader: CobinhoodTrading, signal: Bu
         print(error)
 
 
-@print_function_name
+# @print_function_name
 def _act_if_sell_signal_and_filled_bid_order(trader: CobinhoodTrading, signal: Sell, order: Order) -> Order:
     try:
         return trader.place_order(Order(

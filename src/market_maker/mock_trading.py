@@ -1,77 +1,18 @@
 import random
 from copy import copy
 from datetime import datetime
-from typing import Optional, List, Any, Callable
+from typing import Optional, List
+
+import wrapt
 
 from src.containers.order import Order, OrderID, Price, Size
 from src.containers.time import MilliSeconds
 from src.containers.trading import Trading, Trade
 from src.containers.trading_pair import TradingPair
 from src.helpers import generate_hash
-from src.test.mock_client import MockClient
-from src.test.mock_trading_helpers import print_function_name
-
-
-def _find_order_by_id(orders: List[Order], order_id: OrderID) -> Optional[Order]:
-    order = list(filter(lambda x: x.id == order_id, orders))
-    if len(order) > 0:
-        return order[0]
-
-
-def _find_latest_order(orders: List[Order]) -> Optional[Order]:
-    if len(orders) > 0:
-        return max(orders, key=lambda x: x.timestamp)
-
-
-def _find_oldest_order(orders: List[Order]) -> Optional[Order]:
-    if len(orders) > 0:
-        return min(orders, key=lambda x: x.timestamp)
-
-
-def _print_list(lst: List[Any]):
-    for element in sorted(lst, key=lambda x: x.timestamp):
-        print(element)
-
-
-def print_contents_of_order_lists(func: Callable):
-    def func_wrapper(*args, **kwargs):
-        # list_of_funcs = ["place_order", "modify_order", "cancel_order", "randomly_fill_orders"]
-        # if func.__name__ in list_of_funcs:
-        print("\n==============BEFORE==================\n")
-        print("Contents of filled orders: \n ")
-        _print_list(args[0]._filled_orders)
-        print("\n")
-        print("Contents of open orders: \n")
-        _print_list(args[0]._open_orders)
-        print("\n")
-        print("\n=======================================\n")
-
-        result = func(*args, **kwargs)
-
-        # if func.__name__ in list_of_funcs:
-        print("\n===============AFTER==================\n")
-        print("Contents of filled orders: \n ")
-        _print_list(args[0]._filled_orders)
-        print("\n")
-        print("Contents of open orders: \n")
-        _print_list(args[0]._open_orders)
-        print("\n")
-        print("\n==========================================\n")
-        return result
-
-    return func_wrapper
-
-
-def randomly_fill_orders(func: Callable):
-    def func_wrapper(*args, **kwargs):
-        if random.choice([True, False]):
-            args[0]._fill_orders()
-        result = func(*args, **kwargs)
-
-        return result
-
-    return func_wrapper
-
+from src.market_maker.mock_client import MockClient
+from src.market_maker.mock_trading_helpers import print_function_name, print_contents_of_order_lists, _find_order_by_id, \
+    _find_latest_order, _find_oldest_order
 
 sample_order = {
     "id": "8850805e-d783-46ec-9af5-30712035e760",
@@ -86,6 +27,14 @@ sample_order = {
     "eq_price": "0.0001194999996323",
     "completed_at": "2018-05-11T06:09:38.946678Z",
     "source": "exchange"}
+
+
+@wrapt.decorator
+def randomly_fill_orders(wrapped_func, instance, args, kwargs):
+    if random.choice([True, False]):
+        instance._fill_orders()
+    result = wrapped_func(*args, **kwargs)
+    return result
 
 
 class MockTrading(Trading):
