@@ -1,3 +1,4 @@
+from time import sleep
 from typing import Optional, List
 
 from src.classification.classifier_helpers import generate_signals_iteratively, generate_signals_from_classifier
@@ -56,10 +57,11 @@ def main():
               "+++++++++++++++++++++++++++++++++++++++"
               "+++++++++++++++++++++++++++++++++++++")
         for i in range(0,5):
+            sleep(0.005)
             _ = mm.insert_signal(signal)
 
         count += 1
-        if count > 80:
+        if count > 200:
             break
 
     test_if_alternate_bid_ask_orders(mm.trader.filled_orders)
