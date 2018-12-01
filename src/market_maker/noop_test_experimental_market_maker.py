@@ -1,13 +1,16 @@
 from time import sleep
-from typing import List
+from typing import List, Union
 
+from src.analysis_tools.generate_run_statistics import compute_all_statistics, display
+from src.backtesting_logic.logic import Buy, Sell
 from src.classification.classifier_helpers import generate_signals_from_classifier
 from src.classification.trading_classifier import TradingClassifier
 from src.classification.train_classifier import run_trained_classifier
-from src.containers.order import Order
+from src.containers.data_point import PricePoint, Price
+from src.containers.order import Order, Side
 from src.containers.portfolio import Portfolio
 from src.containers.trading_pair import TradingPair
-from src.definitions import TEST_DATA_DIR
+from src.definitions import TEST_DATA_DIR, DATA_DIR
 from src.market_maker.ExperimentalMarketMaker import ExperimentalMarketMaker
 from src.market_maker.mock_client import MockClient
 from src.market_maker.mock_trading import MockTrading
@@ -26,6 +29,19 @@ def test_if_alternate_bid_ask_orders(orders: List[Order]):
             result = True
             continue
     assert result
+
+
+def convert_order_to_signal(order: Order) -> Union[Buy, Sell]:
+    if order.side is Side.bid:
+        cls = Buy
+        signal = -1
+    elif order.side is Side.ask:
+        cls = Sell
+        signal = 1
+    else:
+        raise RuntimeError("Input should be of type Order.")
+    return cls(signal=signal, price_point=PricePoint(value=Price(order.price),
+                                                     date_time=order.completed_at.as_datetime()))
 
 
 def main():
@@ -47,25 +63,35 @@ def main():
     mm = ExperimentalMarketMaker(trader, trading_pair, 0.02)
 
     signals = generate_signals_from_classifier(stock_data, classifier)
-    count = 0
+    signal_count = 0
     for signal in signals:
         # print_signal(signal)
         for i in range(0, 5):
             sleep(0.005)
             _ = mm.insert_signal(signal)
 
-        count += 1
-        if count > 400:
+        signal_count += 1
+        if signal_count > 400:
             break
 
     portfolio = Portfolio(initial_capital=1, trade_amount=trade_amount,
                           classifier=TradingClassifier.load_from_disk(classifier))
     for order in mm.trader.filled_orders:
-        portfolio.update(order)
+        signal = convert_order_to_signal(order)
+        portfolio.update(signal)
 
-
-    print(count)
     test_if_alternate_bid_ask_orders(mm.trader.filled_orders)
+
+    portfolio.compute_performance()
+    path_to_portfolio = os.path.join(DATA_DIR, "sample_portfolio.dill")
+    portfolio.save_to_disk(path_to_portfolio)
+    run_statistics = compute_all_statistics(path_to_portfolio)
+    print("Number of signals: {}".format(signal_count))
+    print("Signal/Order ratio: {}".format(signal_count / run_statistics.number_of_orders))
+
+
+
+    display(run_statistics)
 
 
 if __name__ == '__main__':

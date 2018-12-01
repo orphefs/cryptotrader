@@ -8,7 +8,7 @@ from src.containers.data_point import PricePoint
 from src.containers.order import Order, OrderType, Size, Side, Price
 from src.containers.time import MilliSeconds
 from src.containers.trading import CobinhoodTrading, CobinhoodError
-from src.market_maker.config import PRINT_FUNCTION_INFO
+from src.market_maker.config import PRINT_TO_SDTOUT
 from src.market_maker.mock_trading import MockTrading
 from src.market_maker.mock_trading_helpers import print_function_name
 from src.type_aliases import BinanceClient

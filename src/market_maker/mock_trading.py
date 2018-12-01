@@ -10,28 +10,29 @@ from src.containers.time import MilliSeconds
 from src.containers.trading import Trading, Trade
 from src.containers.trading_pair import TradingPair
 from src.helpers import generate_hash
+from src.market_maker.config import PRINT_TO_SDTOUT
 from src.market_maker.mock_client import MockClient
 from src.market_maker.mock_trading_helpers import print_function_name, print_contents_of_order_lists, _find_order_by_id, \
     _find_latest_order, _find_oldest_order
 
-sample_order = {
+starting_order = {
     "id": "8850805e-d783-46ec-9af5-30712035e760",
     "trading_pair_id": "COB-ETH",
     "side": "bid",
     "type": "limit",
-    "price": "0.0001195",
+    "price": "0.031469",
     "size": "0.02",
     "filled": "0.02",
     "state": "filled",
-    "timestamp": 1543508274848,
-    "eq_price": "0.0001194999996323",
+    "timestamp": round(datetime.now().timestamp() * 1e3),
+    "eq_price": "0.031469",
     "completed_at": "2018-05-11T06:09:38.946678Z",
     "source": "exchange"}
 
 
 @wrapt.decorator
 def randomly_fill_orders(wrapped_func, instance, args, kwargs):
-    if random.choice([True, False]):
+    if random.choice([True] + [False] * 100):
         instance._fill_orders()
     result = wrapped_func(*args, **kwargs)
     return result
@@ -61,14 +62,17 @@ class MockTrading(Trading):
             self._filled_orders += [oldest_order]
 
     def _initialize_filled_orders(self):
-        self._filled_orders = [Order.from_cobinhood_response(sample_order)]
+        order = Order.from_cobinhood_response(starting_order)
+        order.completed_at = MilliSeconds(round(datetime.now().timestamp() * 1000))
+        self._filled_orders = [order]
 
     @print_contents_of_order_lists
     @randomly_fill_orders
     @print_function_name
     def place_order(self, order: Order, ) -> Order:
         order.id = generate_hash(order.timestamp, order.size, order.price, order.side)
-        print("Place order {}".format(order))
+        if PRINT_TO_SDTOUT:
+            print("Place order {}".format(order))
         self._open_orders += [order]
         return order
 
@@ -83,9 +87,11 @@ class MockTrading(Trading):
             order.price = price
             order.size = size
             order.timestamp = MilliSeconds(round(datetime.now().timestamp() * 1000))
-            print("Modify order {} \n to \n {}".format(original_order, order))
+            if PRINT_TO_SDTOUT:
+                print("Modify order {} \n to \n {}".format(original_order, order))
         else:
-            print("Order {} was already filled, so could not modify.".format(order_id))
+            if PRINT_TO_SDTOUT:
+                print("Order {} was already filled, so could not modify.".format(order_id))
         return True
 
     @print_contents_of_order_lists
@@ -105,11 +111,13 @@ class MockTrading(Trading):
             self._open_orders.remove(order)
 
         if order is not None:
-            print("Cancel order {} \n".format(order.id))
+            if PRINT_TO_SDTOUT:
+                print("Cancel order {} \n".format(order.id))
         else:
             order = _find_order_by_id(self._filled_orders, order_id)
             if order is not None:
-                print("Order {} was already filled, so could not cancel.".format(order.id))
+                if PRINT_TO_SDTOUT:
+                    print("Order {} was already filled, so could not cancel.".format(order.id))
         return True
 
     @print_contents_of_order_lists

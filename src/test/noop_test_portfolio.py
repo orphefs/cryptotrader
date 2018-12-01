@@ -25,8 +25,9 @@ def load_candle_data() -> List[Candle]:
 
 
 def create_mock_signals_from_candles(candles: List[Candle]) -> List[Buy]:
-    return [Buy(signal=1, price_point=PricePoint(value=Price(candle.get_close_price()),
-                                                 date_time=candle.get_close_time_as_datetime())) for candle in candles]
+    return [Buy(signal=1, price_point=PricePoint(
+        value=Price(candle.get_close_price()),
+        date_time=candle.get_close_time_as_datetime())) for candle in candles]
 
 
 def initialize_portfolio() -> Portfolio:

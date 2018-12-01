@@ -4,7 +4,7 @@ import wrapt
 
 from src.backtesting_logic.logic import Buy, Sell
 from src.containers.order import Order, OrderID
-from src.market_maker.config import PRINT_FUNCTION_INFO
+from src.market_maker.config import PRINT_TO_SDTOUT
 
 
 def print_signal(signal: Union[Buy, Sell]):
@@ -17,13 +17,13 @@ def print_signal(signal: Union[Buy, Sell]):
           "+++++++++++++++++++++++++++++++++++++")
 
 
-@wrapt.decorator(enabled=PRINT_FUNCTION_INFO)
+@wrapt.decorator(enabled=PRINT_TO_SDTOUT)
 def print_function_name(wrapped, instance, args, kwargs):
     print("Running function {}\n".format(wrapped.__name__))
     return wrapped(*args, **kwargs)
 
 
-@wrapt.decorator(enabled=PRINT_FUNCTION_INFO)
+@wrapt.decorator(enabled=PRINT_TO_SDTOUT)
 def print_contents_of_order_lists(wrapped, instance, args, kwargs):
     # list_of_funcs = ["place_order", "modify_order", "cancel_order", "randomly_fill_orders"]
     # if func.__name__ in list_of_funcs:
