@@ -1,3 +1,4 @@
+import datetime
 from time import sleep
 from typing import List, Union
 
@@ -12,6 +13,7 @@ from src.containers.portfolio import Portfolio
 from src.containers.trading_pair import TradingPair
 from src.definitions import TEST_DATA_DIR, DATA_DIR
 from src.market_maker.ExperimentalMarketMaker import ExperimentalMarketMaker
+from src.market_maker.config import PRINT_TO_SDTOUT
 from src.market_maker.mock_client import MockClient
 from src.market_maker.mock_trading import MockTrading
 from src.market_maker.mock_trading_helpers import print_signal
@@ -65,7 +67,9 @@ def main():
     signals = generate_signals_from_classifier(stock_data, classifier)
     signal_count = 0
     for signal in signals:
-        # print_signal(signal)
+        signal.price_point.date_time = datetime.datetime.now()
+        if PRINT_TO_SDTOUT:
+            print_signal(signal)
         for i in range(0, 5):
             sleep(0.005)
             _ = mm.insert_signal(signal)

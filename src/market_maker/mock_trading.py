@@ -32,7 +32,7 @@ starting_order = {
 
 @wrapt.decorator
 def randomly_fill_orders(wrapped_func, instance, args, kwargs):
-    if random.choice([True] + [False] * 100):
+    if random.choice([True] + [False] * 40):
         instance._fill_orders()
     result = wrapped_func(*args, **kwargs)
     return result
@@ -80,8 +80,12 @@ class MockTrading(Trading):
     @randomly_fill_orders
     @print_function_name
     def modify_order(self, order: Order, price: Price, size: Size) -> bool:
+        if PRINT_TO_SDTOUT:
+            print("new price: {}".format(price))
         order_id = order.id
         order = _find_order_by_id(self._open_orders, order_id)
+        if order is not None and PRINT_TO_SDTOUT:
+            print("old price: {}".format(order.price))
         original_order = copy(order)
         if original_order is not None:
             order.price = price
@@ -105,7 +109,8 @@ class MockTrading(Trading):
     @randomly_fill_orders
     @print_function_name
     def cancel_order(self, order_id: OrderID) -> bool:
-        print("Cancelling order with order id {} \n".format(order_id))
+        if PRINT_TO_SDTOUT:
+            print("Cancelling order with order id {} \n".format(order_id))
         order = _find_order_by_id(self._open_orders, order_id)
         if order in self._open_orders:
             self._open_orders.remove(order)

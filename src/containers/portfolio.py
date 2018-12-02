@@ -117,6 +117,14 @@ class Portfolio:
         if isinstance(signal, Hold):
             self._append_to_positions(signal.price_point.date_time, 0.0, price_point.value)
 
+    def _append_order(self, order: Order, quantity: int, price_point: PricePoint):
+        if isinstance(signal, Buy):
+            self._append_to_positions(signal.price_point.date_time, quantity, price_point.value)
+        if isinstance(signal, Sell):
+            self._append_to_positions(signal.price_point.date_time, -quantity, price_point.value)
+        if isinstance(signal, Hold):
+            self._append_to_positions(signal.price_point.date_time, 0.0, price_point.value)
+
     def convert_to_csv(self):
         self._portfolio_df.to_csv(os.path.join(definitions.DATA_DIR, "portfolio.csv"))
 

@@ -40,6 +40,20 @@ class OrderType(Enum):
 
 
 class Order(object):
+
+    def __new__(cls, *args, **kwargs):
+        if kwargs["side"] is Side.bid:
+            return super().__new__(OrderBuy)
+        elif kwargs["side"] is Side.ask:
+            return super().__new__(OrderSell)
+        else:
+            raise RuntimeError("Argument Side should be Union[Side.bid, Side.ask]"
+                               " on Order instantiation.")
+
+    def __copy__(self):
+        obj_copy = Order(**self.__dict__)
+        return obj_copy
+
     def __init__(self,
                  trading_pair_id: TradingPair,
                  price: Price,
@@ -83,7 +97,7 @@ class Order(object):
         }
 
     def __repr__(self):
-        return "Order(completed_at={}, " \
+        return "{}(completed_at={}, " \
                "equivalent_price={}, " \
                "filled={}, " \
                "id={}, " \
@@ -95,23 +109,31 @@ class Order(object):
                "timestamp={}, " \
                "trading_pair_id={}, " \
                "type={}, " \
-               ")".format(self.completed_at,
-                          self.equivalent_price,
-                          self.filled,
-                          self.id,
-                          self.price,
-                          self.side,
-                          self.size,
-                          self.source,
-                          self.state,
-                          self.timestamp.as_epoch_time(),
-                          self.trading_pair_id,
-                          self.type,
-                          )
+               ")".format(
+            self.__class__.__name__,
+            self.completed_at,
+            self.equivalent_price,
+            self.filled,
+            self.id,
+            self.price,
+            self.side,
+            self.size,
+            self.source,
+            self.state,
+            self.timestamp.as_epoch_time(),
+            self.trading_pair_id,
+            self.type,
+        )
 
     @staticmethod
     def from_cobinhood_response(order: dict):
-        return Order(
+        if order["side"] == "bid":
+            cls = OrderBuy
+        elif order["side"] == "ask":
+            cls = OrderSell
+        else:
+            cls = Order
+        return cls(
             completed_at=MilliSeconds.from_cobinhood_timestamp(order["completed_at"]),
             equivalent_price=EquivalentPrice(order["eq_price"]),
             filled=Filled(order["filled"]),
@@ -125,6 +147,14 @@ class Order(object):
             trading_pair_id=TradingPair.from_cobinhood(order["trading_pair_id"]),
             type=OrderType(order["type"]),
         )
+
+
+class OrderBuy(Order):
+    pass
+
+
+class OrderSell(Order):
+    pass
 
 
 """

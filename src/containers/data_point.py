@@ -16,6 +16,10 @@ class PricePoint(object):
     def date_time(self):
         return self._date_time
 
+    @date_time.setter
+    def date_time(self, date_time: datetime):
+        self._date_time = date_time
+
     def __repr__(self):
         return "DataPoint({},{})".format(self._value, self._date_time)
 
