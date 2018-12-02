@@ -2,12 +2,12 @@ from typing import Callable, List, Optional, Any, Union
 
 import wrapt
 
-from src.backtesting_logic.logic import Buy, Sell
+from src.containers.signal import SignalBuy, SignalSell
 from src.containers.order import Order, OrderID
 from src.market_maker.config import PRINT_TO_SDTOUT
 
 
-def print_signal(signal: Union[Buy, Sell]):
+def print_signal(signal: Union[SignalBuy, SignalSell]):
     print("\n\n+++++++++++++++++++++++++++++++++++++\n"
           "++++++++++++NEW SIGNAL+++++++++++++++++"
           "+++++++++++++++++++++++++++++++++++++")

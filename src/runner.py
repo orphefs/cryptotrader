@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from typing import Union, Optional
 
 from src.analysis_tools.run_metadata import RunMetaData
-from src.backtesting_logic.logic import Hold
+from src.containers.signal import SignalHold
 from src.classification.trading_classifier import TradingClassifier
 from src.connection.load_stock_data import load_stock_data
 from src.connection.download_live_data import download_live_data
@@ -37,10 +37,10 @@ class Runner(DillSaveLoadMixin):
         self._stop_time = None
         self._current_candle = None
         self._current_prediction = None
-        self._current_signal = Hold(0, None)
+        self._current_signal = SignalHold(0, None)
         self._previous_candle = None
         self._previous_prediction = None
-        self._previous_signal = Hold(0, None)
+        self._previous_signal = SignalHold(0, None)
         self._iteration_number = None
         if client is None:
             self._client = BinanceClient("","") # this client does not need API key and is only used for downloading candles

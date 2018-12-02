@@ -6,7 +6,7 @@ from typing import Tuple, List, Union
 import matplotlib.pyplot as plt
 import numpy as np
 
-from src.backtesting_logic.logic import Sell, Buy, Hold
+from src.containers.signal import SignalBuy, SignalSell, SignalHold
 from src.containers.portfolio import Portfolio
 from src.containers.time_windows import TimeWindow
 from src.definitions import DATA_DIR
@@ -53,16 +53,16 @@ def load_portfolio(path_to_portfolio_df_dill: str) -> Portfolio:
     return portfolio
 
 
-def extract_signals_from_portfolio(portfolio: Portfolio) -> List[Union[Buy, Sell, Hold]]:
+def extract_signals_from_portfolio(portfolio: Portfolio) -> List[Union[SignalBuy, SignalSell, SignalHold]]:
     return portfolio.signals
 
 
-def cleanup_signals(signals: List[Union[Buy, Sell, Hold]]) -> List[Union[Buy, Sell]]:
-    return [signal for signal in signals if isinstance(signal, Buy) or isinstance(signal, Sell)]
+def cleanup_signals(signals: List[Union[SignalBuy, SignalSell, SignalHold]]) -> List[Union[SignalBuy, SignalSell]]:
+    return [signal for signal in signals if isinstance(signal, SignalBuy) or isinstance(signal, SignalSell)]
 
 
-def generate_order_pairs(signals: List[Union[Buy, Sell]]) -> List[Tuple[Buy, Sell]]:
-    if isinstance(signals[0], Buy):
+def generate_order_pairs(signals: List[Union[SignalBuy, SignalSell]]) -> List[Tuple[SignalBuy, SignalSell]]:
+    if isinstance(signals[0], SignalBuy):
         print("First order is a Buy order...")
         order_pairs = list(zip(signals[1::2], signals[0::2]))
     else:
@@ -71,7 +71,7 @@ def generate_order_pairs(signals: List[Union[Buy, Sell]]) -> List[Tuple[Buy, Sel
     return order_pairs
 
 
-def compute_profits_and_losses(order_pairs: List[Tuple[Buy, Sell]]) -> np.array:
+def compute_profits_and_losses(order_pairs: List[Tuple[SignalBuy, SignalSell]]) -> np.array:
     net = np.array([sell.price_point.value - buy.price_point.value for sell, buy in order_pairs])
     return net
 
@@ -92,21 +92,21 @@ def plot_histograms(net: np.array):
     plt.show()
 
 
-def display_timeframe(order_pairs: List[Tuple[Buy, Sell]]) -> str:
+def display_timeframe(order_pairs: List[Tuple[SignalBuy, SignalSell]]) -> str:
     return "Run started on {} and ended on {}".format(order_pairs[0][1].price_point.date_time,
                                                       order_pairs[-1][1].price_point.date_time)
 
 
-def display_start_and_finish_prices(order_pairs: List[Tuple[Buy, Sell]]) -> str:
+def display_start_and_finish_prices(order_pairs: List[Tuple[SignalBuy, SignalSell]]) -> str:
     return "Trading pair start price: {}, Trading pair finish price: {}".format(order_pairs[0][1].price_point.value,
                                                                                 order_pairs[-1][1].price_point.value)
 
 
-def display_total_number_of_orders(order_pairs: List[Tuple[Buy, Sell]]):
+def display_total_number_of_orders(order_pairs: List[Tuple[SignalBuy, SignalSell]]):
     return "Total number of buy/sell orders: {}".format(len(order_pairs) * 2)
 
 
-def compute_testing_window(order_pairs: List[Tuple[Buy, Sell]]) -> TimeWindow:
+def compute_testing_window(order_pairs: List[Tuple[SignalBuy, SignalSell]]) -> TimeWindow:
     return TimeWindow(order_pairs[0][1].price_point.date_time, order_pairs[-1][1].price_point.date_time)
 
 
@@ -115,7 +115,7 @@ def calculate_trading_fees(fees: float):
 
 
 class RunStatistics:
-    def __init__(self, order_pairs: List[Tuple[Buy, Sell]],
+    def __init__(self, order_pairs: List[Tuple[SignalBuy, SignalSell]],
                  trading_gains: TradingGains,
                  index_gains: IndexGains,
                  net_gains: NetGains,
@@ -131,7 +131,7 @@ class RunStatistics:
         self.profit_per_order_pair = (self.net_gains.gains / self.number_of_orders) *100
 
 
-def calculate_percentage_gains(trade_amount: float, order_pairs: List[Tuple[Buy, Sell]]) -> TradingGains:
+def calculate_percentage_gains(trade_amount: float, order_pairs: List[Tuple[SignalBuy, SignalSell]]) -> TradingGains:
     net = compute_profits_and_losses(order_pairs)
     total_profit = np.sum(net)
     initial_investment = order_pairs[0][1].price_point.value * trade_amount
@@ -140,7 +140,7 @@ def calculate_percentage_gains(trade_amount: float, order_pairs: List[Tuple[Buy,
                                                   order_pairs[0][1].price_point.date_time)
 
 
-def calculate_index_performance(order_pairs: List[Tuple[Buy, Sell]]) -> IndexGains:
+def calculate_index_performance(order_pairs: List[Tuple[SignalBuy, SignalSell]]) -> IndexGains:
     index_gains = (order_pairs[-1][1].price_point.value - order_pairs[0][1].price_point.value) / order_pairs[0][
         1].price_point.value
     return IndexGains(gains=index_gains, elapsed_time=order_pairs[-1][1].price_point.date_time -

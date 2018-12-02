@@ -6,7 +6,7 @@ from typing import DefaultDict, List
 import numpy as np
 import pandas as pd
 
-from src.backtesting_logic.logic import Buy, Sell
+from src.containers.signal import SignalBuy, SignalSell
 from src.containers.candle import Candle
 from src.containers.data_point import PricePoint
 from src.containers.stock_data import StockData
@@ -36,11 +36,11 @@ def get_training_labels(stock_data: StockData):
     for current_candle, next_candle in list(zip(stock_data.candles[0:], stock_data.candles[1:])):
 
         if next_candle.get_close_price() > current_candle.get_close_price():
-            training_labels.append(Buy(-1, PricePoint(value=current_candle.get_close_price(),
-                                                      date_time=current_candle.get_close_time_as_datetime())))
+            training_labels.append(SignalBuy(-1, PricePoint(value=current_candle.get_close_price(),
+                                                            date_time=current_candle.get_close_time_as_datetime())))
         else:
-            training_labels.append(Sell(1, PricePoint(value=current_candle.get_close_price(),
-                                                      date_time=current_candle.get_close_time_as_datetime())))
+            training_labels.append(SignalSell(1, PricePoint(value=current_candle.get_close_price(),
+                                                            date_time=current_candle.get_close_time_as_datetime())))
     return training_labels
 
 

@@ -7,7 +7,7 @@ import pytest
 from pandas._libs.tslib import Timestamp
 
 from src import definitions
-from src.backtesting_logic.logic import Buy
+from src.containers.signal import SignalBuy
 from src.containers.stock_data import load_from_disk
 from src.containers.candle import Candle
 from src.containers.data_point import PricePoint, Price
@@ -24,8 +24,8 @@ def load_candle_data() -> List[Candle]:
     return stock_data.candles
 
 
-def create_mock_signals_from_candles(candles: List[Candle]) -> List[Buy]:
-    return [Buy(signal=1, price_point=PricePoint(
+def create_mock_signals_from_candles(candles: List[Candle]) -> List[SignalBuy]:
+    return [SignalBuy(signal=1, price_point=PricePoint(
         value=Price(candle.get_close_price()),
         date_time=candle.get_close_time_as_datetime())) for candle in candles]
 

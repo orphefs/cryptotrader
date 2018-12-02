@@ -3,7 +3,7 @@ from typing import Union, Optional
 
 from datetime import datetime
 
-from src.backtesting_logic.logic import Buy, Sell, Hold
+from src.containers.signal import SignalBuy, SignalSell, SignalHold
 from src.type_aliases import BinanceOrder, CobinhoodClient, BinanceClient
 from src.containers.trading_pair import TradingPair
 
@@ -16,10 +16,10 @@ class NoopMarketMaker:
         self._trading_pair = trading_pair
         self._quantity = quantity
 
-    def place_order(self, signal: Union[Buy, Sell, Hold]) -> Optional[BinanceOrder]:
-        if isinstance(signal, Buy):
+    def place_order(self, signal: Union[SignalBuy, SignalSell, SignalHold]) -> Optional[BinanceOrder]:
+        if isinstance(signal, SignalBuy):
             return self.place_buy_order()
-        elif isinstance(signal, Sell):
+        elif isinstance(signal, SignalSell):
             return self.place_sell_order()
         else:
             pass
@@ -37,10 +37,10 @@ class TestMarketMaker:
         self._trading_pair = trading_pair
         self._quantity = quantity
 
-    def place_order(self, signal: Union[Buy, Sell, Hold]) -> Optional[BinanceOrder]:
-        if isinstance(signal, Buy):
+    def place_order(self, signal: Union[SignalBuy, SignalSell, SignalHold]) -> Optional[BinanceOrder]:
+        if isinstance(signal, SignalBuy):
             return self.place_buy_order()
-        elif isinstance(signal, Sell):
+        elif isinstance(signal, SignalSell):
             return self.place_sell_order()
         else:
             pass
@@ -99,10 +99,10 @@ class MarketMaker:
         self._trading_pair = trading_pair
         self._quantity = quantity
 
-    def place_order(self, signal: Union[Buy, Sell, Hold]) -> Optional[BinanceOrder]:
-        if isinstance(signal, Buy):
+    def place_order(self, signal: Union[SignalBuy, SignalSell, SignalHold]) -> Optional[BinanceOrder]:
+        if isinstance(signal, SignalBuy):
             return self.place_buy_order()
-        elif isinstance(signal, Sell):
+        elif isinstance(signal, SignalSell):
             return self.place_sell_order()
         else:
             pass

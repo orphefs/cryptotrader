@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 
 import matplotlib.dates as mdate
 import matplotlib.pyplot as plt
@@ -8,7 +8,8 @@ from matplotlib.axis import Axis
 from matplotlib.dates import DateFormatter, WeekdayLocator, \
     DayLocator, MONDAY
 
-from src.backtesting_logic.logic import IntersectionPoint, _TradingSignal
+from src.containers.intersection_point import IntersectionPoint
+from src.containers.signal import SignalBuy, SignalSell, SignalHold
 from src.containers.portfolio import Portfolio
 from src.containers.candle import Candle
 from src.containers.stock_data import StockData
@@ -70,7 +71,7 @@ def plot_intersection_point(ax: Axes, intersection_point: IntersectionPoint):
     ax.scatter(y=intersection_point.data_point.value, x=intersection_point.data_point.date_time)
 
 
-def plot_trading_signals(ax: Axes, trading_signals: List[_TradingSignal], color: str = None, **kwargs):
+def plot_trading_signals(ax: Axes, trading_signals: List[Union[SignalBuy, SignalSell, SignalHold]], color: str = None, **kwargs):
     if color is None:
         color = 'k'
 

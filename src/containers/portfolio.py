@@ -6,7 +6,7 @@ import logging
 import pandas as pd
 
 from src import definitions
-from src.backtesting_logic.logic import Buy, Sell, Hold
+from src.containers.signal import SignalBuy, SignalSell, SignalHold
 from src.classification.trading_classifier import TradingClassifier
 from src.containers.data_point import PricePoint
 from src.containers.order import Order
@@ -54,8 +54,8 @@ class Portfolio:
     def signals(self):
         return self._signals
 
-    def update(self, data: Union[Union[Buy, Sell, Hold], Order]):
-        if isinstance(data, Buy) or isinstance(data, Sell) or isinstance(data, Hold):
+    def update(self, data: Union[Union[SignalBuy, SignalSell, SignalHold], Order]):
+        if isinstance(data, SignalBuy) or isinstance(data, SignalSell) or isinstance(data, SignalHold):
             self._append_signal(data, self._trade_amount, data.price_point)
             self._signals.append(data)
             logging.debug("Appended signal: {}".format(data))
@@ -109,20 +109,20 @@ class Portfolio:
     def _compute_cumulative_order_expenditure(order_expenditures: pd.Series) -> pd.Series:
         return order_expenditures.cumsum()
 
-    def _append_signal(self, signal: Union[Buy, Sell, Hold], quantity: int, price_point: PricePoint):
-        if isinstance(signal, Buy):
+    def _append_signal(self, signal: Union[SignalBuy, SignalSell, SignalHold], quantity: int, price_point: PricePoint):
+        if isinstance(signal, SignalBuy):
             self._append_to_positions(signal.price_point.date_time, quantity, price_point.value)
-        if isinstance(signal, Sell):
+        if isinstance(signal, SignalSell):
             self._append_to_positions(signal.price_point.date_time, -quantity, price_point.value)
-        if isinstance(signal, Hold):
+        if isinstance(signal, SignalHold):
             self._append_to_positions(signal.price_point.date_time, 0.0, price_point.value)
 
     def _append_order(self, order: Order, quantity: int, price_point: PricePoint):
-        if isinstance(signal, Buy):
+        if isinstance(signal, SignalBuy):
             self._append_to_positions(signal.price_point.date_time, quantity, price_point.value)
-        if isinstance(signal, Sell):
+        if isinstance(signal, SignalSell):
             self._append_to_positions(signal.price_point.date_time, -quantity, price_point.value)
-        if isinstance(signal, Hold):
+        if isinstance(signal, SignalHold):
             self._append_to_positions(signal.price_point.date_time, 0.0, price_point.value)
 
     def convert_to_csv(self):

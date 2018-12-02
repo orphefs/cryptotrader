@@ -13,7 +13,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 
 from src import definitions
-from src.backtesting_logic.logic import _TradingSignal
+from src.containers.signal import SignalBuy, SignalSell
 from src.classification.classifier_helpers import compute_confusion_matrix, \
     generate_reference_portfolio, generate_all_signals_at_once
 from src.classification.trading_classifier import TradingClassifier
@@ -113,8 +113,8 @@ def run_trained_classifier(trading_pair: TradingPair,
 
 def plot_portfolios(my_classifier: TradingClassifier,
                     predicted_portfolio: Portfolio, reference_portfolio: Portfolio,
-                    reference_signals: List[_TradingSignal],
-                    predicted_signals: List[_TradingSignal]):
+                    reference_signals: List[Union[SignalBuy, SignalSell]],
+                    predicted_signals: List[Union[SignalBuy, SignalSell]]):
     custom_plot(portfolio=predicted_portfolio, strategy=None, title='Prediction portfolio_df')
     custom_plot(portfolio=reference_portfolio, strategy=None, title='Reference portfolio_df')
     print(my_classifier.sklearn_classifier.feature_importances_)

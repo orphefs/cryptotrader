@@ -1,7 +1,8 @@
 from datetime import datetime
 from typing import List, Union
 
-from src.backtesting_logic.logic import Buy, Sell
+from src.containers.intersection_point import SignalBuy
+from src.containers.signal import SignalSell
 from src.containers.data_point import PricePoint, Price
 from src.containers.portfolio import Portfolio
 from src.definitions import DATA_DIR
@@ -15,19 +16,19 @@ def load_cobinhood_api_token():
     return token
 
 
-def convert_orders_to_signals(orders: List[dict]) -> List[Union[Buy, Sell]]:
+def convert_orders_to_signals(orders: List[dict]) -> List[Union[SignalBuy, SignalSell]]:
     signals = []
     for order in orders:
         if "state" in order:
             if order["state"] == "filled":
                 if order["side"] == "bid":
-                    signals.append(Buy(signal=-1,
-                                       price_point=PricePoint(value=Price(order["eq_price"]),
+                    signals.append(SignalBuy(signal=-1,
+                                             price_point=PricePoint(value=Price(order["eq_price"]),
                                                               date_time=datetime.fromtimestamp(
                                                                   order["timestamp"] / 1000))))
                 if order["side"] == "ask":
-                    signals.append(Sell(signal=1,
-                                        price_point=PricePoint(value=Price(order["eq_price"]),
+                    signals.append(SignalSell(signal=1,
+                                              price_point=PricePoint(value=Price(order["eq_price"]),
                                                                date_time=datetime.fromtimestamp(
                                                                    order["timestamp"] / 1000))))
 
@@ -37,11 +38,11 @@ def convert_orders_to_signals(orders: List[dict]) -> List[Union[Buy, Sell]]:
     return signals
 
 
-def order_signals_by_timestamp(signals: List[Union[Buy, Sell]]):
+def order_signals_by_timestamp(signals: List[Union[SignalBuy, SignalSell]]):
     return sorted(signals, key=lambda x: x.price_point.date_time, reverse=False)
 
 
-def construct_portfolio_from_exchange_order_data(signals: List[Union[Buy, Sell]],
+def construct_portfolio_from_exchange_order_data(signals: List[Union[SignalBuy, SignalSell]],
                                                  path_to_exchange_portfolio: Path) -> Path:
     portfolio = Portfolio(initial_capital=0.0091,
                           trade_amount=0.02)

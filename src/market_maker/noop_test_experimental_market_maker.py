@@ -3,7 +3,7 @@ from time import sleep
 from typing import List, Union
 
 from src.analysis_tools.generate_run_statistics import compute_all_statistics, display
-from src.backtesting_logic.logic import Buy, Sell
+from src.containers.signal import SignalBuy, SignalSell
 from src.classification.classifier_helpers import generate_signals_from_classifier
 from src.classification.trading_classifier import TradingClassifier
 from src.classification.train_classifier import run_trained_classifier
@@ -33,12 +33,12 @@ def test_if_alternate_bid_ask_orders(orders: List[Order]):
     assert result
 
 
-def convert_order_to_signal(order: Order) -> Union[Buy, Sell]:
+def convert_order_to_signal(order: Order) -> Union[SignalBuy, SignalSell]:
     if order.side is Side.bid:
-        cls = Buy
+        cls = SignalBuy
         signal = -1
     elif order.side is Side.ask:
-        cls = Sell
+        cls = SignalSell
         signal = 1
     else:
         raise RuntimeError("Input should be of type Order.")

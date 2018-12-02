@@ -3,7 +3,7 @@ from typing import Union, Optional
 
 from datetime import datetime
 
-from src.backtesting_logic.logic import Buy, Sell, Hold
+from src.containers.signal import SignalBuy, SignalSell, SignalHold
 from src.containers.data_point import PricePoint
 from src.containers.order import Order, OrderType, Size, Side, Price
 from src.containers.time import MilliSeconds
@@ -26,7 +26,7 @@ def _instantiate_order() -> Order:
 
 
 @print_function_name
-def _act_if_buy_signal_and_bid_order(trader: CobinhoodTrading, signal: Buy, order: Order, ) -> Order:
+def _act_if_buy_signal_and_bid_order(trader: CobinhoodTrading, signal: SignalBuy, order: Order, ) -> Order:
     try:
         if signal.price_point.value < order.price:
             success = trader.modify_order(order, price=signal.price_point.value, size=order.size)
@@ -43,12 +43,12 @@ def _act_if_buy_signal_and_bid_order(trader: CobinhoodTrading, signal: Buy, orde
 
 
 @print_function_name
-def _act_if_sell_signal_and_ask_order(trader: CobinhoodTrading, signal: Sell, order: Order, ) -> Order:
+def _act_if_sell_signal_and_ask_order(trader: CobinhoodTrading, signal: SignalSell, order: Order, ) -> Order:
     return _act_if_buy_signal_and_bid_order(trader=trader, signal=signal, order=order)
 
 
 @print_function_name
-def _act_if_sell_signal_and_bid_order(trader: CobinhoodTrading, signal: Sell, order: Order) -> Order:
+def _act_if_sell_signal_and_bid_order(trader: CobinhoodTrading, signal: SignalSell, order: Order) -> Order:
     try:
         success = trader.cancel_order(order_id="{}".format(order.id))
         if success:
@@ -59,22 +59,22 @@ def _act_if_sell_signal_and_bid_order(trader: CobinhoodTrading, signal: Sell, or
 
 
 @print_function_name
-def _act_if_buy_signal_and_ask_order(trader: CobinhoodTrading, signal: Buy, order: Order, ) -> Order:
+def _act_if_buy_signal_and_ask_order(trader: CobinhoodTrading, signal: SignalBuy, order: Order, ) -> Order:
     return _act_if_sell_signal_and_bid_order(trader=trader, signal=signal, order=order)
 
 
 @print_function_name
-def _act_if_buy_signal_and_filled_bid_order(trader: CobinhoodTrading, signal: Buy, order: Order) -> Order:
+def _act_if_buy_signal_and_filled_bid_order(trader: CobinhoodTrading, signal: SignalBuy, order: Order) -> Order:
     pass
 
 
 @print_function_name
-def _act_if_sell_signal_and_filled_ask_order(trader: CobinhoodTrading, signal: Sell, order: Order) -> Order:
+def _act_if_sell_signal_and_filled_ask_order(trader: CobinhoodTrading, signal: SignalSell, order: Order) -> Order:
     pass
 
 
 @print_function_name
-def _act_if_buy_signal_and_filled_ask_order(trader: CobinhoodTrading, signal: Buy, order: Order) -> Order:
+def _act_if_buy_signal_and_filled_ask_order(trader: CobinhoodTrading, signal: SignalBuy, order: Order) -> Order:
     try:
         return trader.place_order(Order(
             trading_pair_id=order.trading_pair_id,
@@ -90,7 +90,7 @@ def _act_if_buy_signal_and_filled_ask_order(trader: CobinhoodTrading, signal: Bu
 
 
 # @print_function_name
-def _act_if_sell_signal_and_filled_bid_order(trader: CobinhoodTrading, signal: Sell, order: Order) -> Order:
+def _act_if_sell_signal_and_filled_bid_order(trader: CobinhoodTrading, signal: SignalSell, order: Order) -> Order:
     try:
         return trader.place_order(Order(
             trading_pair_id=order.trading_pair_id,
@@ -107,8 +107,8 @@ def _act_if_sell_signal_and_filled_bid_order(trader: CobinhoodTrading, signal: S
         print(error)
 
 
-def _init_signal() -> Buy:
-    return Buy(-1, PricePoint(value=None, date_time=datetime.now()))
+def _init_signal() -> SignalBuy:
+    return SignalBuy(-1, PricePoint(value=None, date_time=datetime.now()))
 
 
 class ExperimentalMarketMaker:
@@ -128,7 +128,7 @@ class ExperimentalMarketMaker:
     def trader(self):
         return self._trader
 
-    def insert_signal(self, signal: Union[Buy, Sell, Hold]):
+    def insert_signal(self, signal: Union[SignalBuy, SignalSell, SignalHold]):
         self._current_signal = signal
         # if self._current_signal != self._previous_signal:  # if new incoming signal
         self._update()
@@ -151,14 +151,14 @@ class ExperimentalMarketMaker:
 
         if self._open_order:
 
-            if isinstance(self._current_signal, Buy):
+            if isinstance(self._current_signal, SignalBuy):
                 if self._open_order.side is Side.bid:
                     order = _act_if_buy_signal_and_bid_order(trader=self._trader, signal=self._current_signal,
                                                              order=self._open_order)
                 elif self._open_order.side is Side.ask:
                     order = _act_if_buy_signal_and_ask_order(trader=self._trader, signal=self._current_signal,
                                                              order=self._open_order)
-            elif isinstance(self._current_signal, Sell):
+            elif isinstance(self._current_signal, SignalSell):
                 if self._open_order.side is Side.bid:
                     order = _act_if_sell_signal_and_bid_order(trader=self._trader, signal=self._current_signal,
                                                               order=self._open_order)
@@ -168,14 +168,14 @@ class ExperimentalMarketMaker:
 
         else:
             last_filled_order = self._trader.get_last_filled_order(trading_pair=self._trading_pair)
-            if isinstance(self._current_signal, Buy):
+            if isinstance(self._current_signal, SignalBuy):
                 if last_filled_order.side is Side.bid:
                     order = _act_if_buy_signal_and_filled_bid_order(trader=self._trader, signal=self._current_signal,
                                                                     order=last_filled_order)
                 elif last_filled_order.side is Side.ask:
                     order = _act_if_buy_signal_and_filled_ask_order(trader=self._trader, signal=self._current_signal,
                                                                     order=last_filled_order)
-            elif isinstance(self._current_signal, Sell):
+            elif isinstance(self._current_signal, SignalSell):
                 if last_filled_order.side is Side.bid:
                     order = _act_if_sell_signal_and_filled_bid_order(trader=self._trader, signal=self._current_signal,
                                                                      order=last_filled_order)

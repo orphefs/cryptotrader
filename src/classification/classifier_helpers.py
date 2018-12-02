@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import confusion_matrix
 
-from src.backtesting_logic.logic import Buy, Sell, Hold
+from src.containers.signal import SignalBuy, SignalSell, SignalHold
 from src.classification.helpers import get_training_labels
 from src.classification.trading_classifier import TradingClassifier
 from src.containers.portfolio import Portfolio
@@ -12,12 +12,12 @@ from src.containers.trade_helper import generate_trading_signal_from_prediction,
 from src.type_aliases import Path
 
 
-def convert_signals_to_pandas(signals: List[Union[Buy, Sell, Hold]]) -> pd.DataFrame:
+def convert_signals_to_pandas(signals: List[Union[SignalBuy, SignalSell, SignalHold]]) -> pd.DataFrame:
     return pd.DataFrame([{'Action': s.type.__name__, 'Timestamp': s.price_point.date_time} for s in signals])
 
 
-def compute_confusion_matrix(training_signals: List[Union[Buy, Sell, Hold]],
-                             predicted_signals: List[Union[Buy, Sell, Hold]]) -> np.ndarray:
+def compute_confusion_matrix(training_signals: List[Union[SignalBuy, SignalSell, SignalHold]],
+                             predicted_signals: List[Union[SignalBuy, SignalSell, SignalHold]]) -> np.ndarray:
     # TODO: Figure out why the two dfs are not merged properly
     # The wrong merging results in a wrong confusion matrix
     training_df = convert_signals_to_pandas(training_signals)
@@ -51,7 +51,7 @@ def generate_signals_iteratively(stock_data: Union[Path, StockData], classifier:
 
 
 def generate_signals_from_classifier(stock_data: Union[Path, StockData],
-                                     classifier: Union[Path, TradingClassifier]) -> List[Union[Buy, Sell]]:
+                                     classifier: Union[Path, TradingClassifier]) -> List[Union[SignalBuy, SignalSell]]:
     if isinstance(classifier, Path):
         classifier = TradingClassifier.load_from_disk(classifier)
     if isinstance(stock_data, Path):
@@ -61,12 +61,12 @@ def generate_signals_from_classifier(stock_data: Union[Path, StockData],
     return predicted_signals
 
 
-def replace_repeating_signals_with_holds(signals: List[Union[Buy, Sell]]) -> List[Union[Buy, Sell, Hold]]:
+def replace_repeating_signals_with_holds(signals: List[Union[SignalBuy, SignalSell]]) -> List[Union[SignalBuy, SignalSell, SignalHold]]:
     cleaned_up_signals = []
     previous_signal = None
     for signal in signals:
         if isinstance(signal, type(previous_signal)):
-            hold_signal = Hold(0, signal.price_point)
+            hold_signal = SignalHold(0, signal.price_point)
             cleaned_up_signals.append(hold_signal)
         else:
             cleaned_up_signals.append(signal)
@@ -75,7 +75,7 @@ def replace_repeating_signals_with_holds(signals: List[Union[Buy, Sell]]) -> Lis
 
 
 def generate_all_signals_at_once(stock_data_testing_set, classifier, predicted_portfolio) -> Tuple[
-    TradingClassifier, Portfolio, List[Union[Buy, Sell, Hold]]]:
+    TradingClassifier, Portfolio, List[Union[SignalBuy, SignalSell, SignalHold]]]:
     predictions = classifier.predict(stock_data_testing_set)
     signals = generate_trading_signals_from_array(predictions[:], stock_data_testing_set)
     cleaned_up_signals = replace_repeating_signals_with_holds(signals[:])

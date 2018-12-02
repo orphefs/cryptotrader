@@ -6,7 +6,7 @@ import pandas as pd
 import pytest
 
 from src import definitions
-from src.backtesting_logic.logic import Buy, Sell, Hold
+from src.containers.signal import SignalBuy, SignalSell, SignalHold
 from src.classification.classifier_helpers import replace_repeating_signals_with_holds
 from src.containers.candle import Candle
 from src.containers.data_point import PricePoint, Price
@@ -16,11 +16,11 @@ from src.helpers import is_equal
 from src.containers.trading_pair import TradingPair
 
 predictions = [-1, -1, 1, 1, -1]
-answers = [Buy,
-           Hold,
-           Sell,
-           Hold,
-           Buy]
+answers = [SignalBuy,
+           SignalHold,
+           SignalSell,
+           SignalHold,
+           SignalBuy]
 
 
 @pytest.fixture()
@@ -29,12 +29,12 @@ def load_candle_data() -> List[Candle]:
     return stock_data.candles
 
 
-def create_mock_signals_from_candles(candles: List[Candle]) -> List[Union[Buy, Sell]]:
+def create_mock_signals_from_candles(candles: List[Candle]) -> List[Union[SignalBuy, SignalSell]]:
     return generate_trading_signals_from_array(signals=predictions,
                                                stock_data=StockData(candles=candles, trading_pair=TradingPair("XRP", "ETH")))
 
 
-def initialize_signals() -> List[Union[Buy, Sell]]:
+def initialize_signals() -> List[Union[SignalBuy, SignalSell]]:
     candles = load_candle_data()
     signals = create_mock_signals_from_candles(candles)
     return signals
