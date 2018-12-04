@@ -22,7 +22,7 @@ class _TradingSignal(object):
 
 
 def generate_trading_signal(*args, **kwargs):
-    if len(args) ==0 and len(kwargs) ==0:
+    if len(args) == 0 and len(kwargs) == 0:
         return _TradingSignal
     else:
         return _TradingSignal(*args, **kwargs)

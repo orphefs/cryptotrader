@@ -69,3 +69,5 @@ def test_compare_runs():
         path_to_offline_portfolio_df, path_to_backtest_portfolio_df)
     compare(offline_portfolio, backtest_portfolio)
 
+if __name__ == '__main__':
+    test_compare_runs()

@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import confusion_matrix
 
+from src.containers.order import Order
 from src.containers.signal import SignalBuy, SignalSell, SignalHold
 from src.classification.helpers import get_training_labels
 from src.classification.trading_classifier import TradingClassifier
@@ -32,7 +33,7 @@ def generate_reference_portfolio(initial_capital, parameters, stock_data_testing
                                     trade_amount=parameters.trade_amount)
     training_signals = get_training_labels(stock_data_testing_set)
     for signal in training_signals:
-        reference_portfolio.update(signal)
+        reference_portfolio.update(Order.from_signal(signal))
     reference_portfolio.compute_performance()
     return reference_portfolio, training_signals
 
@@ -80,5 +81,5 @@ def generate_all_signals_at_once(stock_data_testing_set, classifier, predicted_p
     signals = generate_trading_signals_from_array(predictions[:], stock_data_testing_set)
     cleaned_up_signals = replace_repeating_signals_with_holds(signals[:])
     for signal in cleaned_up_signals:
-        predicted_portfolio.update(signal)
+        predicted_portfolio.update(Order.from_signal(signal))
     return classifier, predicted_portfolio, cleaned_up_signals

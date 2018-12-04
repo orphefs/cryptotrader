@@ -7,7 +7,7 @@ import dill
 from src.connection.constants import binance_sampling_rate_mappings, cobinhood_sampling_rate_mappings
 from src.connection.helpers import DownloadingError, finetune_time_window
 
-dill.dill._reverse_typemap['ClassType'] = type
+dill._dill._reverse_typemap['ClassType'] = type
 
 from src.containers.candle import Candle
 from src.containers.time_windows import TimeWindow, Date

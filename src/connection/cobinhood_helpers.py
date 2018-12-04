@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import List, Union
 
 from src.containers.intersection_point import SignalBuy
+from src.containers.order import Order
 from src.containers.signal import SignalSell
 from src.containers.data_point import PricePoint, Price
 from src.containers.portfolio import Portfolio
@@ -47,7 +48,7 @@ def construct_portfolio_from_exchange_order_data(signals: List[Union[SignalBuy, 
     portfolio = Portfolio(initial_capital=0.0091,
                           trade_amount=0.02)
     for signal in signals:
-        portfolio.update(signal)
+        portfolio.update(Order.from_signal(signal))
     portfolio.compute_performance()
     portfolio.save_to_disk(path_to_exchange_portfolio)
     return path_to_exchange_portfolio

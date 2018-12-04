@@ -1,7 +1,9 @@
 from datetime import datetime
 from enum import Enum
-from typing import Optional
+from functools import partial
+from typing import Optional, Union
 
+from src.containers.signal import SignalBuy, SignalSell
 from src.containers.time import MilliSeconds
 from src.containers.trading_pair import TradingPair
 
@@ -10,7 +12,7 @@ TrailingDistance = str
 StopPrice = float
 Price = float
 Source = str
-Filled = str
+Filled = float
 Size = float
 EquivalentPrice = float
 
@@ -42,17 +44,41 @@ class OrderType(Enum):
 class Order(object):
 
     def __new__(cls, *args, **kwargs):
-        if kwargs["side"] is Side.bid:
-            return super().__new__(OrderBuy)
-        elif kwargs["side"] is Side.ask:
-            return super().__new__(OrderSell)
+        if not kwargs: # handle object creation for unpickling
+            if args[7] is Side.bid:
+                return super().__new__(OrderBuy)
+            elif args[7] is Side.ask:
+                return super().__new__(OrderSell)
+        elif kwargs:
+            if kwargs["side"] is Side.bid:
+                return super().__new__(OrderBuy)
+            elif kwargs["side"] is Side.ask:
+                return super().__new__(OrderSell)
         else:
             raise RuntimeError("Argument Side should be Union[Side.bid, Side.ask]"
-                               " on Order instantiation.")
+                                   " on Order instantiation.")
 
     def __copy__(self):
         obj_copy = Order(**self.__dict__)
         return obj_copy
+
+    def __getnewargs__(self):
+        print('getnewargs was called')
+        return (self.equivalent_price,
+               self.trading_pair_id,
+               self.stop_price,
+               self.completed_at,
+               self.completed_at,
+               self.timestamp,
+               self.price,
+               self.side,
+               self.source,
+               self.state,
+               self.trailing_distance,
+               self.type,
+               self.id,
+               self.filled,
+               self.size)
 
     def __init__(self,
                  trading_pair_id: TradingPair,
@@ -124,6 +150,23 @@ class Order(object):
             self.trading_pair_id,
             self.type,
         )
+
+    @staticmethod
+    def from_signal(signal: Union[SignalBuy, SignalSell]):
+        Ord = partial(Order, trading_pair_id=TradingPair("NotImplemented",
+                                                         "NotImplemented"),
+                      price=Price(signal.price_point.value),
+                      type=OrderType.limit,
+                      size=Size(1.0),
+                      filled=Filled(1.0),
+                      equivalent_price=Price(signal.price_point.value),
+                      completed_at=MilliSeconds(signal.price_point.date_time.timestamp()),
+                      timestamp=MilliSeconds(signal.price_point.date_time.timestamp())
+                      )
+        if isinstance(signal, SignalBuy):
+            return Ord(side=Side.bid)
+        elif isinstance(signal, SignalSell):
+            return Ord(side=Side.ask)
 
     @staticmethod
     def from_cobinhood_response(order: dict):

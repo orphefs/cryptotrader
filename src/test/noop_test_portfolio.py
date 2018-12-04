@@ -7,6 +7,7 @@ import pytest
 from pandas._libs.tslib import Timestamp
 
 from src import definitions
+from src.containers.order import Order
 from src.containers.signal import SignalBuy
 from src.containers.stock_data import load_from_disk
 from src.containers.candle import Candle
@@ -36,7 +37,7 @@ def initialize_portfolio() -> Portfolio:
     signals = create_mock_signals_from_candles(candles)
     # print(signals)
     for signal in signals:
-        portfolio.update(signal)
+        portfolio.update(Order.from_signal(signal))
     portfolio.compute_performance()
     return portfolio
 

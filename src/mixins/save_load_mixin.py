@@ -2,7 +2,7 @@ import dill
 
 from src.type_aliases import Path
 
-dill.dill._reverse_typemap['ClassType'] = type
+dill._dill._reverse_typemap['ClassType'] = type
 import os
 from src import definitions
 import simplejson as json

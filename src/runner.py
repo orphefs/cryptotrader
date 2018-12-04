@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from typing import Union, Optional
 
 from src.analysis_tools.run_metadata import RunMetaData
+from src.containers.order import Order
 from src.containers.signal import SignalHold
 from src.classification.trading_classifier import TradingClassifier
 from src.connection.load_stock_data import load_stock_data
@@ -157,7 +158,7 @@ class Runner(DillSaveLoadMixin):
                         logging.info("Prediction for signal {}".format(self._current_signal))
                         order = self._market_maker.place_order(self._current_signal)
 
-                        self._portfolio.update(self._current_signal)
+                        self._portfolio.update(Order.from_signal(self._current_signal))
                         self._portfolio.save_to_disk(self._path_to_portfolio)
                         self._previous_signal = self._current_signal
                 self._previous_candle = self._current_candle

@@ -82,7 +82,7 @@ def main():
                           classifier=TradingClassifier.load_from_disk(classifier))
     for order in mm.trader.filled_orders:
         signal = convert_order_to_signal(order)
-        portfolio.update(signal)
+        portfolio.update(Order.from_signal(signal))
 
     test_if_alternate_bid_ask_orders(mm.trader.filled_orders)
 
