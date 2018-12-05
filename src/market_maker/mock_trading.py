@@ -32,7 +32,7 @@ starting_order = {
 
 @wrapt.decorator
 def randomly_fill_orders(wrapped_func, instance, args, kwargs):
-    if random.choice([True] + [False] * 40):
+    if random.choice([True] + [False] * 10):
         instance._fill_orders()
     result = wrapped_func(*args, **kwargs)
     return result

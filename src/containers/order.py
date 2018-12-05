@@ -63,7 +63,6 @@ class Order(object):
         return obj_copy
 
     def __getnewargs__(self):
-        print('getnewargs was called')
         return (self.equivalent_price,
                self.trading_pair_id,
                self.stop_price,

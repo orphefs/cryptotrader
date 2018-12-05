@@ -62,9 +62,8 @@ class Portfolio:
     def update(self, data: Union[Union[SignalBuy, SignalSell, SignalHold], Order]):
         if isinstance(data, SignalBuy) or isinstance(data, SignalSell) or isinstance(data, SignalHold):
             # self._append_signal(data, self._trade_amount, data.price_point)
-            # self._signals.append(data)
-            # logging.debug("Appended signal: {}".format(data))
-            raise NotImplementedError
+            self._signals.append(data)
+            logging.debug("Appended signal: {}".format(data))
         elif isinstance(data, Order):
             self._append_order(data)
             self._orders.append(data)

@@ -1,3 +1,4 @@
+import datetime
 from typing import List, Union
 
 import matplotlib.dates as mdate
@@ -9,6 +10,7 @@ from matplotlib.dates import DateFormatter, WeekdayLocator, \
     DayLocator, MONDAY
 
 from src.containers.intersection_point import IntersectionPoint
+from src.containers.order import OrderBuy, OrderSell
 from src.containers.signal import SignalBuy, SignalSell, SignalHold
 from src.containers.portfolio import Portfolio
 from src.containers.candle import Candle
@@ -53,9 +55,6 @@ def plot_portfolio_2(ax: List[Axis], portfolio_df: pd.DataFrame):
     ax[1].legend()
 
 
-
-
-
 def plot_returns(ax: Axes, stock_data: StockData, returns: List[float]):
     ax.scatter(x=[mdate.date2num(candle.get_close_time_as_datetime())
                   for candle in stock_data.candles][0:-1],
@@ -71,14 +70,15 @@ def plot_intersection_point(ax: Axes, intersection_point: IntersectionPoint):
     ax.scatter(y=intersection_point.data_point.value, x=intersection_point.data_point.date_time)
 
 
-def plot_trading_signals(ax: Axes, trading_signals: List[Union[SignalBuy, SignalSell, SignalHold]], color: str = None, **kwargs):
+def plot_trading_signals(ax: Axes, trading_signals: List[Union[SignalBuy, SignalSell, SignalHold]], color: str = None,
+                         **kwargs):
     if color is None:
         color = 'k'
 
     marker_map = {
-        "Buy": '^',
-        "Sell": 'v',
-        "Hold": "",
+        "SignalBuy": '^',
+        "SignalSell": 'v',
+        "SignalHold": "",
     }
     markers = [marker_map[trading_signal.type.__name__] for trading_signal in trading_signals]
 
@@ -94,7 +94,42 @@ def plot_trading_signals(ax: Axes, trading_signals: List[Union[SignalBuy, Signal
                 marker,
                 kwargs
             )
+    print(trading_signals[0].price_point.date_time.timestamp())
     ax.set_ylim(min(prices), max(prices))
+    ax.set_xlim(
+        min(trading_signals, key=lambda x: x.price_point.date_time.timestamp()).price_point.date_time,
+        max(trading_signals, key=lambda x: x.price_point.date_time.timestamp()).price_point.date_time
+    )
+
+
+def plot_orders(ax: Axes, orders: List[Union[OrderBuy, OrderSell]], color: str = None, **kwargs):
+    if color is None:
+        color = 'r'
+
+    marker_map = {
+        "OrderBuy": '^',
+        "OrderSell": 'v',
+    }
+    markers = [marker_map[type(order).__name__] for order in orders]
+
+    prices = []
+    for marker, order in zip(markers, orders):
+        if marker != "":
+            prices.append(order.price)
+            ax.scatter(
+                order.completed_at.as_datetime(),
+                order.price,
+                40,
+                color,
+                marker,
+                kwargs
+            )
+    print(orders[0].completed_at.as_datetime())
+    ax.set_ylim(min(prices), max(prices))
+    ax.set_xlim(
+        min(orders, key=lambda x: x.completed_at.as_datetime()).completed_at.as_datetime(),
+        max(orders, key=lambda x: x.completed_at.as_datetime()).completed_at.as_datetime()
+    )
 
 
 def plot_candlesticks(ax: Axes, data: StockData):
@@ -128,8 +163,9 @@ def plot_candlesticks(ax: Axes, data: StockData):
 def custom_plot(portfolio, strategy, title=None):
     fig, ax = plt.subplots(nrows=4, ncols=1, sharex=True)
     ax[0].set_title(title)
-    plot_portfolio_2(ax[1:4], portfolio.portfolio_df)
+    # plot_portfolio_2(ax[1:4], portfolio.portfolio_df)
     plot_trading_signals(ax=ax[0], trading_signals=portfolio.signals[1:])
+    plot_orders(ax=ax[0], orders=portfolio.orders)
     if strategy is not None:
         plot_moving_average(ax=ax[0], time_series=strategy._short_sma)
         plot_moving_average(ax=ax[0], time_series=strategy._long_sma)

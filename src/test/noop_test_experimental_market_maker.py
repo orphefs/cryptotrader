@@ -65,9 +65,13 @@ def main():
     mm = ExperimentalMarketMaker(trader, trading_pair, 0.02)
 
     signals = generate_signals_from_classifier(stock_data, classifier)
+
+    portfolio = Portfolio(initial_capital=1, trade_amount=trade_amount,
+                          classifier=TradingClassifier.load_from_disk(classifier))
     signal_count = 0
     for signal in signals:
         signal.price_point.date_time = datetime.datetime.now()
+        portfolio.update(signal)
         if PRINT_TO_SDTOUT:
             print_signal(signal)
         for i in range(0, 5):
@@ -78,11 +82,11 @@ def main():
         if signal_count > 400:
             break
 
-    portfolio = Portfolio(initial_capital=1, trade_amount=trade_amount,
-                          classifier=TradingClassifier.load_from_disk(classifier))
     for order in mm.trader.filled_orders:
-        signal = convert_order_to_signal(order)
-        portfolio.update(Order.from_signal(signal))
+        # signal = convert_order_to_signal(order)
+        # print(signal)
+        print(order)
+        portfolio.update(order)
 
     test_if_alternate_bid_ask_orders(mm.trader.filled_orders)
 
