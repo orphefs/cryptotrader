@@ -20,8 +20,8 @@ class runner:
                  path_to_stock_data: Path = None,
                  path_to_portfolio: Path = None,
                  path_to_classifier: Path = None,
-                 client: Union[BinanceClient, CobinhoodClient] = None,
-                 market_maker: Optional[Union[NoopMarketMaker, TestMarketMaker, MarketMaker]] = None
+                 client = None,
+                 market_maker = None
                  ):
         if (mock_data_start_time and mock_data_stop_time) and path_to_stock_data:
             raise TooManyArgumentsError("Either specify start and end time OR a path to the stock data file.")

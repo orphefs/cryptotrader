@@ -73,7 +73,7 @@ def plot_intersection_point(ax: Axes, intersection_point: IntersectionPoint):
 def plot_trading_signals(ax: Axes, trading_signals: List[Union[SignalBuy, SignalSell, SignalHold]], color: str = None,
                          **kwargs):
     if color is None:
-        color = 'k'
+        color = 'b'
 
     marker_map = {
         "SignalBuy": '^',
@@ -84,6 +84,10 @@ def plot_trading_signals(ax: Axes, trading_signals: List[Union[SignalBuy, Signal
 
     prices = []
     for marker, trading_signal in zip(markers, trading_signals):
+        if isinstance(trading_signal, SignalBuy):
+            color = "g"
+        else:
+            color = "r"
         if marker != "":
             prices.append(trading_signal.price_point.value)
             ax.scatter(
@@ -104,7 +108,7 @@ def plot_trading_signals(ax: Axes, trading_signals: List[Union[SignalBuy, Signal
 
 def plot_orders(ax: Axes, orders: List[Union[OrderBuy, OrderSell]], color: str = None, **kwargs):
     if color is None:
-        color = 'r'
+        color = 'k'
 
     marker_map = {
         "OrderBuy": '^',

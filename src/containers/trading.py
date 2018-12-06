@@ -1,3 +1,5 @@
+import logging
+
 from src.connection.cobinhood_helpers import load_cobinhood_api_token
 from src.containers.order import Order, Price, Size, OrderID
 from src.containers.trading_pair import TradingPair
@@ -7,14 +9,15 @@ from src.type_aliases import CobinhoodClient, BinanceClient
 from typing import List, Optional, Union
 
 
+logger = logging.getLogger('cryptotrader_api')
+
+
 class CobinhoodError(RuntimeError):
     pass
 
 
 class Trade:
     pass
-
-
 
 
 class Trading:
@@ -27,7 +30,7 @@ class Trading:
     def modify_order(self, order_id: OrderID, price: Price, size: Size) -> bool:
         raise NotImplementedError
 
-    def get_open_orders(self, order_id: Optional[OrderID]) ->List[Optional[Order]]:
+    def get_open_orders(self, order_id: Optional[OrderID]) -> List[Optional[Order]]:
         raise NotImplementedError
 
     def cancel_order(self, order_id: OrderID) -> bool:
@@ -46,17 +49,14 @@ class Trading:
         raise NotImplementedError
 
 
-
-
-
 class CobinhoodTrading(Trading):
     def __init__(self, client: CobinhoodClient):
         super().__init__(client=client)
 
     def place_order(self, order: Order) -> Order:
         response = self._client.trading.post_orders(data=order.to_cobinhood_dict())
-
         if response["success"]:
+            logger.info("Placed order...")
             return Order.from_cobinhood_response(response["result"]["order"])
         else:
             raise CobinhoodError("Could not place order. "
@@ -68,6 +68,7 @@ class CobinhoodTrading(Trading):
         response = self._client.trading.put_orders(order_id=order.id,
                                                    data=order.to_cobinhood_dict())
         if response["success"]:
+            logger.info("Modified order...")
             return True
         else:
             raise CobinhoodError("Could not modify order. "
@@ -77,16 +78,20 @@ class CobinhoodTrading(Trading):
         response = self._client.trading.get_orders(order_id=order_id)
 
         if response["success"]:
-            if isinstance(response["result"]["orders"], list):
+            print(response)
+            if "order" in response["result"]:
+                return [Order.from_cobinhood_response(response["result"]["order"])]
+            elif "orders" in response["result"]:
                 return [Order.from_cobinhood_response(order) for order in response["result"]["orders"]]
         else:
-            raise CobinhoodError("There are no result in history to be fetched. "
+            raise CobinhoodError("There are no results in history to be fetched. "
                                  "Reason: {}".format(response["error"]["error_code"]))
 
     def cancel_order(self, order_id: OrderID) -> bool:
         response = self._client.trading.cancel_order(order_id)
 
         if response["success"]:
+            logger.info("Cancelled order...")
             return True
         else:
             raise CobinhoodError("Could not cancel order. "
@@ -96,6 +101,7 @@ class CobinhoodTrading(Trading):
         response = self._client.trading.get_order_history(trading_pair_id=trading_pair.as_string_for_cobinhood(),
                                                           limit=1, page=0)
         if response["success"]:
+            logger.info("Fetched last filled order...")
             return Order.from_cobinhood_response(response["result"]["orders"][0])
         else:
             raise CobinhoodError("Could not fetch latest order. "
@@ -129,4 +135,4 @@ if __name__ == '__main__':
     trader = CobinhoodTrading(client)
     # orders = trader.get_order_history(trading_pair=TradingPair("ETH", "BTC"))
     orders = trader.get_open_orders()
-
+    print(orders)

@@ -1,8 +1,11 @@
 import logging
 import os
+import sys
 from typing import Tuple
 
+from src.containers.trading import CobinhoodTrading
 from src.definitions import DATA_DIR
+from src.market_maker.ExperimentalMarketMaker import ExperimentalMarketMaker
 from src.market_maker.market_maker import MarketMaker
 from src.resource_manager import runner
 from src.type_aliases import Path, CobinhoodClient
@@ -16,8 +19,8 @@ def run_live(trading_pair: TradingPair, trade_amount: float,
     "Run live, on real time exchange data."
 
     logging.basicConfig(
-        filename=path_to_log, filemode='w',
-        # stream=sys.stdout,
+        # filename=path_to_log, filemode='w',
+        stream=sys.stdout,
         level=logging.INFO,
     )
 
@@ -31,7 +34,8 @@ def run_live(trading_pair: TradingPair, trade_amount: float,
                              "wXajozgTo.V2:4df57bcdf6191fb4423d8726d45849c34f10d6749809009"
                              "70978da0c441a42a6")
 
-    market_maker = MarketMaker(client, trading_pair, trade_amount)
+    trader = CobinhoodTrading(client)
+    market_maker = ExperimentalMarketMaker(trader, trading_pair, trade_amount)
 
     with runner(trading_pair=trading_pair,
                 trade_amount=trade_amount,
@@ -47,8 +51,8 @@ def run_live(trading_pair: TradingPair, trade_amount: float,
 
 
 if __name__ == '__main__':
-    quantity = 0.2
-    assert quantity <= 0.2
+    quantity = 0.19
+    assert quantity <= 0.19
     path_to_portfolio, path_to_log = run_live(TradingPair("ETH", "BTC"),
                                               quantity,
                                               os.path.join(DATA_DIR, "live_run.log"),

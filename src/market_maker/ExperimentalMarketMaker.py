@@ -1,5 +1,5 @@
 import logging
-from typing import Union, Optional
+from typing import Union, Optional, List
 
 from datetime import datetime
 
@@ -121,12 +121,17 @@ class ExperimentalMarketMaker:
         self._trading_pair = trading_pair
         self._quantity = quantity
         self._open_orders = []
+        self._filled_orders = []
         self._current_signal = None
         self._previous_signal = _init_signal()
 
     @property
-    def trader(self):
+    def trader(self) -> Union[CobinhoodTrading, MockTrading]:
         return self._trader
+
+    @property
+    def filled_orders(self) -> List[Order]:
+        return self._filled_orders
 
     def insert_signal(self, signal: Union[SignalBuy, SignalSell, SignalHold]):
         self._current_signal = signal
@@ -148,6 +153,7 @@ class ExperimentalMarketMaker:
 
     def _update(self) -> Optional[Order]:
         self._check_for_open_orders()
+        last_filled_order = None
 
         if self._open_order:
 
@@ -168,6 +174,10 @@ class ExperimentalMarketMaker:
 
         else:
             last_filled_order = self._trader.get_last_filled_order(trading_pair=self._trading_pair)
+
+            if last_filled_order not in self._filled_orders:
+                self._filled_orders.append(last_filled_order)
+
             if isinstance(self._current_signal, SignalBuy):
                 if last_filled_order.side is Side.bid:
                     order = _act_if_buy_signal_and_filled_bid_order(trader=self._trader, signal=self._current_signal,
@@ -182,7 +192,7 @@ class ExperimentalMarketMaker:
                 elif last_filled_order.side is Side.ask:
                     order = _act_if_sell_signal_and_filled_ask_order(trader=self._trader, signal=self._current_signal,
                                                                      order=last_filled_order)
-        return None
+        return last_filled_order
 
 
 if __name__ == '__main__':

@@ -15,6 +15,7 @@ from src.containers.stock_data import StockData, load_from_disk
 from src.containers.time_windows import TimeWindow
 from src.containers.trade_helper import generate_trading_signal_from_prediction
 from src.helpers import is_time_difference_larger_than_threshold, get_capital_from_account
+from src.market_maker import ExperimentalMarketMaker
 from src.market_maker.market_maker import TestMarketMaker, MarketMaker, NoopMarketMaker
 from src.live_logic.parameters import LiveParameters
 from src.mixins.save_load_mixin import DillSaveLoadMixin
@@ -30,7 +31,7 @@ class Runner(DillSaveLoadMixin):
                  path_to_portfolio: Path,
                  path_to_classifier: Path,
                  client: Optional[Union[BinanceClient, CobinhoodClient]],
-                 market_maker=Optional[Union[NoopMarketMaker, TestMarketMaker, MarketMaker]]):
+                 market_maker: Optional[Union[NoopMarketMaker, TestMarketMaker, MarketMaker]]):
         self._trading_pair = trading_pair
         self._trade_amount = trade_amount
         self._run_type = run_type
@@ -139,7 +140,6 @@ class Runner(DillSaveLoadMixin):
                                                         self._waiting_threshold,
                                                         time_getter_callback=Candle.get_close_time_as_datetime):
                 logging.info("Registering candle: {}".format(self._current_candle))
-                # print(repr(self._classifier))
                 self._classifier.append_new_candle(self._current_candle)
                 try:
                     prediction = self._classifier.predict_one(self._current_candle)
@@ -149,18 +149,17 @@ class Runner(DillSaveLoadMixin):
                 logging.info("Prediction is: {} on iteration {}".format(prediction, self._iteration_number))
                 if prediction is not None:
                     self._current_signal = generate_trading_signal_from_prediction(prediction[0], self._current_candle)
-                    # print("\n\n Prediction for signal {} \n\n".format(self._current_signal))
-                    logging.debug("Prediction for signal {}".format(self._current_signal))
+                    logging.info("Prediction for signal {}".format(self._current_signal))
+                    last_filled_order = self._market_maker.insert_signal(self._current_signal)
 
-                    if self._current_signal.type == self._previous_signal.type:
-                        logging.info("Hodling...")
-                    else:
-                        logging.info("Prediction for signal {}".format(self._current_signal))
-                        order = self._market_maker.place_order(self._current_signal)
+                    self._portfolio.update(self._current_signal)
 
-                        self._portfolio.update(Order.from_signal(self._current_signal))
-                        self._portfolio.save_to_disk(self._path_to_portfolio)
-                        self._previous_signal = self._current_signal
+                    if last_filled_order is not None and last_filled_order not in self._portfolio.orders:
+                        self._portfolio.update(last_filled_order)
+                        logging.info("Filled order: {}".format(last_filled_order))
+
+                    self._portfolio.save_to_disk(self._path_to_portfolio)
+                    self._previous_signal = self._current_signal
                 self._previous_candle = self._current_candle
 
             if self._run_type == "live":

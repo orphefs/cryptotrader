@@ -82,7 +82,7 @@ def main():
         if signal_count > 400:
             break
 
-    for order in mm.trader.filled_orders:
+    for order in mm.filled_orders:
         # signal = convert_order_to_signal(order)
         # print(signal)
         print(order)
