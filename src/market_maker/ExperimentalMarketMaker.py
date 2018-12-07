@@ -205,7 +205,7 @@ class ExperimentalMarketMaker:
                 elif self._last_filled_order.side is Side.ask:
                     order = _act_if_sell_signal_and_filled_ask_order(trader=self._trader, signal=self._current_signal,
                                                                      order=self._last_filled_order)
-        return last_filled_order
+        return self._last_filled_order
 
 
 if __name__ == '__main__':
