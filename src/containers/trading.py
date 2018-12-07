@@ -93,14 +93,14 @@ class CobinhoodTrading(Trading):
             raise CobinhoodError("Could not cancel order. "
                                  "Reason: {}".format(response["error"]["error_code"]))
 
-    def get_last_filled_order(self, trading_pair: TradingPair) -> Order:
+    def get_last_n_orders(self, trading_pair: TradingPair, n: int) -> List[Order]:
         response = self._client.trading.get_order_history(trading_pair_id=trading_pair.as_string_for_cobinhood(),
-                                                          limit=1, page=0)
+                                                          limit=n, page=0)
         if response["success"]:
-            logger.info("Fetched last filled order...")
-            return Order.from_cobinhood_response(response["result"]["orders"][0])
+            logger.info("Fetched last order...")
+            return [Order.from_cobinhood_response(order) for order in response["result"]["orders"]]
         else:
-            raise CobinhoodError("Could not fetch latest order. "
+            raise CobinhoodError("Could not fetch last n orders. "
                                  "Reason: {}".format(response["error"]["error_code"]))
 
     def get_order_history(self, trading_pair: TradingPair) -> List[Order]:
@@ -130,8 +130,9 @@ if __name__ == '__main__':
     client = CobinhoodClient(API_TOKEN=load_cobinhood_api_token())
     trader = CobinhoodTrading(client)
     # orders = trader.get_order_history(trading_pair=TradingPair("ETH", "BTC"))
-    order = trader.get_last_filled_order(trading_pair=TradingPair("ETH", "BTC"))
-    print(order)
+    orders = trader.get_last_n_orders(trading_pair=TradingPair("ETH", "BTC"), n=3)
+    for order in orders:
+        print(order)
     # order = trader.place_order(order)
     # orders = trader.get_open_orders()
     # print(orders[0])

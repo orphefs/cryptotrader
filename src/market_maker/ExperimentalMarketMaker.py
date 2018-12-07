@@ -5,7 +5,7 @@ from datetime import datetime
 
 from src.containers.signal import SignalBuy, SignalSell, SignalHold
 from src.containers.data_point import PricePoint
-from src.containers.order import Order, OrderType, Size, Side, Price
+from src.containers.order import Order, OrderType, Size, Side, Price, OrderState
 from src.containers.time import MilliSeconds
 from src.containers.trading import CobinhoodTrading, CobinhoodError
 from src.market_maker.config import PRINT_TO_SDTOUT
@@ -190,7 +190,8 @@ class ExperimentalMarketMaker:
                                                                    order=self._open_order)
 
         else:
-            self._last_filled_order = self._trader.get_last_filled_order(trading_pair=self._trading_pair)
+
+            self._last_filled_order = _get_last_filled_order(trading_pair=self._trading_pair, trader=self._trader)
 
             if self._last_filled_order not in self._filled_orders:
                 self._filled_orders.append(self._last_filled_order)
@@ -210,6 +211,15 @@ class ExperimentalMarketMaker:
                     order = _act_if_sell_signal_and_filled_ask_order(trader=self._trader, signal=self._current_signal,
                                                                      order=self._last_filled_order)
         return self._last_filled_order
+
+
+def _get_last_filled_order(trading_pair: TradingPair, trader: Union[CobinhoodTrading, MockTrading]):
+    last_order = trader.get_last_n_orders(trading_pair, 1)[0]
+    i = 1
+    while last_order.state is not OrderState.filled:
+        last_order = trader.get_last_n_orders(trading_pair, i)[-1]
+        i += 1
+    return last_order
 
 
 if __name__ == '__main__':
