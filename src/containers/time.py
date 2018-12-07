@@ -18,8 +18,10 @@ class MilliSeconds(object):
     @staticmethod
     def from_cobinhood_timestamp(timestamp: Optional[str]):
         if timestamp is not None:
+            if len(timestamp) > 27:
+                timestamp = timestamp[0:26] + timestamp[-1]
             return MilliSeconds(time=round(datetime.datetime.strptime(
-                timestamp, "%Y-%m-%dT%H:%M:%S.%fZ").timestamp() * 1000))
+                    timestamp, "%Y-%m-%dT%H:%M:%S.%fZ").timestamp() * 1000))
 
     def __lt__(self, other):
         return self.as_epoch_time() < other.as_epoch_time()

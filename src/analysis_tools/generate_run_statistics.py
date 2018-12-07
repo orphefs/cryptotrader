@@ -50,7 +50,7 @@ def load_portfolio(path_to_portfolio_df_dill: str) -> Portfolio:
     if path_to_portfolio_df_dill is None:
         path_to_portfolio_df_dill = os.path.join(DATA_DIR, "portfolio_df.dill")
     portfolio = Portfolio.load_from_disk(path_to_portfolio_df_dill)
-    portfolio.compute_performance()
+    # portfolio.compute_performance()
     return portfolio
 
 
