@@ -88,7 +88,7 @@ class CobinhoodTrading(Trading):
                                  "Reason: {}".format(response["error"]["error_code"]))
 
     def cancel_order(self, order_id: OrderID) -> bool:
-        response = self._client.trading.cancel_order(order_id)
+        response = self._client.trading.delete_orders(order_id)
 
         if response["success"]:
             logger.info("Cancelled order...")
