@@ -1,4 +1,4 @@
-import logging
+from src.logger import logger
 from typing import Union, Optional
 
 from datetime import datetime
@@ -6,8 +6,6 @@ from datetime import datetime
 from src.containers.signal import SignalBuy, SignalSell, SignalHold
 from src.type_aliases import BinanceOrder, CobinhoodClient, BinanceClient
 from src.containers.trading_pair import TradingPair
-
-logger = logging.getLogger('cryptotrader_api')
 
 
 class NoopMarketMaker:

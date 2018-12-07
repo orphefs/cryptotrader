@@ -13,6 +13,9 @@ from src.containers.data_point import PricePoint
 from src.mixins.save_load_mixin import DillSaveLoadMixin, JsonSaveMixin
 from src.type_aliases import Path
 
+from src.logger import logger
+
+
 percentage = float
 
 
@@ -63,11 +66,11 @@ class Portfolio:
         if isinstance(data, SignalBuy) or isinstance(data, SignalSell) or isinstance(data, SignalHold):
             # self._append_signal(data, self._trade_amount, data.price_point)
             self._signals.append(data)
-            logging.debug("Appended signal: {}".format(data))
+            logger.debug("Appended signal: {}".format(data))
         elif isinstance(data, Order):
             self._append_order(data)
             self._orders.append(data)
-            logging.debug("Appended order: {}".format(data))
+            logger.debug("Appended order: {}".format(data))
 
     def compute_performance(self):
 

@@ -1,4 +1,4 @@
-import logging
+import logging as logger
 from typing import Union, Optional, List
 
 from datetime import datetime
@@ -13,8 +13,6 @@ from src.market_maker.mock_trading import MockTrading
 from src.market_maker.mock_trading_helpers import print_function_name
 from src.type_aliases import BinanceClient
 from src.containers.trading_pair import TradingPair
-
-logger = logging.getLogger('cryptotrader_api')
 
 
 class MarketMakerError(RuntimeError):

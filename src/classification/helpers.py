@@ -16,7 +16,7 @@ from src.feature_extraction.technical_indicator import TechnicalIndicator
 def extract_indicators_from_stock_data(stock_data, list_of_technical_indicators):
     training_data = defaultdict(list)
     for candle in stock_data.candles:
-        logging.debug("Running update_indicators() on candle {}\n".format(candle))
+        # logging.debug("Running update_indicators() on candle {}\n".format(candle))
         training_data = update_indicators(candle, training_data, list_of_technical_indicators)
     return training_data
 
@@ -53,14 +53,13 @@ def update_indicators(candle: Candle, training_data: DefaultDict,
         indicator.update(candle)
         indicator_key = str(indicator)
         training_data[indicator_key].append(indicator.result)
-        logging.debug(
-            "\n\n\n\n Candle: \n {} \n\n Indicator: {} \n Result: {}".format(candle, indicator, indicator.result))
+        # logging.debug("\n\n\n\n Candle: \n {} \n\n Indicator: {} \n Result: {}".format(candle, indicator, indicator.result))
     return training_data
 
 
 def extract_indicator_from_candle(candle, list_of_technical_indicators):
     training_data = defaultdict(list)
-    logging.debug("Running update_indicators() on candle {}\n".format(candle))
+    # logging.debug("Running update_indicators() on candle {}\n".format(candle))
     training_data = update_indicators(candle, training_data, list_of_technical_indicators)
     return training_data
 

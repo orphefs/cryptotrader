@@ -1,11 +1,11 @@
-import logging
+
 import time
 from datetime import datetime, timedelta
 from typing import Union, Optional
 
 from src.analysis_tools.run_metadata import RunMetaData
 from src.containers.order import Order
-from src.containers.signal import SignalHold
+from src.containers.signal import SignalHold, SignalBuy, SignalSell
 from src.classification.trading_classifier import TradingClassifier
 from src.connection.load_stock_data import load_stock_data
 from src.connection.download_live_data import download_live_data
@@ -21,6 +21,19 @@ from src.live_logic.parameters import LiveParameters
 from src.mixins.save_load_mixin import DillSaveLoadMixin
 from src.type_aliases import Path, BinanceClient, CobinhoodClient
 from src.containers.trading_pair import TradingPair
+from src.logger import logger
+
+
+
+def _pass_signal_to_market_maker(current_signal: Union[SignalBuy, SignalSell],
+                                 portfolio: Portfolio,
+                                 market_maker: Union[NoopMarketMaker, TestMarketMaker,
+                                                    MarketMaker]) -> Order:
+    last_filled_order = market_maker.insert_signal(current_signal)
+    if last_filled_order and last_filled_order not in portfolio.orders:
+        portfolio.update(last_filled_order)
+        logger.info("Filled order: {}".format(last_filled_order))
+
 
 
 class Runner(DillSaveLoadMixin):
@@ -45,7 +58,8 @@ class Runner(DillSaveLoadMixin):
         self._previous_signal = SignalHold(0, None)
         self._iteration_number = None
         if client is None:
-            self._client = BinanceClient("","") # this client does not need API key and is only used for downloading candles
+            self._client = BinanceClient("",
+                                         "")  # this client does not need API key and is only used for downloading candles
         else:
             self._client = client
         self._sampling_period = timedelta(minutes=1)
@@ -65,6 +79,7 @@ class Runner(DillSaveLoadMixin):
         self._portfolio = Portfolio(initial_capital=get_capital_from_account(trading_pair=self._trading_pair),
                                     trade_amount=self._parameters.trade_amount)
         self._waiting_threshold = timedelta(seconds=self._sampling_period.total_seconds() - 15)
+        # self._waiting_threshold = timedelta(seconds=4)
 
         self._classifier = TradingClassifier.load_from_disk(path_to_classifier)
         if market_maker is None:
@@ -125,7 +140,7 @@ class Runner(DillSaveLoadMixin):
 
     def run(self):
         self._iteration_number = 0
-        logging.debug("Waiting threshold between decisions is {}".format(self._waiting_threshold))
+        logger.debug("Waiting threshold between decisions is {}".format(self._waiting_threshold))
         if self._run_type == "mock":
             self._mock_download_stock_data_for_all_iterations()
 
@@ -134,36 +149,37 @@ class Runner(DillSaveLoadMixin):
             if self._iteration_number == 0:
                 self._run_metadata.start_candle = self._current_candle
 
-            logging.debug("Current candle time: {}".format(self._current_candle.get_close_time_as_datetime()))
+            logger.debug("Current candle time: {}".format(self._current_candle.get_close_time_as_datetime()))
 
             if is_time_difference_larger_than_threshold(self._current_candle, self._previous_candle,
                                                         self._waiting_threshold,
                                                         time_getter_callback=Candle.get_close_time_as_datetime):
-                logging.info("Registering candle: {}".format(self._current_candle))
+                logger.info("Registering candle: {}".format(self._current_candle))
                 self._classifier.append_new_candle(self._current_candle)
                 try:
                     prediction = self._classifier.predict_one(self._current_candle)
                 except ValueError:
                     prediction = None
 
-                logging.info("Prediction is: {} on iteration {}".format(prediction, self._iteration_number))
-                if prediction is not None:
+                logger.debug("Prediction is: {} on iteration {}".format(prediction, self._iteration_number))
+                if prediction:
                     self._current_signal = generate_trading_signal_from_prediction(prediction[0], self._current_candle)
-                    logging.info("Prediction for signal {}".format(self._current_signal))
-                    last_filled_order = self._market_maker.insert_signal(self._current_signal)
-
                     self._portfolio.update(self._current_signal)
+                    logger.info("Prediction for signal {}".format(self._current_signal))
 
-                    if last_filled_order is not None and last_filled_order not in self._portfolio.orders:
-                        self._portfolio.update(last_filled_order)
-                        logging.info("Filled order: {}".format(last_filled_order))
+                    last_filled_order = _pass_signal_to_market_maker(current_signal=self._current_signal,
+                                                                     portfolio=self._portfolio,
+                                                                     market_maker=self._market_maker)
 
                     self._portfolio.save_to_disk(self._path_to_portfolio)
                     self._previous_signal = self._current_signal
                 self._previous_candle = self._current_candle
 
             if self._run_type == "live":
-                logging.debug("Going to sleep for {} seconds.".format(self._parameters.sleep_time))
+                logger.debug("Going to sleep for {} seconds.".format(self._parameters.sleep_time))
                 time.sleep(self._parameters.sleep_time)
+                last_filled_order = _pass_signal_to_market_maker(current_signal=self._current_signal,
+                                                                 portfolio=self._portfolio,
+                                                                 market_maker=self._market_maker)
             self._iteration_number += 1
-            logging.debug("We are on the {}th iteration".format(self._iteration_number))
+            logger.debug("We are on the {}th iteration".format(self._iteration_number))

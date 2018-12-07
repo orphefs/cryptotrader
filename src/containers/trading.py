@@ -1,15 +1,11 @@
-import logging
-
 from src.connection.cobinhood_helpers import load_cobinhood_api_token
 from src.containers.order import Order, Price, Size, OrderID
 from src.containers.trading_pair import TradingPair
 from src.market_maker.mock_client import MockClient
 from src.type_aliases import CobinhoodClient, BinanceClient
+from src.logger import logger
 
 from typing import List, Optional, Union
-
-
-logger = logging.getLogger('cryptotrader_api')
 
 
 class CobinhoodError(RuntimeError):
@@ -137,7 +133,7 @@ if __name__ == '__main__':
     order = trader.get_last_filled_order(trading_pair=TradingPair("ETH", "BTC"))
     print(order)
     # order = trader.place_order(order)
-    orders = trader.get_open_orders()
-    print(orders[0])
-    orders = trader.cancel_order(str(orders[0].id))
-    print(orders)
+    # orders = trader.get_open_orders()
+    # print(orders[0])
+    # orders = trader.cancel_order(str(orders[0].id))
+    # print(orders)
