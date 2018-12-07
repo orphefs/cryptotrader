@@ -27,7 +27,9 @@ def _instantiate_order() -> Order:
 
 @print_function_name
 def _act_if_buy_signal_and_open_bid_order(trader: CobinhoodTrading, signal: SignalBuy, order: Order, ) -> Order:
-    logger.info("Current signal is SignalBuy and open order is OrderBuy...")
+    logger.info(
+        "Current signal is SignalBuy and open order is OrderBuy, OR Current signal is SignalSell and open order is OrderSell...")
+    logger.info("Going to modify open order...")
     try:
         if signal.price_point.value < order.price:
             success = trader.modify_order(order, price=signal.price_point.value, size=order.size)
@@ -45,13 +47,14 @@ def _act_if_buy_signal_and_open_bid_order(trader: CobinhoodTrading, signal: Sign
 
 @print_function_name
 def _act_if_sell_signal_and_open_ask_order(trader: CobinhoodTrading, signal: SignalSell, order: Order, ) -> Order:
-    logger.info("Current signal is SignalSell and open order is OrderSell...")
     return _act_if_buy_signal_and_open_bid_order(trader=trader, signal=signal, order=order)
 
 
 @print_function_name
 def _act_if_sell_signal_and_open_bid_order(trader: CobinhoodTrading, signal: SignalSell, order: Order) -> Order:
-    logger.info("Current signal is SignalSell and open order is OrderBuy...")
+    logger.info(
+        "Current signal is SignalSell and open order is OrderBuy, OR Current signal is SignalBuy and open order is OrderSell...")
+    logger.info("Going to cancel open order...")
     try:
         success = trader.cancel_order(order_id="{}".format(order.id))
         if success:
@@ -63,25 +66,27 @@ def _act_if_sell_signal_and_open_bid_order(trader: CobinhoodTrading, signal: Sig
 
 @print_function_name
 def _act_if_buy_signal_and_open_ask_order(trader: CobinhoodTrading, signal: SignalBuy, order: Order, ) -> Order:
-    logger.info("Current signal is SignalBuy and open order is OrderSell...")
     return _act_if_sell_signal_and_open_bid_order(trader=trader, signal=signal, order=order)
 
 
 @print_function_name
 def _act_if_buy_signal_and_filled_bid_order(trader: CobinhoodTrading, signal: SignalBuy, order: Order) -> Order:
     logger.info("Current signal is SignalBuy and last filled order is OrderBuy...")
+    logger.info("Doing nothing...")
     pass
 
 
 @print_function_name
 def _act_if_sell_signal_and_filled_ask_order(trader: CobinhoodTrading, signal: SignalSell, order: Order) -> Order:
     logger.info("Current signal is SignalSell and last filled order is OrderSell...")
+    logger.info("Doing nothing...")
     pass
 
 
 @print_function_name
 def _act_if_buy_signal_and_filled_ask_order(trader: CobinhoodTrading, signal: SignalBuy, order: Order) -> Order:
     logger.info("Current signal is SignalBuy and last filled order is OrderSell...")
+    logger.info("Placing OrderBuy...")
     try:
         return trader.place_order(Order(
             trading_pair_id=order.trading_pair_id,
@@ -99,6 +104,7 @@ def _act_if_buy_signal_and_filled_ask_order(trader: CobinhoodTrading, signal: Si
 # @print_function_name
 def _act_if_sell_signal_and_filled_bid_order(trader: CobinhoodTrading, signal: SignalSell, order: Order) -> Order:
     logger.info("Current signal is SignalSell and last filled order is OrderBuy...")
+    logger.info("Placing OrderSell...")
     try:
         return trader.place_order(Order(
             trading_pair_id=order.trading_pair_id,
@@ -163,10 +169,10 @@ class ExperimentalMarketMaker:
     def _update(self) -> Optional[Order]:
         self._check_for_open_orders()
 
-        logger.info("Previous signal was {}...".format(type(self._previous_signal)))
-        logger.info("Current signal is {}...".format(type(self._current_signal)))
-        logger.info("Last filled order is {}...".format(type(self._last_filled_order)))
-        logger.info("Open order is {}...".format(type(self._open_order)))
+        logger.info("Previous signal was {}...".format(type(self._previous_signal).__name__))
+        logger.info("Current signal is {}...".format(type(self._current_signal).__name__))
+        logger.info("Last filled order is {}...".format(type(self._last_filled_order).__name__))
+        logger.info("Open order is {}...".format(type(self._open_order).__name__))
 
         if self._open_order:
 
