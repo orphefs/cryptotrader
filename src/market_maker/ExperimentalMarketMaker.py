@@ -26,7 +26,8 @@ def _instantiate_order() -> Order:
 
 
 @print_function_name
-def _act_if_buy_signal_and_bid_order(trader: CobinhoodTrading, signal: SignalBuy, order: Order, ) -> Order:
+def _act_if_buy_signal_and_open_bid_order(trader: CobinhoodTrading, signal: SignalBuy, order: Order, ) -> Order:
+    logger.info("Current signal is SignalBuy and open order is OrderBuy...")
     try:
         if signal.price_point.value < order.price:
             success = trader.modify_order(order, price=signal.price_point.value, size=order.size)
@@ -43,12 +44,14 @@ def _act_if_buy_signal_and_bid_order(trader: CobinhoodTrading, signal: SignalBuy
 
 
 @print_function_name
-def _act_if_sell_signal_and_ask_order(trader: CobinhoodTrading, signal: SignalSell, order: Order, ) -> Order:
-    return _act_if_buy_signal_and_bid_order(trader=trader, signal=signal, order=order)
+def _act_if_sell_signal_and_open_ask_order(trader: CobinhoodTrading, signal: SignalSell, order: Order, ) -> Order:
+    logger.info("Current signal is SignalSell and open order is OrderSell...")
+    return _act_if_buy_signal_and_open_bid_order(trader=trader, signal=signal, order=order)
 
 
 @print_function_name
-def _act_if_sell_signal_and_bid_order(trader: CobinhoodTrading, signal: SignalSell, order: Order) -> Order:
+def _act_if_sell_signal_and_open_bid_order(trader: CobinhoodTrading, signal: SignalSell, order: Order) -> Order:
+    logger.info("Current signal is SignalSell and open order is OrderBuy...")
     try:
         success = trader.cancel_order(order_id="{}".format(order.id))
         if success:
@@ -59,22 +62,26 @@ def _act_if_sell_signal_and_bid_order(trader: CobinhoodTrading, signal: SignalSe
 
 
 @print_function_name
-def _act_if_buy_signal_and_ask_order(trader: CobinhoodTrading, signal: SignalBuy, order: Order, ) -> Order:
-    return _act_if_sell_signal_and_bid_order(trader=trader, signal=signal, order=order)
+def _act_if_buy_signal_and_open_ask_order(trader: CobinhoodTrading, signal: SignalBuy, order: Order, ) -> Order:
+    logger.info("Current signal is SignalBuy and open order is OrderSell...")
+    return _act_if_sell_signal_and_open_bid_order(trader=trader, signal=signal, order=order)
 
 
 @print_function_name
 def _act_if_buy_signal_and_filled_bid_order(trader: CobinhoodTrading, signal: SignalBuy, order: Order) -> Order:
+    logger.info("Current signal is SignalBuy and last filled order is OrderBuy...")
     pass
 
 
 @print_function_name
 def _act_if_sell_signal_and_filled_ask_order(trader: CobinhoodTrading, signal: SignalSell, order: Order) -> Order:
+    logger.info("Current signal is SignalSell and last filled order is OrderSell...")
     pass
 
 
 @print_function_name
 def _act_if_buy_signal_and_filled_ask_order(trader: CobinhoodTrading, signal: SignalBuy, order: Order) -> Order:
+    logger.info("Current signal is SignalBuy and last filled order is OrderSell...")
     try:
         return trader.place_order(Order(
             trading_pair_id=order.trading_pair_id,
@@ -91,6 +98,7 @@ def _act_if_buy_signal_and_filled_ask_order(trader: CobinhoodTrading, signal: Si
 
 # @print_function_name
 def _act_if_sell_signal_and_filled_bid_order(trader: CobinhoodTrading, signal: SignalSell, order: Order) -> Order:
+    logger.info("Current signal is SignalSell and last filled order is OrderBuy...")
     try:
         return trader.place_order(Order(
             trading_pair_id=order.trading_pair_id,
@@ -124,6 +132,7 @@ class ExperimentalMarketMaker:
         self._filled_orders = []
         self._current_signal = None
         self._previous_signal = _init_signal()
+        self._last_filled_order = None
 
     @property
     def trader(self) -> Union[CobinhoodTrading, MockTrading]:
@@ -153,45 +162,49 @@ class ExperimentalMarketMaker:
 
     def _update(self) -> Optional[Order]:
         self._check_for_open_orders()
-        last_filled_order = None
+
+        logger.info("Previous signal was {}...".format(type(self._previous_signal)))
+        logger.info("Current signal is {}...".format(type(self._current_signal)))
+        logger.info("Last filled order is {}...".format(type(self._last_filled_order)))
+        logger.info("Open order is {}...".format(type(self._open_order)))
 
         if self._open_order:
 
             if isinstance(self._current_signal, SignalBuy):
                 if self._open_order.side is Side.bid:
-                    order = _act_if_buy_signal_and_bid_order(trader=self._trader, signal=self._current_signal,
-                                                             order=self._open_order)
+                    order = _act_if_buy_signal_and_open_bid_order(trader=self._trader, signal=self._current_signal,
+                                                                  order=self._open_order)
                 elif self._open_order.side is Side.ask:
-                    order = _act_if_buy_signal_and_ask_order(trader=self._trader, signal=self._current_signal,
-                                                             order=self._open_order)
+                    order = _act_if_buy_signal_and_open_ask_order(trader=self._trader, signal=self._current_signal,
+                                                                  order=self._open_order)
             elif isinstance(self._current_signal, SignalSell):
                 if self._open_order.side is Side.bid:
-                    order = _act_if_sell_signal_and_bid_order(trader=self._trader, signal=self._current_signal,
-                                                              order=self._open_order)
+                    order = _act_if_sell_signal_and_open_bid_order(trader=self._trader, signal=self._current_signal,
+                                                                   order=self._open_order)
                 elif self._open_order.side is Side.ask:
-                    order = _act_if_sell_signal_and_ask_order(trader=self._trader, signal=self._current_signal,
-                                                              order=self._open_order)
+                    order = _act_if_sell_signal_and_open_ask_order(trader=self._trader, signal=self._current_signal,
+                                                                   order=self._open_order)
 
         else:
-            last_filled_order = self._trader.get_last_filled_order(trading_pair=self._trading_pair)
+            self._last_filled_order = self._trader.get_last_filled_order(trading_pair=self._trading_pair)
 
-            if last_filled_order not in self._filled_orders:
-                self._filled_orders.append(last_filled_order)
+            if self._last_filled_order not in self._filled_orders:
+                self._filled_orders.append(self._last_filled_order)
 
             if isinstance(self._current_signal, SignalBuy):
-                if last_filled_order.side is Side.bid:
+                if self._last_filled_order.side is Side.bid:
                     order = _act_if_buy_signal_and_filled_bid_order(trader=self._trader, signal=self._current_signal,
-                                                                    order=last_filled_order)
-                elif last_filled_order.side is Side.ask:
+                                                                    order=self._last_filled_order)
+                elif self._last_filled_order.side is Side.ask:
                     order = _act_if_buy_signal_and_filled_ask_order(trader=self._trader, signal=self._current_signal,
-                                                                    order=last_filled_order)
+                                                                    order=self._last_filled_order)
             elif isinstance(self._current_signal, SignalSell):
-                if last_filled_order.side is Side.bid:
+                if self._last_filled_order.side is Side.bid:
                     order = _act_if_sell_signal_and_filled_bid_order(trader=self._trader, signal=self._current_signal,
-                                                                     order=last_filled_order)
-                elif last_filled_order.side is Side.ask:
+                                                                     order=self._last_filled_order)
+                elif self._last_filled_order.side is Side.ask:
                     order = _act_if_sell_signal_and_filled_ask_order(trader=self._trader, signal=self._current_signal,
-                                                                     order=last_filled_order)
+                                                                     order=self._last_filled_order)
         return last_filled_order
 
 
