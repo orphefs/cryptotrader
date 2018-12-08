@@ -12,7 +12,7 @@ from src.containers.trading_pair import TradingPair
 from src.helpers import generate_hash
 from src.market_maker.config import PRINT_TO_SDTOUT
 from src.market_maker.mock_client import MockClient
-from src.market_maker.mock_trading_helpers import print_function_name, print_contents_of_order_lists, _find_order_by_id, \
+from src.market_maker.mock_trading_helpers import print_context, print_contents_of_order_lists, _find_order_by_id, \
     _find_latest_order, _find_oldest_order
 
 starting_order = {
@@ -68,7 +68,7 @@ class MockTrading(Trading):
 
     @print_contents_of_order_lists
     @randomly_fill_orders
-    @print_function_name
+    @print_context
     def place_order(self, order: Order, ) -> Order:
         order.id = generate_hash(order.timestamp, order.size, order.price, order.side)
         if PRINT_TO_SDTOUT:
@@ -78,7 +78,7 @@ class MockTrading(Trading):
 
     @print_contents_of_order_lists
     @randomly_fill_orders
-    @print_function_name
+    @print_context
     def modify_order(self, order: Order, price: Price, size: Size) -> bool:
         if PRINT_TO_SDTOUT:
             print("new price: {}".format(price))
@@ -107,7 +107,7 @@ class MockTrading(Trading):
 
     @print_contents_of_order_lists
     @randomly_fill_orders
-    @print_function_name
+    @print_context
     def cancel_order(self, order_id: OrderID) -> bool:
         if PRINT_TO_SDTOUT:
             print("Cancelling order with order id {} \n".format(order_id))

@@ -18,7 +18,7 @@ def print_signal(signal: Union[SignalBuy, SignalSell]):
 
 
 @wrapt.decorator(enabled=PRINT_TO_SDTOUT)
-def print_function_name(wrapped, instance, args, kwargs):
+def print_context(wrapped, instance, args, kwargs):
     print("Running function {}\n".format(wrapped.__name__))
     return wrapped(*args, **kwargs)
 
