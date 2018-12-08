@@ -1,5 +1,5 @@
 from src.connection.cobinhood_helpers import load_cobinhood_api_token
-from src.containers.order import Order, Price, Size, OrderID
+from src.containers.order import Order, Price, Size, OrderID, OrderState
 from src.containers.trading_pair import TradingPair
 from src.market_maker.mock_client import MockClient
 from src.type_aliases import CobinhoodClient, BinanceClient
@@ -76,9 +76,12 @@ class CobinhoodTrading(Trading):
         if response["success"]:
             print(response)
             if "order" in response["result"]:
-                return [Order.from_cobinhood_response(response["result"]["order"])]
+                order = Order.from_cobinhood_response(response["result"]["order"])
+                if order.state is OrderState.open:
+                    return [order]
             elif "orders" in response["result"]:
-                return [Order.from_cobinhood_response(order) for order in response["result"]["orders"]]
+                return [Order.from_cobinhood_response(order) for order in response["result"]["orders"]
+                        if order.state is OrderState.open]
         else:
             raise CobinhoodError("There are no results in history to be fetched. "
                                  "Reason: {}".format(response["error"]["error_code"]))
