@@ -80,8 +80,8 @@ class CobinhoodTrading(Trading):
                 if order.state is OrderState.open:
                     return [order]
             elif "orders" in response["result"]:
-                return [Order.from_cobinhood_response(order) for order in response["result"]["orders"]
-                        if order.state is OrderState.open]
+                orders = [Order.from_cobinhood_response(order) for order in response["result"]["orders"]]
+                return [order for order in orders if order.state is OrderState.open]
         else:
             raise CobinhoodError("There are no results in history to be fetched. "
                                  "Reason: {}".format(response["error"]["error_code"]))
