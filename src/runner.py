@@ -26,13 +26,10 @@ from src.logger import logger
 
 
 def _pass_signal_to_market_maker(current_signal: Union[SignalBuy, SignalSell],
-                                 portfolio: Portfolio,
                                  market_maker: Union[NoopMarketMaker, TestMarketMaker,
                                                     MarketMaker]) -> Order:
     last_filled_order = market_maker.insert_signal(current_signal)
-    if last_filled_order and last_filled_order not in portfolio.orders:
-        portfolio.update(last_filled_order)
-        logger.info("Filled order: {}".format(last_filled_order))
+
 
 
 
@@ -168,8 +165,10 @@ class Runner(DillSaveLoadMixin):
                     logger.info("Prediction for signal {}".format(self._current_signal))
 
                     last_filled_order = _pass_signal_to_market_maker(current_signal=self._current_signal,
-                                                                     portfolio=self._portfolio,
                                                                      market_maker=self._market_maker)
+                    if last_filled_order and last_filled_order not in self._portfolio.orders:
+                        self._portfolio.update(last_filled_order)
+                        logger.info("Updated portfolio with new order: {}".format(last_filled_order))
 
                     self._portfolio.save_to_disk(self._path_to_portfolio)
                     self._previous_signal = self._current_signal
@@ -178,8 +177,13 @@ class Runner(DillSaveLoadMixin):
             if self._run_type == "live":
                 logger.debug("Going to sleep for {} seconds.".format(self._parameters.sleep_time))
                 time.sleep(self._parameters.sleep_time)
+
                 last_filled_order = _pass_signal_to_market_maker(current_signal=self._current_signal,
-                                                                 portfolio=self._portfolio,
                                                                  market_maker=self._market_maker)
+                if last_filled_order and last_filled_order not in self._portfolio.orders:
+                    self._portfolio.update(last_filled_order)
+                    logger.info("Updated portfolio with new order: {}".format(last_filled_order))
+
+
             self._iteration_number += 1
             logger.debug("We are on the {}th iteration".format(self._iteration_number))
