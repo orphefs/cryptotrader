@@ -3,13 +3,17 @@ from typing import Union, Optional, List
 
 from datetime import datetime
 
+import tenacity
+
 from src.containers.signal import SignalBuy, SignalSell, SignalHold
 from src.containers.data_point import PricePoint
-from src.containers.order import Order, OrderType, Size, Side, Price, OrderState, OrderID
-from src.containers.time import MilliSeconds
-from src.containers.trading import CobinhoodTrading, CobinhoodError
-from src.logging.tools import print_context
-from src.market_maker.config import PRINT_TO_SDTOUT
+from src.containers.order import Order, Side, OrderState, OrderID
+from src.containers.trading import CobinhoodTrading
+from src.market_maker.actions import _act_if_buy_signal_and_open_bid_order, _act_if_sell_signal_and_open_ask_order, \
+    _act_if_sell_signal_and_open_bid_order, _act_if_buy_signal_and_open_ask_order, \
+    _act_if_buy_signal_and_filled_bid_order, _act_if_sell_signal_and_filled_ask_order, \
+    _act_if_buy_signal_and_filled_ask_order, _act_if_sell_signal_and_filled_bid_order, \
+    _noop_act_if_sell_signal_and_open_ask_order, _noop_act_if_buy_signal_and_open_bid_order
 from src.market_maker.mock_trading import MockTrading
 from src.market_maker.mock_trading_helpers import print_context
 from src.type_aliases import BinanceClient
@@ -24,100 +28,18 @@ def _instantiate_order() -> Order:
     raise NotImplementedError
 
 
-@print_context
-def _act_if_buy_signal_and_open_bid_order(trader: CobinhoodTrading, signal: SignalBuy, order: Order, ) -> Order:
-    logger.info(
-        "Current signal is SignalBuy and open order is OrderBuy, OR Current signal is SignalSell and open order is OrderSell...")
-    logger.info("Going to modify open order...")
-    try:
-        if signal.price_point.value < order.price:
-            success = trader.modify_order(order, price=signal.price_point.value, size=order.size)
-        elif signal.price_point.value > order.price:
-            success = trader.modify_order(order, price=signal.price_point.value, size=order.size)
-        else:
-            success = trader.modify_order(order, price=signal.price_point.value, size=order.size)
-        if success:
-            order = trader.get_open_orders(order_id="{}".format(order.id))  # TODO: return new order (using order id)
-            return order
-    except CobinhoodError as error:
-        logger.debug(error)
-        print(error)
-
-
-@print_context
-def _act_if_sell_signal_and_open_ask_order(trader: CobinhoodTrading, signal: SignalSell, order: Order, ) -> Order:
-    return _act_if_buy_signal_and_open_bid_order(trader=trader, signal=signal, order=order)
-
-
-@print_context
-def _act_if_sell_signal_and_open_bid_order(trader: CobinhoodTrading, signal: SignalSell, order: Order) -> Order:
-    logger.info(
-        "Current signal is SignalSell and open order is OrderBuy, OR Current signal is SignalBuy and open order is OrderSell...")
-    logger.info("Going to cancel open order...")
-    try:
-        success = trader.cancel_order(order_id="{}".format(order.id))
-        if success:
-            return order
-    except CobinhoodError as error:
-        logger.debug(error)
-        print(error)
-
-
-@print_context
-def _act_if_buy_signal_and_open_ask_order(trader: CobinhoodTrading, signal: SignalBuy, order: Order, ) -> Order:
-    return _act_if_sell_signal_and_open_bid_order(trader=trader, signal=signal, order=order)
-
-
-@print_context
-def _act_if_buy_signal_and_filled_bid_order(trader: CobinhoodTrading, signal: SignalBuy, order: Order) -> Order:
-    logger.info("Current signal is SignalBuy and last filled order is OrderBuy...Doing nothing...")
-    pass
-
-
-@print_context
-def _act_if_sell_signal_and_filled_ask_order(trader: CobinhoodTrading, signal: SignalSell, order: Order) -> Order:
-    logger.info("Current signal is SignalSell and last filled order is OrderSell...Doing nothing...")
-    pass
-
-
-@print_context
-def _act_if_buy_signal_and_filled_ask_order(trader: CobinhoodTrading, signal: SignalBuy, order: Order) -> Order:
-    logger.info("Current signal is SignalBuy and last filled order is OrderSell...Placing OrderBuy...")
-    try:
-        return trader.place_order(Order(
-            trading_pair_id=order.trading_pair_id,
-            price=Price(signal.price_point.value),
-            type=OrderType("limit"),
-            side=Side("bid"),
-            size=Size(order.size),
-            timestamp=MilliSeconds(round(datetime.now().timestamp() * 1000)),
-        ))
-    except CobinhoodError as error:
-        logger.debug(error)
-        print(error)
-
-
-@print_context
-def _act_if_sell_signal_and_filled_bid_order(trader: CobinhoodTrading, signal: SignalSell, order: Order) -> Order:
-    logger.info("Current signal is SignalSell and last filled order is OrderBuy...Placing OrderSell...")
-    try:
-        return trader.place_order(Order(
-            trading_pair_id=order.trading_pair_id,
-            price=Price(signal.price_point.value),
-            type=OrderType("limit"),
-            side=Side("ask"),
-            size=Size(order.size),
-            timestamp=MilliSeconds(round(datetime.now().timestamp() * 1000)),
-
-        ))
-
-    except CobinhoodError as error:
-        logger.debug(error)
-        print(error)
-
-
 def _init_signal() -> SignalBuy:
     return SignalBuy(-1, PricePoint(value=None, date_time=datetime.now()))
+
+
+@tenacity.retry(wait=tenacity.wait_fixed(1))
+def _get_last_filled_order(trading_pair: TradingPair, trader: Union[CobinhoodTrading, MockTrading]):
+    last_order = trader.get_last_n_orders(trading_pair, 1)[0]
+    i = 1
+    while last_order.state is not OrderState.filled:
+        last_order = trader.get_last_n_orders(trading_pair, i)[-1]
+        i += 1
+    return last_order
 
 
 class ExperimentalMarketMaker:
@@ -170,10 +92,14 @@ class ExperimentalMarketMaker:
         else:
             return True
 
-    @print_context
-    def _update(self) -> Optional[Order]:
+    def _update_orders_status(self):
         self._open_order = self._check_for_open_orders()
         self._last_filled_order = _get_last_filled_order(self._trading_pair, self._trader)
+        self._last_placed_order = self._trader.get_last_n_orders(trading_pair=self._trading_pair, n=1)[0]
+
+    @print_context
+    def _update(self) -> Optional[Order]:
+        self._update_orders_status()
 
         logger.info("Previous signal was {}...".format(type(self._previous_signal).__name__))
         logger.info("Current signal is {}...".format(type(self._current_signal).__name__))
@@ -184,8 +110,8 @@ class ExperimentalMarketMaker:
 
             if isinstance(self._current_signal, SignalBuy):
                 if self._open_order.side is Side.bid:
-                    _ = _act_if_buy_signal_and_open_bid_order(trader=self._trader, signal=self._current_signal,
-                                                              order=self._open_order)
+                    _ = _noop_act_if_buy_signal_and_open_bid_order(trader=self._trader, signal=self._current_signal,
+                                                                   order=self._open_order)
                 elif self._open_order.side is Side.ask:
                     _ = _act_if_buy_signal_and_open_ask_order(trader=self._trader, signal=self._current_signal,
                                                               order=self._open_order)
@@ -194,8 +120,8 @@ class ExperimentalMarketMaker:
                     _ = _act_if_sell_signal_and_open_bid_order(trader=self._trader, signal=self._current_signal,
                                                                order=self._open_order)
                 elif self._open_order.side is Side.ask:
-                    _ = _act_if_sell_signal_and_open_ask_order(trader=self._trader, signal=self._current_signal,
-                                                               order=self._open_order)
+                    _ = _noop_act_if_sell_signal_and_open_ask_order(trader=self._trader, signal=self._current_signal,
+                                                                    order=self._open_order)
 
         else:
 
@@ -223,19 +149,9 @@ class ExperimentalMarketMaker:
                     _ = _act_if_sell_signal_and_filled_ask_order(trader=self._trader, signal=self._current_signal,
                                                                  order=self._last_filled_order)
         for _ in range(0, 2):
-            self._last_filled_order = _get_last_filled_order(trading_pair=self._trading_pair, trader=self._trader)
-            self._open_order = self._check_for_open_orders()
+            self._update_orders_status()
 
         return self._last_filled_order
-
-
-def _get_last_filled_order(trading_pair: TradingPair, trader: Union[CobinhoodTrading, MockTrading]):
-    last_order = trader.get_last_n_orders(trading_pair, 1)[0]
-    i = 1
-    while last_order.state is not OrderState.filled:
-        last_order = trader.get_last_n_orders(trading_pair, i)[-1]
-        i += 1
-    return last_order
 
 
 if __name__ == '__main__':
