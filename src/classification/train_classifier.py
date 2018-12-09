@@ -64,7 +64,7 @@ def train_classifier(trading_pair: TradingPair,
     stock_data_training_set = load_stock_data(training_time_window, trading_pair, timedelta(minutes=1), client)
 
     sklearn_classifier = RandomForestClassifier(max_depth=5,
-                                                n_estimators=1000,
+                                                n_estimators=5000,
                                                 # criterion="gini",
                                                 class_weight="balanced",
                                                 random_state=random.seed(1234))
@@ -138,7 +138,7 @@ if __name__ == "__main__":
     train_classifier(trading_pair=trading_pair,
                      client=client,
                      training_time_window=TimeWindow(
-                         start_time=datetime(2018, 12, 1),
+                         start_time=datetime(2018, 11, 20),
                          end_time=datetime(2018, 12, 7)
                      ),
                      technical_indicators=[

@@ -70,22 +70,19 @@ def _act_if_buy_signal_and_open_ask_order(trader: CobinhoodTrading, signal: Sign
 
 @print_context
 def _act_if_buy_signal_and_filled_bid_order(trader: CobinhoodTrading, signal: SignalBuy, order: Order) -> Order:
-    logger.info("Current signal is SignalBuy and last filled order is OrderBuy...")
-    logger.info("Doing nothing...")
+    logger.info("Current signal is SignalBuy and last filled order is OrderBuy...Doing nothing...")
     pass
 
 
 @print_context
 def _act_if_sell_signal_and_filled_ask_order(trader: CobinhoodTrading, signal: SignalSell, order: Order) -> Order:
-    logger.info("Current signal is SignalSell and last filled order is OrderSell...")
-    logger.info("Doing nothing...")
+    logger.info("Current signal is SignalSell and last filled order is OrderSell...Doing nothing...")
     pass
 
 
 @print_context
 def _act_if_buy_signal_and_filled_ask_order(trader: CobinhoodTrading, signal: SignalBuy, order: Order) -> Order:
-    logger.info("Current signal is SignalBuy and last filled order is OrderSell...")
-    logger.info("Placing OrderBuy...")
+    logger.info("Current signal is SignalBuy and last filled order is OrderSell...Placing OrderBuy...")
     try:
         return trader.place_order(Order(
             trading_pair_id=order.trading_pair_id,
@@ -102,8 +99,7 @@ def _act_if_buy_signal_and_filled_ask_order(trader: CobinhoodTrading, signal: Si
 
 @print_context
 def _act_if_sell_signal_and_filled_bid_order(trader: CobinhoodTrading, signal: SignalSell, order: Order) -> Order:
-    logger.info("Current signal is SignalSell and last filled order is OrderBuy...")
-    logger.info("Placing OrderSell...")
+    logger.info("Current signal is SignalSell and last filled order is OrderBuy...Placing OrderSell...")
     try:
         return trader.place_order(Order(
             trading_pair_id=order.trading_pair_id,
@@ -148,30 +144,36 @@ class ExperimentalMarketMaker:
     def filled_orders(self) -> List[Order]:
         return self._filled_orders
 
+    @print_context
     def insert_signal(self, signal: Union[SignalBuy, SignalSell, SignalHold]):
         self._current_signal = signal
         # if self._current_signal != self._previous_signal:  # if new incoming signal
         self._update()
         self._previous_signal = self._current_signal
 
+    @print_context
     def _perform_order_limit_check(self):
         if len(self._open_orders) > 1:
             raise MarketMakerError("There should only be one open order at a time.")
 
+    @print_context
     def _check_for_open_orders(self) -> Optional[Order]:
         self._open_orders = self._trader.get_open_orders()
         self._perform_order_limit_check()
         if len(self._open_orders) == 1:
             return self._open_orders[0]
 
+    @print_context
     def _is_order_filled(self, order_id: OrderID) -> bool:
         if self._trader.get_open_orders(order_id=order_id):
             return False
         else:
             return True
 
+    @print_context
     def _update(self) -> Optional[Order]:
         self._open_order = self._check_for_open_orders()
+        self._last_filled_order = _get_last_filled_order(self._trading_pair, self._trader)
 
         logger.info("Previous signal was {}...".format(type(self._previous_signal).__name__))
         logger.info("Current signal is {}...".format(type(self._current_signal).__name__))
@@ -220,6 +222,9 @@ class ExperimentalMarketMaker:
                 elif self._last_filled_order.side is Side.ask:
                     _ = _act_if_sell_signal_and_filled_ask_order(trader=self._trader, signal=self._current_signal,
                                                                  order=self._last_filled_order)
+        for _ in range(0, 2):
+            self._last_filled_order = _get_last_filled_order(trading_pair=self._trading_pair, trader=self._trader)
+            self._open_order = self._check_for_open_orders()
 
         return self._last_filled_order
 

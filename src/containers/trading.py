@@ -1,3 +1,5 @@
+import tenacity
+
 from src.connection.cobinhood_helpers import load_cobinhood_api_token
 from src.containers.order import Order, Price, Size, OrderID, OrderState
 from src.containers.trading_pair import TradingPair
@@ -52,29 +54,30 @@ class CobinhoodTrading(Trading):
     def place_order(self, order: Order) -> Order:
         response = self._client.trading.post_orders(data=order.to_cobinhood_dict())
         if response["success"]:
-            logger.info("Placed order...")
+            logger.debug("Placed order...")
             return Order.from_cobinhood_response(response["result"]["order"])
         else:
             raise CobinhoodError("Could not place order. "
                                  "Reason: {}".format(response["error"]["error_code"]))
 
+    @tenacity.retry(wait=tenacity.wait_fixed(1))
     def modify_order(self, order: Order, price: Price, size: Size) -> bool:
         order.price = price
         order.size = size
         response = self._client.trading.put_orders(order_id=order.id,
                                                    data=order.to_cobinhood_dict())
         if response["success"]:
-            logger.info("Modified order...")
+            logger.debug("Modified order...")
             return True
         else:
             raise CobinhoodError("Could not modify order. "
                                  "Reason: {}".format(response["error"]["error_code"]))
 
+    @tenacity.retry(wait=tenacity.wait_fixed(1))
     def get_open_orders(self, order_id: Optional[OrderID] = None) -> List[Optional[Order]]:
         response = self._client.trading.get_orders(order_id=order_id)
 
         if response["success"]:
-            print(response)
             if "order" in response["result"]:
                 order = Order.from_cobinhood_response(response["result"]["order"])
                 if order.state is OrderState.open:
@@ -86,26 +89,29 @@ class CobinhoodTrading(Trading):
             raise CobinhoodError("There are no results in history to be fetched. "
                                  "Reason: {}".format(response["error"]["error_code"]))
 
+    @tenacity.retry(wait=tenacity.wait_fixed(1))
     def cancel_order(self, order_id: OrderID) -> bool:
         response = self._client.trading.delete_orders(order_id)
 
         if response["success"]:
-            logger.info("Cancelled order...")
+            logger.debug("Cancelled order...")
             return True
         else:
             raise CobinhoodError("Could not cancel order. "
                                  "Reason: {}".format(response["error"]["error_code"]))
 
+    @tenacity.retry(wait=tenacity.wait_fixed(1))
     def get_last_n_orders(self, trading_pair: TradingPair, n: int) -> List[Order]:
         response = self._client.trading.get_order_history(trading_pair_id=trading_pair.as_string_for_cobinhood(),
                                                           limit=n, page=0)
         if response["success"]:
-            logger.info("Fetched last order...")
+            logger.debug("Fetched last order...")
             return [Order.from_cobinhood_response(order) for order in response["result"]["orders"]]
         else:
             raise CobinhoodError("Could not fetch last n orders. "
                                  "Reason: {}".format(response["error"]["error_code"]))
 
+    @tenacity.retry(wait=tenacity.wait_fixed(1))
     def get_order_history(self, trading_pair: TradingPair) -> List[Order]:
         response = self._client.trading.get_order_history(trading_pair_id=trading_pair.as_string_for_cobinhood(),
                                                           limit=10)
