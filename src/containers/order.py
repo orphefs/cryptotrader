@@ -44,7 +44,7 @@ class OrderType(Enum):
 class Order(object):
 
     def __new__(cls, *args, **kwargs):
-        if not kwargs: # handle object creation for unpickling
+        if not kwargs:  # handle object creation for unpickling
             if args[7] is Side.bid:
                 return super().__new__(OrderBuy)
             elif args[7] is Side.ask:
@@ -56,7 +56,7 @@ class Order(object):
                 return super().__new__(OrderSell)
         else:
             raise RuntimeError("Argument Side should be Union[Side.bid, Side.ask]"
-                                   " on Order instantiation.")
+                               " on Order instantiation.")
 
     def __copy__(self):
         obj_copy = Order(**self.__dict__)
@@ -64,20 +64,20 @@ class Order(object):
 
     def __getnewargs__(self):
         return (self.equivalent_price,
-               self.trading_pair_id,
-               self.stop_price,
-               self.completed_at,
-               self.completed_at,
-               self.timestamp,
-               self.price,
-               self.side,
-               self.source,
-               self.state,
-               self.trailing_distance,
-               self.type,
-               self.id,
-               self.filled,
-               self.size)
+                self.trading_pair_id,
+                self.stop_price,
+                self.completed_at,
+                self.completed_at,
+                self.timestamp,
+                self.price,
+                self.side,
+                self.source,
+                self.state,
+                self.trailing_distance,
+                self.type,
+                self.id,
+                self.filled,
+                self.size)
 
     def __init__(self,
                  trading_pair_id: TradingPair,

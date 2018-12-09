@@ -40,6 +40,6 @@ class TimeWindow(object):
 
     def __is_overlap__(self, other):
         return ((other.start_datetime <= self.start_datetime < other.end_datetime) or
-               (other.start_datetime < self.end_datetime <= other.end_datetime)) or \
+                (other.start_datetime < self.end_datetime <= other.end_datetime)) or \
                ((self.start_datetime <= other.start_datetime < self.end_datetime) or
-               (self.start_datetime < other.end_datetime <= self.end_datetime))
+                (self.start_datetime < other.end_datetime <= self.end_datetime))

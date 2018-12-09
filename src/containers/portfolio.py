@@ -15,7 +15,6 @@ from src.type_aliases import Path
 
 from src.logger import logger
 
-
 percentage = float
 
 
