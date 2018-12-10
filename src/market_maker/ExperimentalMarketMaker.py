@@ -136,15 +136,19 @@ class ExperimentalMarketMaker:
                                                                 order=self._last_filled_order)
                 elif self._last_filled_order.side is Side.ask and self._is_order_filled(
                         order_id=self._last_placed_order.id):
-                    self._last_placed_order = _act_if_buy_signal_and_filled_ask_order(trader=self._trader,
-                                                                                      signal=self._current_signal,
-                                                                                      order=self._last_filled_order)
+                    last_placed_order = _act_if_buy_signal_and_filled_ask_order(trader=self._trader,
+                                                                                signal=self._current_signal,
+                                                                                order=self._last_filled_order)
+                    if last_placed_order:
+                        self._last_placed_order = last_placed_order
             elif isinstance(self._current_signal, SignalSell):
                 if self._last_filled_order.side is Side.bid and self._is_order_filled(
                         order_id=self._last_placed_order.id):
-                    self._last_placed_order = _act_if_sell_signal_and_filled_bid_order(trader=self._trader,
-                                                                                       signal=self._current_signal,
-                                                                                       order=self._last_filled_order)
+                    last_placed_order = _act_if_sell_signal_and_filled_bid_order(trader=self._trader,
+                                                                                 signal=self._current_signal,
+                                                                                 order=self._last_filled_order)
+                    if last_placed_order:
+                        self._last_placed_order = last_placed_order
                 elif self._last_filled_order.side is Side.ask:
                     _ = _act_if_sell_signal_and_filled_ask_order(trader=self._trader, signal=self._current_signal,
                                                                  order=self._last_filled_order)

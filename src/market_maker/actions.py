@@ -1,5 +1,6 @@
 import logging as logger
 from datetime import datetime
+from typing import Optional
 
 from src.containers.order import Order, Price, OrderType, Side, Size
 from src.containers.signal import SignalBuy, SignalSell
@@ -77,7 +78,9 @@ def _act_if_sell_signal_and_filled_ask_order(trader: CobinhoodTrading, signal: S
 
 
 @print_function_context
-def _act_if_buy_signal_and_filled_ask_order(trader: CobinhoodTrading, signal: SignalBuy, order: Order) -> Order:
+def _act_if_buy_signal_and_filled_ask_order(trader: CobinhoodTrading, signal: SignalBuy, order: Order) -> Optional[Order]:
+    if trader.get_open_orders():
+        return None
     logger.info("Current signal is SignalBuy and last filled order is OrderSell...Placing OrderBuy...")
     try:
         return trader.place_order(Order(
@@ -94,7 +97,9 @@ def _act_if_buy_signal_and_filled_ask_order(trader: CobinhoodTrading, signal: Si
 
 
 @print_function_context
-def _act_if_sell_signal_and_filled_bid_order(trader: CobinhoodTrading, signal: SignalSell, order: Order) -> Order:
+def _act_if_sell_signal_and_filled_bid_order(trader: CobinhoodTrading, signal: SignalSell, order: Order) -> Optional[Order]:
+    if trader.get_open_orders():
+        return None
     logger.info("Current signal is SignalSell and last filled order is OrderBuy...Placing OrderSell...")
     try:
         return trader.place_order(Order(
