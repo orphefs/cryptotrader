@@ -2,6 +2,7 @@ import tenacity
 
 from src.connection.cobinhood_helpers import load_cobinhood_api_token
 from src.containers.order import Order, Price, Size, OrderID, OrderState
+from src.containers.order_book import OrderBook
 from src.containers.trading_pair import TradingPair
 from src.market_maker.mock_client import MockClient
 from src.type_aliases import CobinhoodClient, BinanceClient
@@ -128,6 +129,18 @@ class CobinhoodTrading(Trading):
             raise CobinhoodError("Could not fetch order history. "
                                  "Reason: {}".format(response["error"]["error_code"]))
 
+    def get_orderbook(self, trading_pair: TradingPair) -> OrderBook:
+        response = self._client.market.get_orderbooks(
+            trading_pair_id=trading_pair.as_string_for_cobinhood())
+        print(response)
+
+        if response["success"]:
+            logger.debug("Fetched last order...")
+            return OrderBook.from_response(trading_pair, response["result"]["orderbook"])
+        else:
+            raise CobinhoodError("Could not fetch last n orders. "
+                                 "Reason: {}".format(response["error"]["error_code"]))
+
     def get_orders_trades(self, order_id: OrderID):
         raise NotImplementedError
 
@@ -138,12 +151,7 @@ class CobinhoodTrading(Trading):
 if __name__ == '__main__':
     client = CobinhoodClient(API_TOKEN=load_cobinhood_api_token())
     trader = CobinhoodTrading(client)
-    # orders = trader.get_order_history(trading_pair=TradingPair("ETH", "BTC"))
-    orders = trader.get_last_n_orders(trading_pair=TradingPair("ETH", "BTC"), n=3)
-    for order in orders:
-        print(order)
-    # order = trader.place_order(order)
-    # orders = trader.get_open_orders()
-    # print(orders[0])
-    # orders = trader.cancel_order(str(orders[0].id))
-    # print(orders)
+    trading_pair = TradingPair("ETH", "BTC")
+    order_book = trader.get_orderbook(trading_pair)
+    for ask in order_book.asks:
+        print(ask)

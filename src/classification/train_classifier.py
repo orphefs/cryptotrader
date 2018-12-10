@@ -142,17 +142,17 @@ if __name__ == "__main__":
                          end_time=datetime(2018, 12, 7)
                      ),
                      technical_indicators=[
-                         AutoCorrelationTechnicalIndicator(Candle.get_open_price, 1),
-                         AutoCorrelationTechnicalIndicator(Candle.get_open_price, 2),
-                         AutoCorrelationTechnicalIndicator(Candle.get_open_price, 3),
-                         AutoCorrelationTechnicalIndicator(Candle.get_open_price, 4),
-                         PPOTechnicalIndicator(Candle.get_open_price, 5, 1),
-                         PPOTechnicalIndicator(Candle.get_open_price, 10, 4),
-                         PPOTechnicalIndicator(Candle.get_open_price, 20, 1),
-                         PPOTechnicalIndicator(Candle.get_open_price, 30, 10),
-                         PPOTechnicalIndicator(Candle.get_open_price, 40, 20),
-                         PPOTechnicalIndicator(Candle.get_open_price, 50, 30),
-                         PPOTechnicalIndicator(Candle.get_open_price, 60, 40),
+                         AutoCorrelationTechnicalIndicator(Candle.get_close_price, 1),
+                         AutoCorrelationTechnicalIndicator(Candle.get_close_price, 2),
+                         AutoCorrelationTechnicalIndicator(Candle.get_close_price, 3),
+                         AutoCorrelationTechnicalIndicator(Candle.get_close_price, 4),
+                         PPOTechnicalIndicator(Candle.get_close_price, 5, 1),
+                         PPOTechnicalIndicator(Candle.get_close_price, 10, 4),
+                         PPOTechnicalIndicator(Candle.get_close_price, 20, 1),
+                         PPOTechnicalIndicator(Candle.get_close_price, 30, 10),
+                         PPOTechnicalIndicator(Candle.get_close_price, 40, 20),
+                         PPOTechnicalIndicator(Candle.get_close_price, 50, 30),
+                         PPOTechnicalIndicator(Candle.get_close_price, 60, 40),
                      ],
                      path_to_classifier=os.path.join(DATA_DIR, "classifier.dill"))
     if 0:
