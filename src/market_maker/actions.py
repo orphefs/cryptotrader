@@ -7,11 +7,9 @@ from src.containers.order_book import Ask, Bid
 from src.containers.signal import SignalBuy, SignalSell
 from src.containers.time import MilliSeconds
 from src.containers.trading import CobinhoodTrading, CobinhoodError
-from src.logging_tools.tools import print_function_context
-from src.market_maker.utils import get_last_filled_order
 
 
-@print_function_context
+# @print_function_context
 def _act_if_buy_signal_and_open_bid_order(trader: CobinhoodTrading, signal: SignalBuy, order: Order, ) -> Order:
     logger.info(
         "Current signal is SignalBuy and open order is OrderBuy, OR Current signal is SignalSell and open order is OrderSell...")
@@ -31,12 +29,12 @@ def _act_if_buy_signal_and_open_bid_order(trader: CobinhoodTrading, signal: Sign
         print(error)
 
 
-@print_function_context
+# @print_function_context
 def _act_if_sell_signal_and_open_ask_order(trader: CobinhoodTrading, signal: SignalSell, order: Order, ) -> Order:
     return _act_if_buy_signal_and_open_bid_order(trader=trader, signal=signal, order=order)
 
 
-@print_function_context
+# @print_function_context
 def _noop_act_if_buy_signal_and_open_bid_order(trader: CobinhoodTrading, signal: SignalBuy, order: Order, ) -> Order:
     logger.info(
         "Current signal is SignalBuy and open order is OrderBuy, OR Current signal is SignalSell and open order is OrderSell...")
@@ -44,12 +42,12 @@ def _noop_act_if_buy_signal_and_open_bid_order(trader: CobinhoodTrading, signal:
     pass
 
 
-@print_function_context
+# @print_function_context
 def _noop_act_if_sell_signal_and_open_ask_order(trader: CobinhoodTrading, signal: SignalSell, order: Order, ) -> Order:
     return _noop_act_if_buy_signal_and_open_bid_order(trader=trader, signal=signal, order=order)
 
 
-@print_function_context
+# @print_function_context
 def _act_if_sell_signal_and_open_bid_order(trader: CobinhoodTrading, signal: SignalSell, order: Order) -> Order:
     logger.info(
         "Current signal is SignalSell and open order is OrderBuy, OR Current signal is SignalBuy and open order is OrderSell...")
@@ -63,24 +61,24 @@ def _act_if_sell_signal_and_open_bid_order(trader: CobinhoodTrading, signal: Sig
         print(error)
 
 
-@print_function_context
+# @print_function_context
 def _act_if_buy_signal_and_open_ask_order(trader: CobinhoodTrading, signal: SignalBuy, order: Order, ) -> Order:
     return _act_if_sell_signal_and_open_bid_order(trader=trader, signal=signal, order=order)
 
 
-@print_function_context
+# @print_function_context
 def _act_if_buy_signal_and_filled_bid_order(trader: CobinhoodTrading, signal: SignalBuy, order: Order) -> Order:
     logger.info("Current signal is SignalBuy and last filled order is OrderBuy...Doing nothing...")
     pass
 
 
-@print_function_context
+# @print_function_context
 def _act_if_sell_signal_and_filled_ask_order(trader: CobinhoodTrading, signal: SignalSell, order: Order) -> Order:
     logger.info("Current signal is SignalSell and last filled order is OrderSell...Doing nothing...")
     pass
 
 
-@print_function_context
+# @print_function_context
 def _act_if_buy_signal_and_filled_ask_order(trader: CobinhoodTrading, signal: SignalBuy, order: Order) -> Optional[
     Order]:
     if trader.get_open_orders():
@@ -101,7 +99,7 @@ def _act_if_buy_signal_and_filled_ask_order(trader: CobinhoodTrading, signal: Si
         print(error)
 
 
-@print_function_context
+# @print_function_context
 def _act_if_sell_signal_and_filled_bid_order(trader: CobinhoodTrading, signal: SignalSell, order: Order) -> Optional[
     Order]:
     if trader.get_open_orders():
