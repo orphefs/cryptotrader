@@ -87,7 +87,7 @@ def _act_if_buy_signal_and_filled_ask_order(trader: CobinhoodTrading, signal: Si
         return None
     logger.info("Current signal is SignalBuy and last filled order is OrderSell...Placing OrderBuy...")
     try:
-        lowest_available_ask_order = get_optimal_bid_price_from_orderbook(trader, signal, order)
+        # lowest_available_ask_order = get_optimal_bid_price_from_orderbook(trader, signal, order)
         return trader.place_order(Order(
             trading_pair_id=order.trading_pair_id,
             price=Price(signal.price_point.value),
@@ -108,7 +108,7 @@ def _act_if_sell_signal_and_filled_bid_order(trader: CobinhoodTrading, signal: S
         return None
     logger.info("Current signal is SignalSell and last filled order is OrderBuy...Placing OrderSell...")
     try:
-        highest_available_bid_order = get_optimal_ask_price_from_orderbook(trader, signal, order)
+        # highest_available_bid_order = get_optimal_ask_price_from_orderbook(trader, signal, order)
         return trader.place_order(Order(
             trading_pair_id=order.trading_pair_id,
             price=Price(signal.price_point.value),
