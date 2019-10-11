@@ -2,7 +2,7 @@
 
 This project implements an automated trading bot, which makes predictions on market movements, buys and sells cryptocurrency (or stocks) automatically, based on historical market data.
 
-The 
+*Disclaimer: The project is experimental and still under development.*
 
 *Disclaimer: This is for educational purposes only and Orfeas Kypris does not bear any responsibility for any financial losses, or otherwise,  incurred due to misuse of this code. Please use responsibly and at your own risk.*
 
@@ -37,5 +37,6 @@ All of the above modes save a log and trading performance data for further analy
 ## Postprocessing
 
 Coming soon...
+
 ---
 
