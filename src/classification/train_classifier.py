@@ -131,15 +131,15 @@ if __name__ == "__main__":
         # stream=sys.stdout,
         level=logging.DEBUG,
     )
-    trading_pair = TradingPair("ETH", "BTC")
-    client = CobinhoodClient()
-    # client = BinanceClient("","")
+    trading_pair = TradingPair("XRP", "BTC")
+    # client = CobinhoodClient()
+    client = BinanceClient("","")
 
     train_classifier(trading_pair=trading_pair,
                      client=client,
                      training_time_window=TimeWindow(
-                         start_time=datetime(2018, 11, 20),
-                         end_time=datetime(2018, 12, 7)
+                         start_time=datetime(2019, 9, 19),
+                         end_time=datetime(2019, 9, 20)
                      ),
                      technical_indicators=[
                          AutoCorrelationTechnicalIndicator(Candle.get_close_price, 1),
