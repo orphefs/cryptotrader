@@ -21,10 +21,7 @@ To start, from the root folder (cryptotrader), run:
 
 This will do the following:
 
-1. Download stock data based on the configuration you provide it within the *train_classifier.py* file. Parameters are 1) time window (i.e. 19 Sep 2019 to 21 Sep 2019), 2) time interval (i.e. 1 min / 1 hour), 3) trading pair (i.e. ETHBTC).
-
-A typical filename where the stock data is saved is *local_data_19_Sep,_2019_20_Sep,_2019_XRPBTC_0:01:00_<class_'binance.client.Client'>.dill*
-
+1. Download stock data based on the configuration you provide it within the *train_classifier.py* file. Parameters are 1) time window (i.e. 19 Sep 2019 to 21 Sep 2019), 2) time interval (i.e. 1 min / 1 hour), 3) trading pair (i.e. ETHBTC). A typical filename where the stock data is saved is *local_data_19_Sep,_2019_20_Sep,_2019_XRPBTC_0:01:00_<class_'binance.client.Client'>.dill*
 2. Train the model using a random forest classifier fed with some custom extracted features of the time series, such as RSI, movnig average etc. The features are configurable through an abstract interface (for the brave).
 3. Serialize the trained model onto classifier.dill file and save it in the $PROJECT_ROOT/data directory	.
 
