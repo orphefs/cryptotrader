@@ -1,7 +1,8 @@
-
 import time
 from datetime import datetime, timedelta
 from typing import Union, Optional
+import simplejson as json
+import websocket
 
 from src.analysis_tools.run_metadata import RunMetaData
 from src.containers.order import Order
@@ -24,13 +25,10 @@ from src.containers.trading_pair import TradingPair
 from src.logger import logger
 
 
-
 def _pass_signal_to_market_maker(current_signal: Union[SignalBuy, SignalSell],
                                  market_maker: Union[NoopMarketMaker, TestMarketMaker,
-                                                    MarketMaker]) -> Order:
+                                                     MarketMaker]) -> Order:
     last_filled_order = market_maker.insert_signal(current_signal)
-
-
 
 
 class Runner(DillSaveLoadMixin):
@@ -41,7 +39,8 @@ class Runner(DillSaveLoadMixin):
                  path_to_portfolio: Path,
                  path_to_classifier: Path,
                  client: Optional[Union[BinanceClient]],
-                 market_maker: Optional[Union[NoopMarketMaker, TestMarketMaker, MarketMaker]]):
+                 market_maker: Optional[Union[NoopMarketMaker, TestMarketMaker, MarketMaker]],
+                 websocket_client: Optional[websocket.WebSocketApp]):
         self._trading_pair = trading_pair
         self._trade_amount = trade_amount
         self._run_type = run_type
@@ -56,7 +55,7 @@ class Runner(DillSaveLoadMixin):
         self._iteration_number = None
         if client is None:
             self._client = BinanceClient("",
-                                         "")  # this client does not need API key and is only used for downloading candles
+                "")  # this client does not need API key and is only used for downloading candles
         else:
             self._client = client
         self._sampling_period = timedelta(minutes=1)
@@ -66,15 +65,15 @@ class Runner(DillSaveLoadMixin):
         self._path_to_portfolio = path_to_portfolio
         self._stock_data = StockData
         self._run_metadata = RunMetaData(trading_pair=self._trading_pair,
-                                         trade_amount=self._trade_amount,
-                                         run_type=self._run_type)
+            trade_amount=self._trade_amount,
+            run_type=self._run_type)
         self._parameters = LiveParameters(update_period=timedelta(hours=1),
-                                          trade_amount=self._trade_amount,
-                                          # sleep_time=update_interval_mappings[self._kline_interval].total_seconds(),
-                                          sleep_time=2,
-                                          )
+            trade_amount=self._trade_amount,
+            # sleep_time=update_interval_mappings[self._kline_interval].total_seconds(),
+            sleep_time=2,
+        )
         self._portfolio = Portfolio(initial_capital=get_capital_from_account(trading_pair=self._trading_pair),
-                                    trade_amount=self._parameters.trade_amount)
+            trade_amount=self._parameters.trade_amount)
         self._waiting_threshold = timedelta(seconds=self._sampling_period.total_seconds() - 15)
         # self._waiting_threshold = timedelta(seconds=4)
 
@@ -83,6 +82,8 @@ class Runner(DillSaveLoadMixin):
             self._market_maker = NoopMarketMaker(self._client, self._trading_pair, self._trade_amount)
         else:
             self._market_maker = market_maker
+
+        self._websocket_client = websocket_client
 
     @property
     def portfolio(self):
@@ -116,8 +117,8 @@ class Runner(DillSaveLoadMixin):
     def _mock_download_stock_data_for_all_iterations(self):
         if self._mock_data_start_time and self._mock_data_stop_time:
             self._stock_data = load_stock_data(TimeWindow(start_time=self._mock_data_start_time,
-                                                          end_time=self._mock_data_stop_time),
-                                               self._trading_pair, self._sampling_period)
+                end_time=self._mock_data_stop_time),
+                self._trading_pair, self._sampling_period)
         elif self._path_to_stock_data:
             self._stock_data = load_from_disk(self._path_to_stock_data)
 
@@ -149,8 +150,8 @@ class Runner(DillSaveLoadMixin):
             logger.debug("Current candle time: {}".format(self._current_candle.get_close_time_as_datetime()))
 
             if is_time_difference_larger_than_threshold(self._current_candle, self._previous_candle,
-                                                        self._waiting_threshold,
-                                                        time_getter_callback=Candle.get_close_time_as_datetime):
+                    self._waiting_threshold,
+                    time_getter_callback=Candle.get_close_time_as_datetime):
                 logger.info("Registering candle: {}".format(self._current_candle))
                 self._classifier.append_new_candle(self._current_candle)
                 try:
@@ -160,12 +161,19 @@ class Runner(DillSaveLoadMixin):
 
                 logger.debug("Prediction is: {} on iteration {}".format(prediction, self._iteration_number))
                 if prediction:
-                    self._current_signal = generate_trading_signal_from_prediction(prediction[0], self._current_candle)
+                    self._current_signal = generate_trading_signal_from_prediction(prediction[0],
+                        self._current_candle)
                     self._portfolio.update(self._current_signal)
                     logger.info("Prediction for signal {}".format(self._current_signal))
 
                     last_filled_order = _pass_signal_to_market_maker(current_signal=self._current_signal,
-                                                                     market_maker=self._market_maker)
+                        market_maker=self._market_maker)
+                    if self._websocket_client:
+                        try:
+                            self._websocket_client.send(json.dumps(self._current_signal))
+                        except Exception as e:
+                            logger.info("Websocket error: {}".format(e))
+
                     if last_filled_order and last_filled_order not in self._portfolio.orders:
                         self._portfolio.update(last_filled_order)
                         logger.info("Updated portfolio with new order: {}".format(last_filled_order))
@@ -179,11 +187,10 @@ class Runner(DillSaveLoadMixin):
                 time.sleep(self._parameters.sleep_time)
 
                 last_filled_order = _pass_signal_to_market_maker(current_signal=self._current_signal,
-                                                                 market_maker=self._market_maker)
+                    market_maker=self._market_maker)
                 if last_filled_order and last_filled_order not in self._portfolio.orders:
                     self._portfolio.update(last_filled_order)
                     logger.info("Updated portfolio with new order: {}".format(last_filled_order))
-
 
             self._iteration_number += 1
             logger.debug("We are on the {}th iteration".format(self._iteration_number))
