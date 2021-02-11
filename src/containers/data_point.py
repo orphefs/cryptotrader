@@ -26,3 +26,7 @@ class PricePoint(object):
     def __eq__(self, other):
         return (self._value == other.value) and \
                (self._date_time == other.date_time)
+
+    def as_dict(self):
+        return {"price": self._value,
+                "timestamp": self._date_time.timestamp()}

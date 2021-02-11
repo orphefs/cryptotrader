@@ -1,7 +1,9 @@
 import os
+import sys
+import traceback
 
 import websocket
-
+import logging
 from src.containers.trading_pair import TradingPair
 from src.definitions import DATA_DIR
 from src.run_live import run_live
@@ -33,7 +35,7 @@ def run(*args):
     try:
         print("Running cryptotrader client...")
         run_live(
-            trading_pair=TradingPair("ETH", "XRP"),
+            trading_pair=TradingPair("XRP", "ETH"),
             trade_amount=0.0,
             path_to_log=os.path.join(DATA_DIR, "live_run.log"),
             path_to_portfolio=os.path.join(DATA_DIR, "live_portfolio.dill"),
@@ -42,6 +44,8 @@ def run(*args):
             websocket_client=ws
         )
     except Exception as e:
+        traceback.print_exc()
+        logging.info("Exited cryptotrader client: {}".format(e))
         time.sleep(1)
         ws.close()
         print("thread terminating...")

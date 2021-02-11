@@ -142,6 +142,7 @@ class Portfolio:
                "Initial Capital: {}".format(self._trade_amount, self._initial_capital)
 
     def save_to_disk(self, path_to_file: Path):
+
         self._dill_save_load.save_to_disk(self, path_to_file)
         self._json_save.save_to_disk(self, path_to_file)
 

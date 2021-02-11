@@ -143,7 +143,10 @@ class Runner(DillSaveLoadMixin):
             self._mock_download_stock_data_for_all_iterations()
 
         while self._is_check_condition():
-            self._current_candle = self._download_candle()
+            try:
+                self._current_candle = self._download_candle()
+            except Exception as e:
+                logger.debug("Error while trying to download candles: {}".format(e))
             if self._iteration_number == 0:
                 self._run_metadata.start_candle = self._current_candle
 
@@ -170,7 +173,7 @@ class Runner(DillSaveLoadMixin):
                         market_maker=self._market_maker)
                     if self._websocket_client:
                         try:
-                            self._websocket_client.send(json.dumps(self._current_signal))
+                            self._websocket_client.send(json.dumps(self._current_signal.as_dict()))
                         except Exception as e:
                             logger.info("Websocket error: {}".format(e))
 

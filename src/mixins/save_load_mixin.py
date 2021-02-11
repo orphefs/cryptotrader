@@ -1,3 +1,5 @@
+import copy
+
 import dill
 
 from src.type_aliases import Path
@@ -25,10 +27,17 @@ def convert_to_absolute_path(path_to_file: Path) -> Path:
 class DillSaveLoadMixin:
     @staticmethod
     def save_to_disk(obj, path_to_file: Path):
-        path_to_file = verify_if_extension(path_to_file, ".dill")
-        path_to_file = convert_to_absolute_path(path_to_file)
-        with open(os.path.join(definitions.DATA_DIR, path_to_file), 'wb') as outfile:
-            dill.dump(obj, outfile)
+        pass
+        # TODO: reenable below
+        if 0:
+            path_to_file = verify_if_extension(path_to_file, ".dill")
+            path_to_file = convert_to_absolute_path(path_to_file)
+            # obj_copy = copy.deepcopy(obj)
+            # if "_websocket_client" in obj_copy.__dict__:
+            #     del obj_copy.__dict__["_websocket_client"]
+            #     print("once")
+            with open(os.path.join(definitions.DATA_DIR, path_to_file), 'wb') as outfile:
+                dill.dump(obj, outfile)
 
     @staticmethod
     def load_from_disk(path_to_file: Path):
