@@ -27,7 +27,7 @@ from src.feature_extraction.technical_indicator import AutoCorrelationTechnicalI
     PPOTechnicalIndicator, TechnicalIndicator
 from src.live_logic.parameters import LiveParameters
 from src.plotting.plot_candles import custom_plot
-from src.type_aliases import Path, Hash, BinanceClient, CobinhoodClient
+from src.type_aliases import Path, Hash, BinanceClient
 from src.containers.trading_pair import TradingPair
 
 
@@ -42,6 +42,9 @@ def generate_predicted_portfolio(initial_capital: int, parameters: LiveParameter
     classifier, predicted_portfolio, predicted_signals = generate_all_signals_at_once(stock_data_testing_set,
                                                                                       classifier,
                                                                                       predicted_portfolio)
+    for signal in predicted_signals:
+        predicted_portfolio.update(signal)
+
     predicted_portfolio.compute_performance()
 
     return predicted_portfolio, predicted_signals
@@ -56,7 +59,7 @@ def generate_reference_to_prediction_portfolio(initial_capital, parameters, stoc
 
 
 def train_classifier(trading_pair: TradingPair,
-                     client: Union[BinanceClient, CobinhoodClient],
+                     client: Union[BinanceClient],
                      training_time_window: TimeWindow,
                      technical_indicators: List[TechnicalIndicator],
                      path_to_classifier: Path,
@@ -78,7 +81,7 @@ def train_classifier(trading_pair: TradingPair,
 
 
 def run_trained_classifier(trading_pair: TradingPair,
-                           client: Union[BinanceClient, CobinhoodClient],
+                           client: Union[BinanceClient],
                            trade_amount: float,
                            testing_data: Union[TimeWindow, StockData, Path],
                            classifier: Union[Path, TradingClassifier],
@@ -155,7 +158,7 @@ if __name__ == "__main__":
                          PPOTechnicalIndicator(Candle.get_close_price, 60, 40),
                      ],
                      path_to_classifier=os.path.join(DATA_DIR, "classifier.dill"))
-    if 0:
+    if 1:
         run_trained_classifier(trading_pair=trading_pair,
                                client=client,
                                trade_amount=100,

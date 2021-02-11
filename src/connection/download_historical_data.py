@@ -11,7 +11,7 @@ dill._dill._reverse_typemap['ClassType'] = type
 
 from src.containers.candle import Candle
 from src.containers.time_windows import TimeWindow, Date
-from src.type_aliases import Exchange, BinanceClient, CobinhoodClient
+from src.type_aliases import Exchange, BinanceClient
 from src.containers.trading_pair import TradingPair
 
 
@@ -42,25 +42,9 @@ def _download_historical_data_from_binance(time_window: TimeWindow, trading_pair
     return Candle.from_list_of_klines(klines, Exchange.BINANCE)
 
 
-def _download_historical_data_from_cobinhood(time_window: TimeWindow, trading_pair: TradingPair,
-                                             sampling_period: timedelta,
-                                             client: CobinhoodClient) -> List[Candle]:
-    klines = client.chart.get_candles(trading_pair_id=trading_pair.as_string_for_cobinhood(),
-                                      start_time=round(time_window.start_datetime.timestamp() * 1000),
-                                      end_time=round(time_window.end_datetime.timestamp() * 1000),
-                                      timeframe=cobinhood_sampling_rate_mappings[sampling_period.total_seconds()],
-                                      )
-    if "error" in klines:
-        raise DownloadingError("{}".format(klines["error"]["error_code"]))
-    else:
-        pass
-
-    return Candle.from_list_of_klines(klines["result"]["candles"], Exchange.COBINHOOD)
-
-
 def _download_historical_data_from_exchange(time_window: TimeWindow, trading_pair: TradingPair,
                                             sampling_period: timedelta,
-                                            client: Union[BinanceClient, CobinhoodClient]) -> List[Candle]:
+                                            client: Union[BinanceClient]) -> List[Candle]:
     if isinstance(client, BinanceClient):
 
         candles = _download_historical_data_from_binance(time_window=time_window,
@@ -70,9 +54,6 @@ def _download_historical_data_from_exchange(time_window: TimeWindow, trading_pai
                                                          )
         return candles
 
-    elif isinstance(client, CobinhoodClient):
-        return _download_historical_data_from_cobinhood(time_window, trading_pair,
-                                                        sampling_period,
-                                                        client)
+
     else:
         raise DownloadingError("Invalid client object.")

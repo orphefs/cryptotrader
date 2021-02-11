@@ -1,17 +1,17 @@
 import tenacity
 
-from src.connection.cobinhood_helpers import load_cobinhood_api_token
+from src.connection.binance_helpers import load_binance_api_token
 from src.containers.order import Order, Price, Size, OrderID, OrderState
 from src.containers.order_book import OrderBook
 from src.containers.trading_pair import TradingPair
 from src.market_maker.mock_client import MockClient
-from src.type_aliases import CobinhoodClient, BinanceClient
+from src.type_aliases import BinanceClient
 from src.logger import logger
 
 from typing import List, Optional, Union
 
 
-class CobinhoodError(RuntimeError):
+class BinanceError(RuntimeError):
     pass
 
 
@@ -20,7 +20,7 @@ class Trade:
 
 
 class Trading:
-    def __init__(self, client: Union[CobinhoodClient, BinanceClient, MockClient]):
+    def __init__(self, client: Union[BinanceClient, MockClient]):
         self._client = client
 
     def place_order(self, order: Order, ) -> Order:
@@ -48,8 +48,8 @@ class Trading:
         raise NotImplementedError
 
 
-class CobinhoodTrading(Trading):
-    def __init__(self, client: CobinhoodClient):
+class BinanceTrading(Trading):
+    def __init__(self, client: BinanceClient):
         super().__init__(client=client)
 
     def place_order(self, order: Order) -> Order:
@@ -58,7 +58,7 @@ class CobinhoodTrading(Trading):
             logger.debug("Placed order...")
             return Order.from_cobinhood_response(response["result"]["order"])
         else:
-            raise CobinhoodError("Could not place order. "
+            raise BinanceError("Could not place order. "
                                  "Reason: {}".format(response["error"]["error_code"]))
 
     @tenacity.retry(wait=tenacity.wait_fixed(1))
@@ -71,7 +71,7 @@ class CobinhoodTrading(Trading):
             logger.debug("Modified order...")
             return True
         else:
-            raise CobinhoodError("Could not modify order. "
+            raise BinanceError("Could not modify order. "
                                  "Reason: {}".format(response["error"]["error_code"]))
 
     @tenacity.retry(wait=tenacity.wait_fixed(1))
@@ -87,7 +87,7 @@ class CobinhoodTrading(Trading):
                 orders = [Order.from_cobinhood_response(order) for order in response["result"]["orders"]]
                 return [order for order in orders if order.state is OrderState.open]
         else:
-            raise CobinhoodError("There are no results in history to be fetched. "
+            raise BinanceError("There are no results in history to be fetched. "
                                  "Reason: {}".format(response["error"]["error_code"]))
 
     @tenacity.retry(wait=tenacity.wait_fixed(1))
@@ -98,7 +98,7 @@ class CobinhoodTrading(Trading):
             logger.debug("Cancelled order...")
             return True
         else:
-            raise CobinhoodError("Could not cancel order. "
+            raise BinanceError("Could not cancel order. "
                                  "Reason: {}".format(response["error"]["error_code"]))
 
     @tenacity.retry(wait=tenacity.wait_fixed(1))
@@ -109,7 +109,7 @@ class CobinhoodTrading(Trading):
             logger.debug("Fetched last order...")
             return [Order.from_cobinhood_response(order) for order in response["result"]["orders"]]
         else:
-            raise CobinhoodError("Could not fetch last n orders. "
+            raise BinanceError("Could not fetch last n orders. "
                                  "Reason: {}".format(response["error"]["error_code"]))
 
     @tenacity.retry(wait=tenacity.wait_fixed(1))
@@ -126,7 +126,7 @@ class CobinhoodTrading(Trading):
                 orders += response["result"]["orders"]
             return [Order.from_cobinhood_response(order) for order in orders]
         else:
-            raise CobinhoodError("Could not fetch order history. "
+            raise BinanceError("Could not fetch order history. "
                                  "Reason: {}".format(response["error"]["error_code"]))
 
     def get_orderbook(self, trading_pair: TradingPair) -> OrderBook:
@@ -138,7 +138,7 @@ class CobinhoodTrading(Trading):
             logger.debug("Fetched last order...")
             return OrderBook.from_response(trading_pair, response["result"]["orderbook"])
         else:
-            raise CobinhoodError("Could not fetch last n orders. "
+            raise BinanceError("Could not fetch last n orders. "
                                  "Reason: {}".format(response["error"]["error_code"]))
 
     def get_orders_trades(self, order_id: OrderID):
@@ -149,8 +149,8 @@ class CobinhoodTrading(Trading):
 
 
 if __name__ == '__main__':
-    client = CobinhoodClient(API_TOKEN=load_cobinhood_api_token())
-    trader = CobinhoodTrading(client)
+    client = BinanceClient(API_TOKEN=load_binance_api_token())
+    trader = BinanceTrading(client)
     trading_pair = TradingPair("ETH", "BTC")
     order_book = trader.get_orderbook(trading_pair)
     for ask in order_book.asks:

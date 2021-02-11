@@ -165,11 +165,11 @@ def plot_candlesticks(ax: Axes, data: StockData):
 
 
 def custom_plot(portfolio, strategy, title=None):
-    fig, ax = plt.subplots(nrows=4, ncols=1, sharex=True)
+    fig, ax = plt.subplots(nrows=2, ncols=1, sharex=True)
     ax[0].set_title(title)
     # plot_portfolio_2(ax[1:4], portfolio.portfolio_df)
     plot_trading_signals(ax=ax[0], trading_signals=portfolio.signals[1:])
-    plot_orders(ax=ax[0], orders=portfolio.orders)
+    plot_orders(ax=ax[1], orders=portfolio.orders)
     if strategy is not None:
         plot_moving_average(ax=ax[0], time_series=strategy._short_sma)
         plot_moving_average(ax=ax[0], time_series=strategy._long_sma)

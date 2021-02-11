@@ -4,12 +4,12 @@ from typing import Union, Optional
 from datetime import datetime
 
 from src.containers.signal import SignalBuy, SignalSell, SignalHold
-from src.type_aliases import BinanceOrder, CobinhoodClient, BinanceClient
+from src.type_aliases import BinanceOrder, BinanceClient
 from src.containers.trading_pair import TradingPair
 
 
 class NoopMarketMaker:
-    def __init__(self, client: Union[BinanceClient, CobinhoodClient], trading_pair: TradingPair, quantity: float):
+    def __init__(self, client: Union[BinanceClient], trading_pair: TradingPair, quantity: float):
         self._client = client
         self._trading_pair = trading_pair
         self._quantity = quantity
@@ -22,6 +22,9 @@ class NoopMarketMaker:
         else:
             pass
 
+    def insert_signal(self, signal: Union[SignalBuy, SignalSell, SignalHold]):
+        pass
+
     def place_buy_order(self):
         pass
 
@@ -30,7 +33,7 @@ class NoopMarketMaker:
 
 
 class TestMarketMaker:
-    def __init__(self, client: Union[BinanceClient, CobinhoodClient], trading_pair: TradingPair, quantity: float):
+    def __init__(self, client: Union[BinanceClient], trading_pair: TradingPair, quantity: float):
         self._client = client
         self._trading_pair = trading_pair
         self._quantity = quantity
@@ -92,7 +95,7 @@ def raise_order_exception_if_error(order: dict):
 
 
 class MarketMaker:
-    def __init__(self, client: Union[BinanceClient, CobinhoodClient], trading_pair: TradingPair, quantity: float):
+    def __init__(self, client: Union[BinanceClient], trading_pair: TradingPair, quantity: float):
         self._client = client
         self._trading_pair = trading_pair
         self._quantity = quantity

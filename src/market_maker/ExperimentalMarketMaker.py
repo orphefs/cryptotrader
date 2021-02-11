@@ -3,7 +3,7 @@ from typing import Union, Optional, List
 
 from src.containers.signal import SignalBuy, SignalSell, SignalHold
 from src.containers.order import Order, Side, OrderID
-from src.containers.trading import CobinhoodTrading
+from src.containers.trading import BinanceTrading
 from src.market_maker.actions import _act_if_sell_signal_and_open_bid_order, _act_if_buy_signal_and_open_ask_order, \
     _act_if_buy_signal_and_filled_bid_order, _act_if_sell_signal_and_filled_ask_order, \
     _act_if_buy_signal_and_filled_ask_order, _act_if_sell_signal_and_filled_bid_order, \
@@ -18,7 +18,7 @@ from src.containers.trading_pair import TradingPair
 
 class ExperimentalMarketMaker:
     def __init__(self,
-                 trader: Union[CobinhoodTrading, MockTrading],
+                 trader: Union[BinanceTrading, MockTrading],
                  trading_pair: TradingPair,
                  quantity: float
                  ):
@@ -33,7 +33,7 @@ class ExperimentalMarketMaker:
         self._last_placed_order = self._trader.get_last_n_orders(trading_pair=self._trading_pair, n=1)[0]
 
     @property
-    def trader(self) -> Union[CobinhoodTrading, MockTrading]:
+    def trader(self) -> Union[BinanceTrading, MockTrading]:
         return self._trader
 
     @property

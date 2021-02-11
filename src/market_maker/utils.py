@@ -6,7 +6,7 @@ import tenacity
 from src.containers.data_point import PricePoint
 from src.containers.order import Order, OrderState
 from src.containers.signal import SignalBuy
-from src.containers.trading import CobinhoodTrading
+from src.containers.trading import BinanceTrading
 from src.containers.trading_pair import TradingPair
 from src.market_maker.mock_trading import MockTrading
 
@@ -24,7 +24,7 @@ def _init_signal() -> SignalBuy:
 
 
 @tenacity.retry(wait=tenacity.wait_fixed(1))
-def get_last_filled_order(trading_pair: TradingPair, trader: Union[CobinhoodTrading, MockTrading]):
+def get_last_filled_order(trading_pair: TradingPair, trader: Union[BinanceTrading, MockTrading]):
     last_order = trader.get_last_n_orders(trading_pair, 1)[0]
     i = 1
     while last_order.state is not OrderState.filled:

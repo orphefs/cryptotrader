@@ -10,12 +10,12 @@ from src.connection.helpers import _generate_file_name
 from src.containers.stock_data import StockData, save_to_disk, load_from_disk
 from src.containers.time_windows import TimeWindow
 from src.containers.trading_pair import TradingPair
-from src.type_aliases import BinanceClient, CobinhoodClient
+from src.type_aliases import BinanceClient
 
 
 def load_stock_data(time_window: TimeWindow, trading_pair: TradingPair,
                     sampling_period: timedelta,
-                    client: Optional[Union[BinanceClient, CobinhoodClient]]) -> StockData:
+                    client: Optional[Union[BinanceClient]]) -> StockData:
     path_to_file = os.path.join(definitions.DATA_DIR,
                                 _generate_file_name(time_window, trading_pair, str(sampling_period), str(type(client))))
     if client is None:

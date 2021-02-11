@@ -6,11 +6,11 @@ from src.containers.order import Order, Price, OrderType, Side, Size
 from src.containers.order_book import Ask, Bid
 from src.containers.signal import SignalBuy, SignalSell
 from src.containers.time import MilliSeconds
-from src.containers.trading import CobinhoodTrading, CobinhoodError
+from src.containers.trading import BinanceTrading, BinanceError
 
 
 # @print_function_context
-def _act_if_buy_signal_and_open_bid_order(trader: CobinhoodTrading, signal: SignalBuy, order: Order, ) -> Order:
+def _act_if_buy_signal_and_open_bid_order(trader: BinanceTrading, signal: SignalBuy, order: Order, ) -> Order:
     logger.info(
         "Current signal is SignalBuy and open order is OrderBuy, OR Current signal is SignalSell and open order is OrderSell...")
     logger.info("Going to modify open order...")
@@ -24,18 +24,18 @@ def _act_if_buy_signal_and_open_bid_order(trader: CobinhoodTrading, signal: Sign
         if success:
             order = trader.get_open_orders(order_id="{}".format(order.id))  # TODO: return new order (using order id)
             return order
-    except CobinhoodError as error:
+    except BinanceError as error:
         logger.debug(error)
         print(error)
 
 
 # @print_function_context
-def _act_if_sell_signal_and_open_ask_order(trader: CobinhoodTrading, signal: SignalSell, order: Order, ) -> Order:
+def _act_if_sell_signal_and_open_ask_order(trader: BinanceTrading, signal: SignalSell, order: Order, ) -> Order:
     return _act_if_buy_signal_and_open_bid_order(trader=trader, signal=signal, order=order)
 
 
 # @print_function_context
-def _noop_act_if_buy_signal_and_open_bid_order(trader: CobinhoodTrading, signal: SignalBuy, order: Order, ) -> Order:
+def _noop_act_if_buy_signal_and_open_bid_order(trader: BinanceTrading, signal: SignalBuy, order: Order, ) -> Order:
     logger.info(
         "Current signal is SignalBuy and open order is OrderBuy, OR Current signal is SignalSell and open order is OrderSell...")
     logger.info("Not going to modify open order...")
@@ -43,12 +43,12 @@ def _noop_act_if_buy_signal_and_open_bid_order(trader: CobinhoodTrading, signal:
 
 
 # @print_function_context
-def _noop_act_if_sell_signal_and_open_ask_order(trader: CobinhoodTrading, signal: SignalSell, order: Order, ) -> Order:
+def _noop_act_if_sell_signal_and_open_ask_order(trader: BinanceTrading, signal: SignalSell, order: Order, ) -> Order:
     return _noop_act_if_buy_signal_and_open_bid_order(trader=trader, signal=signal, order=order)
 
 
 # @print_function_context
-def _act_if_sell_signal_and_open_bid_order(trader: CobinhoodTrading, signal: SignalSell, order: Order) -> Order:
+def _act_if_sell_signal_and_open_bid_order(trader: BinanceTrading, signal: SignalSell, order: Order) -> Order:
     logger.info(
         "Current signal is SignalSell and open order is OrderBuy, OR Current signal is SignalBuy and open order is OrderSell...")
     logger.info("Going to cancel open order...")
@@ -56,30 +56,30 @@ def _act_if_sell_signal_and_open_bid_order(trader: CobinhoodTrading, signal: Sig
         success = trader.cancel_order(order_id="{}".format(order.id))
         if success:
             return order
-    except CobinhoodError as error:
+    except BinanceError as error:
         logger.debug(error)
         print(error)
 
 
 # @print_function_context
-def _act_if_buy_signal_and_open_ask_order(trader: CobinhoodTrading, signal: SignalBuy, order: Order, ) -> Order:
+def _act_if_buy_signal_and_open_ask_order(trader: BinanceTrading, signal: SignalBuy, order: Order, ) -> Order:
     return _act_if_sell_signal_and_open_bid_order(trader=trader, signal=signal, order=order)
 
 
 # @print_function_context
-def _act_if_buy_signal_and_filled_bid_order(trader: CobinhoodTrading, signal: SignalBuy, order: Order) -> Order:
+def _act_if_buy_signal_and_filled_bid_order(trader: BinanceTrading, signal: SignalBuy, order: Order) -> Order:
     logger.info("Current signal is SignalBuy and last filled order is OrderBuy...Doing nothing...")
     pass
 
 
 # @print_function_context
-def _act_if_sell_signal_and_filled_ask_order(trader: CobinhoodTrading, signal: SignalSell, order: Order) -> Order:
+def _act_if_sell_signal_and_filled_ask_order(trader: BinanceTrading, signal: SignalSell, order: Order) -> Order:
     logger.info("Current signal is SignalSell and last filled order is OrderSell...Doing nothing...")
     pass
 
 
 # @print_function_context
-def _act_if_buy_signal_and_filled_ask_order(trader: CobinhoodTrading, signal: SignalBuy, order: Order) -> Optional[
+def _act_if_buy_signal_and_filled_ask_order(trader: BinanceTrading, signal: SignalBuy, order: Order) -> Optional[
     Order]:
     if trader.get_open_orders():
         return None
@@ -94,13 +94,13 @@ def _act_if_buy_signal_and_filled_ask_order(trader: CobinhoodTrading, signal: Si
             size=Size(order.size),
             timestamp=MilliSeconds(round(datetime.now().timestamp() * 1000)),
         ))
-    except CobinhoodError as error:
+    except BinanceError as error:
         logger.debug(error)
         print(error)
 
 
 # @print_function_context
-def _act_if_sell_signal_and_filled_bid_order(trader: CobinhoodTrading, signal: SignalSell, order: Order) -> Optional[
+def _act_if_sell_signal_and_filled_bid_order(trader: BinanceTrading, signal: SignalSell, order: Order) -> Optional[
     Order]:
     if trader.get_open_orders():
         return None
@@ -117,19 +117,19 @@ def _act_if_sell_signal_and_filled_bid_order(trader: CobinhoodTrading, signal: S
 
         ))
 
-    except CobinhoodError as error:
+    except BinanceError as error:
         logger.debug(error)
         print(error)
 
 
-def get_optimal_bid_price_from_orderbook(trader: CobinhoodTrading, signal: SignalBuy,
+def get_optimal_bid_price_from_orderbook(trader: BinanceTrading, signal: SignalBuy,
                                          previously_filled_ask_order: Order) -> Ask:
     orderbook = trader.get_orderbook(trading_pair=previously_filled_ask_order.trading_pair_id)
     return min([ask for ask in orderbook.asks if ask.size >= previously_filled_ask_order.size],
                key=lambda x: x.price)
 
 
-def get_optimal_ask_price_from_orderbook(trader: CobinhoodTrading, signal: SignalSell,
+def get_optimal_ask_price_from_orderbook(trader: BinanceTrading, signal: SignalSell,
                                          previously_filled_bid_order: Order) -> Bid:
     orderbook = trader.get_orderbook(trading_pair=previously_filled_bid_order.trading_pair_id)
     return max([bid for bid in orderbook.bids if bid.size >= previously_filled_bid_order.size],

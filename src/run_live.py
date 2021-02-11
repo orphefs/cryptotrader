@@ -3,13 +3,13 @@ import os
 import sys
 from typing import Tuple
 
-from src.containers.trading import CobinhoodTrading
+from src.containers.trading import BinanceTrading
 from src.definitions import DATA_DIR
 from src.logging_filter import LoggingFilter
 from src.market_maker.ExperimentalMarketMaker import ExperimentalMarketMaker
-from src.market_maker.market_maker import MarketMaker
+from src.market_maker.market_maker import MarketMaker, NoopMarketMaker
 from src.resource_manager import runner
-from src.type_aliases import Path, CobinhoodClient
+from src.type_aliases import Path, BinanceClient
 from src.containers.trading_pair import TradingPair
 
 
@@ -27,18 +27,10 @@ def run_live(trading_pair: TradingPair, trade_amount: float,
     logger = logging.getLogger('cryptotrader-api')
     logger.addFilter(LoggingFilter(logging.INFO))
 
-    # client = BinanceClient("VWwsv93z4UHRoJEOkye1oZeqRtYPiaEXqzeG9fem2guMNKKU1tUDTTta9Nm4JZ3x",
-    #                 "L8C3ws3xkxX2AUravH41kfDezrHin2LarC1K8MDnmGM51dRBZwqDpvTOVZ1Qztap")
-    client = CobinhoodClient(API_TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlfdG9rZW5faWQiOiI"
-                                       "wNDJiNjQ5MC04NDc5LTRlYmYtYThjNy1jZGQxMGRmZWVhZjIiLCJzY29wZSI"
-                                       "6WyJzY29wZV9leGNoYW5nZV90cmFkZV9yZWFkIiwic2NvcGVfZXhjaGFuZ2V"
-                                       "fdHJhZGVfd3JpdGUiXSwidXNlcl9pZCI6ImQ1N2YwMzdkLWFiMGMtNDY0My0"
-                                       "5OGJlLTI5NGI1YzFhMThlMSJ9.-C9f8-yz7rd-16iD_hGEeDhRD1diP9ObCo"
-                                       "wXajozgTo.V2:4df57bcdf6191fb4423d8726d45849c34f10d6749809009"
-                                       "70978da0c441a42a6")
-
-    trader = CobinhoodTrading(client)
-    market_maker = ExperimentalMarketMaker(trader, trading_pair, trade_amount)
+    client = BinanceClient(api_key="fLKWRkS1V1yKj19G5GP4oB3m1Yuzls9GR0XK5kk0erZGwoksMULIh39vc7R47TN2",
+                           api_secret="Pn9czdU95eSBSoYNAtqUzZXVTloBSANBvi23w8VnvNAFTYWE9POhNs4bkXw8oFOk")
+    trader = BinanceTrading(client)
+    market_maker = NoopMarketMaker(trader, trading_pair, trade_amount)
 
     with runner(trading_pair=trading_pair,
                 trade_amount=trade_amount,
@@ -58,8 +50,8 @@ if __name__ == '__main__':
     logging.getLogger("urllib3").setLevel(logging.WARNING)
     logging.getLogger("cobinhood-api").setLevel(logging.WARNING)
 
-    quantity = 0.19
-    assert quantity <= 0.19
+    quantity = 0.001
+    assert quantity <= 0.001
     path_to_portfolio, path_to_log = run_live(TradingPair("ETH", "BTC"),
                                               quantity,
                                               os.path.join(DATA_DIR, "live_run.log"),

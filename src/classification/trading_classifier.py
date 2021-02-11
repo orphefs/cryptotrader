@@ -56,8 +56,8 @@ class TradingClassifier:
     def train(self, stock_data_training: StockData):
         self._precondition(stock_data_training)
         self._sklearn_classifier.fit(
-            X=self._predictors.as_matrix() * fudge_factor,
-            y=self._labels.as_matrix())
+            X=self._predictors.values * fudge_factor,
+            y=self._labels.values)
 
     def predict(self, stock_data: StockData):
         '''Return Buy/Sell/Hold prediction for a stock dataset.

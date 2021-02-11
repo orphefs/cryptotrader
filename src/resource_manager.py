@@ -3,7 +3,7 @@ from typing import Union, Optional
 
 from src.market_maker.market_maker import NoopMarketMaker, TestMarketMaker, MarketMaker
 from src.runner import Runner
-from src.type_aliases import Path, BinanceClient, CobinhoodClient
+from src.type_aliases import Path, BinanceClient
 from src.containers.trading_pair import TradingPair
 
 
@@ -20,7 +20,7 @@ class runner:
                  path_to_stock_data: Path = None,
                  path_to_portfolio: Path = None,
                  path_to_classifier: Path = None,
-                 client = None,
+                 client = BinanceClient,
                  market_maker = None
                  ):
         if (mock_data_start_time and mock_data_stop_time) and path_to_stock_data:

@@ -7,12 +7,12 @@ from src.containers.signal import SignalSell
 from src.containers.data_point import PricePoint, Price
 from src.containers.portfolio import Portfolio
 from src.definitions import DATA_DIR
-from src.type_aliases import CobinhoodClient, Path
+from src.type_aliases import Path, BinanceClient
 import os
 
 
-def load_cobinhood_api_token():
-    with open(os.path.join(DATA_DIR, "api_keys", "cobinhood_api_key.txt"), 'r') as infile:
+def load_binance_api_token():
+    with open(os.path.join(DATA_DIR, "api_keys", "binance_api_key.txt"), 'r') as infile:
         token = infile.readline().strip("\n")
     return token
 
@@ -55,8 +55,8 @@ def construct_portfolio_from_exchange_order_data(signals: List[Union[SignalBuy, 
 
 
 def get_exchange_orders() -> List[dict]:
-    token = load_cobinhood_api_token()
-    client = CobinhoodClient(API_TOKEN=token)
+    token = load_binance_api_token()
+    client = BinanceClient(API_TOKEN=token)
     data = client.trading.get_order_history(limit=100)
     pages = data["result"]["total_page"]
     orders = []
