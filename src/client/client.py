@@ -7,12 +7,21 @@ import logging
 from src.containers.trading_pair import TradingPair
 from src.definitions import DATA_DIR
 from src.run_live import run_live
+import _thread
 
-try:
-    import thread
-except ImportError:
-    import _thread as thread
+import threading
 import time
+
+
+class CryptotraderThread(threading.Thread):
+    def __init__(self, trading_pair: TradingPair):
+        threading.Thread.__init__(self)
+        self._trading_pair = trading_pair
+
+    def run(self):
+        print("Starting " + self._trading_pair.as_string_for_binance() + "thread")
+        run_cryptotrader_instance(self._trading_pair)
+        print("Exiting " + self._trading_pair.as_string_for_binance() + "thread")
 
 
 def on_message(ws, message):
@@ -28,14 +37,14 @@ def on_close(ws):
 
 
 def on_open(ws):
-    thread.start_new_thread(run, ())
+    _thread.start_new_thread(run, ())
 
 
-def run(*args):
+def run_cryptotrader_instance(trading_pair: TradingPair):
     try:
         print("Running cryptotrader client...")
         run_live(
-            trading_pair=TradingPair("XRP", "ETH"),
+            trading_pair=trading_pair,
             trade_amount=0.0,
             path_to_log=os.path.join(DATA_DIR, "live_run.log"),
             path_to_portfolio=os.path.join(DATA_DIR, "live_portfolio.dill"),
@@ -45,10 +54,33 @@ def run(*args):
         )
     except Exception as e:
         traceback.print_exc()
-        logging.info("Exited cryptotrader client: {}".format(e))
+        logging.info("Exited cryptotrader client: {e}".format(e))
         time.sleep(1)
         ws.close()
-        print("thread terminating...")
+
+
+def run(*args):
+    trading_pairs = [TradingPair("XRP", "ETH"),
+                     TradingPair("XRP", "BTC"),
+                     TradingPair("ETH", "BTC")
+                     ]
+    cryptotrader_threads = []
+    for trading_pair in trading_pairs:
+        cryptotrader_thread = CryptotraderThread(trading_pair)
+        cryptotrader_thread.start()
+        cryptotrader_threads.append(cryptotrader_thread)
+    # TODO: use different method to check if threads are alive and "restart" them
+    # https://stackoverflow.com/questions/29692250/restarting-a-thread-in-python
+    # check if threads are alive
+    while True:
+        for thread in cryptotrader_threads:
+            if not thread.is_alive():
+                thread.start()
+                "Attempted to start thread: {}".format(thread.ident)
+                time.sleep(1.0)
+        time.sleep(1.0)
+    ws.close()
+    print("thread terminating...")
 
 
 if __name__ == "__main__":
