@@ -173,7 +173,9 @@ class Runner(DillSaveLoadMixin):
                         market_maker=self._market_maker)
                     if self._websocket_client:
                         try:
-                            self._websocket_client.send(json.dumps(self._current_signal.as_dict()))
+                            self._websocket_client.send(json.dumps(
+                                {   "trading_pair": self._trading_pair.as_string_for_binance(),
+                                    "signal": self._current_signal.as_dict()}))
                         except Exception as e:
                             logger.info("Websocket error: {}".format(e))
 
