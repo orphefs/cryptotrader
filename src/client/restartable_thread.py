@@ -41,14 +41,13 @@ def run_cryptotrader_instance(trading_pair: TradingPair, ws: websocket.WebSocket
 
 class RestartableThread(threading.Thread):
 
-    def __init__(self, *args, **kwargs):
-        self._args, self._kwargs = args, kwargs
-        self.trading_pair = self._kwargs["trading_pair"]
-        self.ws = self._kwargs["ws"]
-        super().__init__(*args, **kwargs)
+    def __init__(self, trading_pair: TradingPair, ws:websocket.WebSocketApp):
+        super().__init__()
+        self.trading_pair = trading_pair
+        self.ws = ws
 
     def clone(self):
-        return RestartableThread(*self._args, **self._kwargs)
+        return RestartableThread(self.trading_pair,self.ws)
 
     def run(self):
         self.exc = None

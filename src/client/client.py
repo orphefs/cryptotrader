@@ -51,9 +51,15 @@ class WebSocketConnectionContextManager:
     def __init__(self, ws: websocket.WebSocketApp):
         self.ws = ws
         self.ws.on_open = on_open
+        self.ws.on_close = on_close
 
-    def _handle_interrupt(self):
-        sys.exit()  # will trigger a exception, causing __exit__ to be called
+    @staticmethod
+    def _handle_interrupt(signum, frame):
+        print('Signal handler called with signal', signum)
+        raise Exception("Signal {} sent...".format(signum))
+        # will trigger a exception, causing __exit__ to be called.
+        # In this case raising an exception for some reason first leads to call of on_close,
+        # and then __exit__ runs. Why?
 
     def __enter__(self):
         signal.signal(signal.SIGINT, self._handle_interrupt)
@@ -61,8 +67,10 @@ class WebSocketConnectionContextManager:
         self.ws.run_forever()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.ws.close()
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        print(exc_type, exc_value)
+        print("Closing websocket connection: {} ".format(ws))
+        # self.ws.close() # not needed here because connection is already closed, due to call to on_close
 
 
 if __name__ == "__main__":
