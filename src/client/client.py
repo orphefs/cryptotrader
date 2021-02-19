@@ -34,6 +34,7 @@ def on_open(ws):
 
 
 def run(*args, **kwargs):
+    # TODO: pass trading_pairs as argument (list)
     trading_pairs = [TradingPair("XRP", "ETH"),
                      TradingPair("XRP", "BTC"),
                      TradingPair("ETH", "BTC")
@@ -77,8 +78,6 @@ if __name__ == "__main__":
     websocket.enableTrace(True)
 
     with WebSocketConnectionContextManager(
-            ws=websocket.WebSocketApp("ws://localhost:3000/",
-                on_message=on_message,
-                on_error=on_error,
-                on_close=on_close)) as ws:
+            ws=websocket.WebSocketApp("ws://localhost:3000/"
+                )) as ws:
         pass
