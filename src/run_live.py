@@ -38,7 +38,7 @@ def run_live(trading_pair: TradingPair, trade_amount: float,
             trade_amount=trade_amount,
             run_type="live",
             path_to_portfolio=path_to_portfolio,
-            path_to_classifier=os.path.join(DATA_DIR, "classifier.dill"),
+            path_to_classifier=os.path.join(DATA_DIR, "classifier.dill"), # TODO: change classifier depending on trading pair
             client=client,
             market_maker=market_maker,
             websocket_client = websocket_client,
