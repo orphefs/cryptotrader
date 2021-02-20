@@ -3,7 +3,8 @@ from typing import List
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 
-from src.classification.helpers import extract_indicators_from_stock_data, convert_to_pandas, get_training_labels, \
+from src.classification.helpers import extract_indicators_from_stock_data, convert_to_pandas, \
+    get_training_labels, \
     extract_indicator_from_candle, timeshift_predictions
 from src.containers.candle import Candle
 from src.containers.stock_data import StockData
@@ -13,7 +14,7 @@ from src.mixins.save_load_mixin import DillSaveLoadMixin, JsonSaveMixin
 from src.type_aliases import Path
 from src.containers.trading_pair import TradingPair
 
-fudge_factor = 1000 # scaling factor to avoid inputting really tiny values to the classifier (may cause instabilities)
+fudge_factor = 1000  # scaling factor to avoid inputting really tiny values to the classifier (may cause instabilities)
 
 
 class TradingClassifier:
@@ -47,9 +48,9 @@ class TradingClassifier:
 
     def _precondition(self, stock_data_training: StockData):
         training_data = extract_indicators_from_stock_data(stock_data_training,
-                                                           self._list_of_technical_indicators)
+            self._list_of_technical_indicators)
         self._predictors, self._labels = convert_to_pandas(predictors=training_data,
-                                                           labels=get_training_labels(stock_data_training))
+            labels=get_training_labels(stock_data_training))
 
         self._labels = timeshift_predictions(self._labels)
 
@@ -63,7 +64,7 @@ class TradingClassifier:
         '''Return Buy/Sell/Hold prediction for a stock dataset.
         stock_data.candles must be of length at least self._maximum_lag'''
         testing_data = extract_indicators_from_stock_data(stock_data,
-                                                          self._list_of_technical_indicators)
+            self._list_of_technical_indicators)
         predictors, _ = convert_to_pandas(predictors=testing_data, labels=None)
         predictors *= fudge_factor
         # TODO: Implement trading based on probabilities
@@ -84,8 +85,8 @@ class TradingClassifier:
             self._is_candles_requirement_satisfied = True
 
     def save_to_disk(self, path_to_file: Path):
-        self._dill_save_load.save_to_disk(self,path_to_file)
-        self._json_save.save_to_disk(self,path_to_file)
+        self._dill_save_load.save_to_disk(self, path_to_file)
+        # self._json_save.save_to_disk(self, path_to_file) # TODO: saving a classifier to JSON does not make sense. Rethink this.
 
     @staticmethod
     def load_from_disk(path_to_file: Path):
@@ -94,4 +95,4 @@ class TradingClassifier:
 
     def __str__(self):
         return "Trading Pair: {}, Technical Indicators: {}".format(self._stock_data_live.trading_pair,
-                                                                   self._list_of_technical_indicators)
+            self._list_of_technical_indicators)

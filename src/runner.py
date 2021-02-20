@@ -1,3 +1,4 @@
+import os
 import time
 from datetime import datetime, timedelta
 from typing import Union, Optional
@@ -5,6 +6,7 @@ import simplejson as json
 import websocket
 
 from src.analysis_tools.run_metadata import RunMetaData
+from src.classification.train_classifier import train_classifier
 from src.containers.order import Order
 from src.containers.signal import SignalHold, SignalBuy, SignalSell
 from src.classification.trading_classifier import TradingClassifier
@@ -15,6 +17,8 @@ from src.containers.portfolio import Portfolio
 from src.containers.stock_data import StockData, load_from_disk
 from src.containers.time_windows import TimeWindow
 from src.containers.trade_helper import generate_trading_signal_from_prediction
+from src.feature_extraction.technical_indicator import AutoCorrelationTechnicalIndicator, \
+    PPOTechnicalIndicator
 from src.helpers import is_time_difference_larger_than_threshold, get_capital_from_account
 from src.market_maker import ExperimentalMarketMaker
 from src.market_maker.market_maker import TestMarketMaker, MarketMaker, NoopMarketMaker
@@ -77,7 +81,29 @@ class Runner(DillSaveLoadMixin):
         self._waiting_threshold = timedelta(seconds=self._sampling_period.total_seconds() - 15)
         # self._waiting_threshold = timedelta(seconds=4)
 
-        self._classifier = TradingClassifier.load_from_disk(path_to_classifier)
+        if os.path.isfile(path_to_classifier):
+            self._classifier = TradingClassifier.load_from_disk(path_to_classifier)
+        else:
+            train_classifier(trading_pair=self._trading_pair,
+                client=self._client,
+                training_time_window=TimeWindow(start_time=datetime.now() - timedelta(days=30),
+                    end_time=datetime.now()),
+                technical_indicators=[
+                    AutoCorrelationTechnicalIndicator(Candle.get_close_price, 1),
+                    AutoCorrelationTechnicalIndicator(Candle.get_close_price, 2),
+                    AutoCorrelationTechnicalIndicator(Candle.get_close_price, 3),
+                    AutoCorrelationTechnicalIndicator(Candle.get_close_price, 4),
+                    PPOTechnicalIndicator(Candle.get_close_price, 5, 1),
+                    PPOTechnicalIndicator(Candle.get_close_price, 10, 4),
+                    PPOTechnicalIndicator(Candle.get_close_price, 20, 1),
+                    PPOTechnicalIndicator(Candle.get_close_price, 30, 10),
+                    PPOTechnicalIndicator(Candle.get_close_price, 40, 20),
+                    PPOTechnicalIndicator(Candle.get_close_price, 50, 30),
+                    PPOTechnicalIndicator(Candle.get_close_price, 60, 40),
+                ],
+                path_to_classifier=path_to_classifier,
+            )
+            pass  # TODO: train classifier on some historical data for this trading pair
         if market_maker is None:
             self._market_maker = NoopMarketMaker(self._client, self._trading_pair, self._trade_amount)
         else:
@@ -95,7 +121,7 @@ class Runner(DillSaveLoadMixin):
         self._start_time = datetime.now()
         self._run_metadata.start_time = self._start_time
         if self._run_type == "live":
-            self._run_metadata.save_to_disk(self, "run_metadata.dill")
+            self._run_metadata.save_to_disk(self._run_metadata, "run_metadata.dill")
 
     def shutdown(self):
         """Should be called by the resource manager class"""
@@ -105,8 +131,8 @@ class Runner(DillSaveLoadMixin):
         if self._run_type == "live":
             self._run_metadata.save_to_disk(self, "run_metadata.dill")
 
-        self.save_to_disk(self, "run.dill")
-        self._portfolio.save_to_disk(self._path_to_portfolio)
+        # self.save_to_disk(self, "run.dill") #TODO: disabled because this tries to pickle unpicklable objects (such as websocket)
+        # self._portfolio.save_to_disk(self._run_metadata._path_to_portfolio)
 
     def _download_candle(self) -> Candle:
         if self._run_type == "live":
@@ -174,8 +200,8 @@ class Runner(DillSaveLoadMixin):
                     if self._websocket_client:
                         try:
                             self._websocket_client.send(json.dumps(
-                                {   "trading_pair": self._trading_pair.as_string_for_binance(),
-                                    "signal": self._current_signal.as_dict()}))
+                                {"trading_pair": self._trading_pair.as_string_for_binance(),
+                                 "signal": self._current_signal.as_dict()}))
                         except Exception as e:
                             logger.info("Websocket error: {}".format(e))
 
@@ -183,7 +209,7 @@ class Runner(DillSaveLoadMixin):
                         self._portfolio.update(last_filled_order)
                         logger.info("Updated portfolio with new order: {}".format(last_filled_order))
 
-                    self._portfolio.save_to_disk(self._path_to_portfolio)
+                    # self._portfolio.save_to_disk(self._path_to_portfolio)
                     self._previous_signal = self._current_signal
                 self._previous_candle = self._current_candle
 

@@ -38,10 +38,12 @@ def run_live(trading_pair: TradingPair, trade_amount: float,
             trade_amount=trade_amount,
             run_type="live",
             path_to_portfolio=path_to_portfolio,
-            path_to_classifier=os.path.join(DATA_DIR, "classifier.dill"), # TODO: change classifier depending on trading pair
+            path_to_classifier=os.path.join(DATA_DIR,
+                "classifier_{}.dill".format(trading_pair.as_string_for_binance())),
+            # TODO: change classifier depending on trading pair
             client=client,
             market_maker=market_maker,
-            websocket_client = websocket_client,
+            websocket_client=websocket_client,
     ) as lr:
         lr.run()
 
@@ -55,8 +57,10 @@ if __name__ == '__main__':
 
     quantity = 0.001
     assert quantity <= 0.001
-    path_to_portfolio, path_to_log = run_live(TradingPair("ETH", "BTC"),
+    path_to_portfolio, path_to_log = run_live(
+        TradingPair("XRP", "BTC"),
         quantity,
         os.path.join(DATA_DIR, "live_run.log"),
-        os.path.join(DATA_DIR, "live_portfolio.dill"))
+        os.path.join(DATA_DIR, "live_portfolio.dill")
+    )
     print(path_to_portfolio, path_to_log)

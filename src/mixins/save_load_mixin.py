@@ -28,16 +28,17 @@ class DillSaveLoadMixin:
     @staticmethod
     def save_to_disk(obj, path_to_file: Path):
         pass
-        # TODO: reenable below
-        if 0:
-            path_to_file = verify_if_extension(path_to_file, ".dill")
-            path_to_file = convert_to_absolute_path(path_to_file)
-            # obj_copy = copy.deepcopy(obj)
-            # if "_websocket_client" in obj_copy.__dict__:
-            #     del obj_copy.__dict__["_websocket_client"]
-            #     print("once")
-            with open(os.path.join(definitions.DATA_DIR, path_to_file), 'wb') as outfile:
-                dill.dump(obj, outfile)
+        # TODO: disable below because it causes problems with pickling the "portfolio" object
+        # but if disabled, it does not pickle the classifier weights
+        path_to_file = verify_if_extension(path_to_file, ".dill")
+        path_to_file = convert_to_absolute_path(path_to_file)
+        # obj_copy = copy.deepcopy(obj)
+        # if "_websocket_client" in obj_copy.__dict__:
+        #     del obj_copy.__dict__["_websocket_client"]
+        #     print("once")
+        with open(os.path.join(definitions.DATA_DIR, path_to_file), 'wb') as outfile:
+            dill.dump(obj, outfile)
+            pass
 
     @staticmethod
     def load_from_disk(path_to_file: Path):
@@ -53,7 +54,8 @@ class JsonSaveMixin:
         path_to_file = verify_if_extension(path_to_file, ".json")
         path_to_file = convert_to_absolute_path(path_to_file)
         with open(os.path.join(definitions.DATA_DIR, path_to_file), 'wb') as outfile:
-            # json.dump(obj, outfile, default=convert_to_dict, indent=4, sort_keys=True)
+            # TODO: this is not working
+            json.dump(obj, outfile, default=convert_to_dict, indent=4, sort_keys=True)
             print("Supposedly saving to JSON...")
 
 def convert_to_dict(obj):

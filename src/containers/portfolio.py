@@ -144,7 +144,7 @@ class Portfolio:
     def save_to_disk(self, path_to_file: Path):
 
         self._dill_save_load.save_to_disk(self, path_to_file)
-        self._json_save.save_to_disk(self, path_to_file)
+        # self._json_save.save_to_disk(self, path_to_file) # TODO: fix json dump
 
     @staticmethod
     def load_from_disk(path_to_file: Path):

@@ -35,10 +35,11 @@ def on_open(ws):
 
 def run(*args, **kwargs):
     # TODO: pass trading_pairs as argument (list)
-    trading_pairs = [TradingPair("XRP", "ETH"),
-                     TradingPair("XRP", "BTC"),
-                     TradingPair("ETH", "BTC")
-                     ]
+    trading_pairs = [
+        TradingPair("XRP", "ETH"),
+        TradingPair("XRP", "BTC"),
+        TradingPair("ETH", "BTC"),
+    ]
     cryptotrader_threads = []
     for trading_pair in trading_pairs:
         cryptotrader_thread = RestartableThread(trading_pair=trading_pair, ws=kwargs["ws"])
@@ -79,5 +80,5 @@ if __name__ == "__main__":
 
     with WebSocketConnectionContextManager(
             ws=websocket.WebSocketApp("ws://localhost:3000/"
-                )) as ws:
+            )) as ws:
         pass

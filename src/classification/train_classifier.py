@@ -63,7 +63,7 @@ def train_classifier(trading_pair: TradingPair,
                      training_time_window: TimeWindow,
                      technical_indicators: List[TechnicalIndicator],
                      path_to_classifier: Path,
-                     ) -> Hash:
+                     ):
     stock_data_training_set = load_stock_data(training_time_window, trading_pair, timedelta(minutes=1), client)
 
     sklearn_classifier = RandomForestClassifier(max_depth=5,
