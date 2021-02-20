@@ -39,12 +39,15 @@ def run(*args, **kwargs):
         TradingPair("XRP", "ETH"),
         TradingPair("XRP", "BTC"),
         TradingPair("ETH", "BTC"),
+        TradingPair("ZIL", "BTC"),
+        TradingPair("ADA", "ETH"),
     ]
     cryptotrader_threads = []
     for trading_pair in trading_pairs:
         cryptotrader_thread = RestartableThread(trading_pair=trading_pair, ws=kwargs["ws"])
         cryptotrader_threads.append(cryptotrader_thread)
 
+    # TODO: use logging.log to output on stdout from each thread
     for cryptotrader_thread in cryptotrader_threads:
         NormalThread(cryptotrader_thread).start()
 
