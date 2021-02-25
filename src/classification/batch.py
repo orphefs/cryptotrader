@@ -14,7 +14,7 @@ from src.containers.time_windows import TimeWindow
 from src.definitions import DATA_DIR
 from src.feature_extraction.technical_indicator import TechnicalIndicator, PPOTechnicalIndicator, \
     AutoCorrelationTechnicalIndicator
-from src.type_aliases import Hash, Path, BinanceClient, CobinhoodClient
+from src.type_aliases import Hash, Path, BinanceClient
 from src.containers.trading_pair import TradingPair
 import numpy as np
 from random import randint
@@ -76,7 +76,7 @@ def generate_path_to_portfolio(testing_hash: str,
 
 def batch_train(training_time_windows: List[TimeWindow],
                 trading_pair: TradingPair,
-                client: Union[BinanceClient, CobinhoodClient],
+                client: Union[BinanceClient],
                 number_of_training_runs: int,
                 technical_indicators: List[TechnicalIndicator],
                 ) -> Set[Hash]:
@@ -99,7 +99,7 @@ def batch_test(testing_time_windows: List[TimeWindow],
                trading_pair: TradingPair,
                trade_amount: float,
                number_of_testing_runs: int,
-               client: Union[BinanceClient, CobinhoodClient],
+               client: Union[BinanceClient],
                classifier: TradingClassifier) -> Set[Hash]:
     training_time_window = classifier.training_time_window
     hashes = []
@@ -125,11 +125,11 @@ def batch_test(testing_time_windows: List[TimeWindow],
 def run_batch():
     clear_downloaded_stock_data()
     trading_pair = TradingPair("ETH", "BTC")
-    # client = BinanceClient("", "")
-    client = CobinhoodClient()
+    client = BinanceClient("", "")
+    # client = CobinhoodClient()
     trade_amount = 50
-    training_time_windows = generate_time_windows(8)
-    testing_time_windows = generate_time_windows(8)
+    training_time_windows = generate_time_windows(2)
+    testing_time_windows = generate_time_windows(2)
     training_hashes = batch_train(
         training_time_windows=training_time_windows,
         trading_pair=trading_pair,
