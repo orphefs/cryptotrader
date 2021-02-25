@@ -6,6 +6,7 @@ import sys
 # Custom Thread Class
 import time
 
+import socketio
 import websocket
 
 from src.containers.trading_pair import TradingPair
@@ -17,7 +18,7 @@ class MyException(Exception):
     pass
 
 
-def run_cryptotrader_instance(trading_pair: TradingPair, ws: websocket.WebSocketApp):
+def run_cryptotrader_instance(trading_pair: TradingPair, websocket_client: socketio.Client):
     try:
         print("Running cryptotrader client...")
         print("Starting " + trading_pair.as_string_for_binance() + "client")
@@ -28,7 +29,7 @@ def run_cryptotrader_instance(trading_pair: TradingPair, ws: websocket.WebSocket
             path_to_portfolio=os.path.join(DATA_DIR, "live_portfolio.dill"),
             api_key="fLKWRkS1V1yKj19G5GP4oB3m1Yuzls9GR0XK5kk0erZGwoksMULIh39vc7R47TN2",
             api_secret="Pn9czdU95eSBSoYNAtqUzZXVTloBSANBvi23w8VnvNAFTYWE9POhNs4bkXw8oFOk",
-            websocket_client=ws
+            websocket_client=websocket_client
         )
     except Exception as e:
         return e
@@ -41,18 +42,18 @@ def run_cryptotrader_instance(trading_pair: TradingPair, ws: websocket.WebSocket
 
 class RestartableThread(threading.Thread):
 
-    def __init__(self, trading_pair: TradingPair, ws:websocket.WebSocketApp):
+    def __init__(self, trading_pair: TradingPair, websocket_client:socketio.Client):
         super().__init__()
         self.trading_pair = trading_pair
-        self.ws = ws
+        self.socket_io = websocket_client
 
     def clone(self):
-        return RestartableThread(self.trading_pair,self.ws)
+        return RestartableThread(self.trading_pair,self.socket_io)
 
     def run(self):
         self.exc = None
         try:
-            run_cryptotrader_instance(self.trading_pair, self.ws)
+            run_cryptotrader_instance(self.trading_pair, self.socket_io)
         except BaseException as e:
             self.exc = e
 

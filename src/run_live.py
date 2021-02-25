@@ -3,6 +3,7 @@ import os
 import sys
 from typing import Tuple
 
+import socketio
 import websocket
 
 from src.containers.trading import BinanceTrading
@@ -19,7 +20,7 @@ def run_live(trading_pair: TradingPair, trade_amount: float,
              path_to_log: Path = os.path.join(DATA_DIR, "live_run.log"),
              path_to_portfolio: Path = os.path.join(DATA_DIR, "live_portfolio.dill"),
              api_key: str = "", api_secret: str = "",
-             websocket_client: websocket.WebSocketApp = None) -> Tuple[Path, Path]:
+             websocket_client: socketio.Client = None) -> Tuple[Path, Path]:
     "Run live, on real time exchange data."
 
     logging.basicConfig(

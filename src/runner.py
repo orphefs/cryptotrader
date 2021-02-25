@@ -3,6 +3,7 @@ import time
 from datetime import datetime, timedelta
 from typing import Union, Optional
 import simplejson as json
+import socketio
 import websocket
 
 from src.analysis_tools.run_metadata import RunMetaData
@@ -44,7 +45,7 @@ class Runner(DillSaveLoadMixin):
                  path_to_classifier: Path,
                  client: Optional[Union[BinanceClient]],
                  market_maker: Optional[Union[NoopMarketMaker, TestMarketMaker, MarketMaker]],
-                 websocket_client: Optional[websocket.WebSocketApp]):
+                 websocket_client: Optional[socketio.Client]):
         self._trading_pair = trading_pair
         self._trade_amount = trade_amount
         self._run_type = run_type
@@ -103,7 +104,7 @@ class Runner(DillSaveLoadMixin):
                 ],
                 path_to_classifier=path_to_classifier,
             )
-            self._classifier = TradingClassifier.load_from_disk(path_to_classifier)  # TODO: train classifier on some historical data for this trading pair
+        self._classifier = TradingClassifier.load_from_disk(path_to_classifier)  # TODO: train classifier on some historical data for this trading pair
         if market_maker is None:
             self._market_maker = NoopMarketMaker(self._client, self._trading_pair, self._trade_amount)
         else:
@@ -199,7 +200,7 @@ class Runner(DillSaveLoadMixin):
                         market_maker=self._market_maker)
                     if self._websocket_client:
                         try:
-                            self._websocket_client.send(json.dumps(
+                            self._websocket_client.emit(event="cryptotrader_prediction", data=json.dumps(
                                 {"trading_pair": self._trading_pair.as_string_for_binance(),
                                  "signal": self._current_signal.as_dict()}))
                         except Exception as e:
