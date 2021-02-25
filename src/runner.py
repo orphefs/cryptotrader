@@ -82,11 +82,11 @@ class Runner(DillSaveLoadMixin):
         # self._waiting_threshold = timedelta(seconds=4)
 
         if os.path.isfile(path_to_classifier):
-            self._classifier = TradingClassifier.load_from_disk(path_to_classifier)
+            pass
         else:
             train_classifier(trading_pair=self._trading_pair,
                 client=self._client,
-                training_time_window=TimeWindow(start_time=datetime.now() - timedelta(days=30),
+                training_time_window=TimeWindow(start_time=datetime.now() - timedelta(days=2),
                     end_time=datetime.now()),
                 technical_indicators=[
                     AutoCorrelationTechnicalIndicator(Candle.get_close_price, 1),
@@ -103,7 +103,7 @@ class Runner(DillSaveLoadMixin):
                 ],
                 path_to_classifier=path_to_classifier,
             )
-            pass  # TODO: train classifier on some historical data for this trading pair
+            self._classifier = TradingClassifier.load_from_disk(path_to_classifier)  # TODO: train classifier on some historical data for this trading pair
         if market_maker is None:
             self._market_maker = NoopMarketMaker(self._client, self._trading_pair, self._trade_amount)
         else:

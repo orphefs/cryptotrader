@@ -36,11 +36,12 @@ def on_open(ws):
 def run(*args, **kwargs):
     # TODO: pass trading_pairs as argument (list)
     trading_pairs = [
-        TradingPair("XRP", "ETH"),
+        # TradingPair("XRP", "ETH"),
         TradingPair("XRP", "BTC"),
-        TradingPair("ETH", "BTC"),
-        TradingPair("ZIL", "BTC"),
-        TradingPair("ADA", "ETH"),
+        # TradingPair("ETH", "BTC"),
+        # TradingPair("ZIL", "BTC"),
+        # TradingPair("ADA", "ETH"),
+        TradingPair("ADA", "BTC"),
     ]
     cryptotrader_threads = []
     for trading_pair in trading_pairs:
@@ -82,6 +83,6 @@ if __name__ == "__main__":
     websocket.enableTrace(True)
 
     with WebSocketConnectionContextManager(
-            ws=websocket.WebSocketApp("ws://localhost:3000/"
+            ws=websocket.WebSocketApp("ws://localhost:4001/"
             )) as ws:
         pass
