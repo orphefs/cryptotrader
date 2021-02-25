@@ -10,6 +10,7 @@ sio = socketio.Client()
 
 @sio.event
 def connect():
+    sio.emit("clientId", "cryptotrader")
     print('connection established')
     _thread.start_new_thread(run, (), {"socket_io": sio})
 
