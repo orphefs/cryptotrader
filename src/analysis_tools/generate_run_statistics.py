@@ -111,7 +111,7 @@ def display_total_number_of_orders(order_pairs: List[Tuple[OrderBuy, OrderSell]]
 
 
 def compute_testing_window(order_pairs: List[Tuple[OrderBuy, OrderSell]]) -> TimeWindow:
-    return TimeWindow(order_pairs[0][1].price, order_pairs[-1][1].price)
+    return TimeWindow(order_pairs[0][1].timestamp.as_datetime(), order_pairs[-1][1].timestamp.as_datetime())
 
 
 def calculate_trading_fees(fees: float):

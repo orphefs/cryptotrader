@@ -31,9 +31,9 @@ def assemble_dataframe(paths_to_portfolios: List[Path]) -> pd.DataFrame:
         d["testing_time_end"].append(run_statistics.testing_time_window.end_datetime)
         d["testing_duration_days"].append(
             run_statistics.testing_time_window.duration.total_seconds() / (24 * 3600))
-        d["index_performance"].append(run_statistics.index_performance.gains)
-        d["percentage_gains"].append(run_statistics.percentage_gains.gains)
-        net_gains = run_statistics.percentage_gains.gains - run_statistics.index_performance.gains
+        d["index_performance"].append(run_statistics.index_gains.gains)
+        d["percentage_gains"].append(run_statistics.trading_gains.gains)
+        net_gains = run_statistics.trading_gains.gains - run_statistics.index_gains.gains
         d["net_gains"].append(net_gains)
         d["net_gains_per_day"].append(net_gains / (
                 run_statistics.testing_time_window.duration.total_seconds() / (24 * 3600)))
