@@ -32,14 +32,13 @@ source $PROJECT_DIR/venv/bin/activate
 
 where `PROJECT_DIR` contains the path to the project root folder.
 
-Next up, we run 
+Next up, we run
 
 ```bash
 make data
 ```
 
 to init the data directory.
-
 
 #### Updating the dependencies
 
@@ -113,6 +112,10 @@ Coming soon...
 
 First, we run `PYTHONPATH=. python3 src/classification/train_classifier.py` which will download historical data, train a model and serialize the model to disk.
 
+### Download some test data
+
+Run `PYTHONPATH=. python3 src/connection/download_test_data.py` to download some test data (`test_data_long.dill`) into the `TEST_DATA_DIR` folder.
+
 ### Run inference on the time series
 
 Then, we have to run the script `PYTHONPATH=. python3 src/run_offline.py `.
@@ -120,9 +123,9 @@ Then, we have to run the script `PYTHONPATH=. python3 src/run_offline.py `.
 The relevant function call is
 
 ```python
-path_to_portfolio, path_to_log = run_offline(TradingPair("NEO","BTC"),
+path_to_portfolio, path_to_log = run_offline(TradingPair("XRP","BTC"),
                                                  100,
-                                                 os.path.join(DATA_DIR, "inference_data.dill"),
+                                                 os.path.join(DATA_DIR, "test_data_long.dill"),
                                                  os.path.join(DATA_DIR, "offline_run.log"),
                                                  os.path.join(DATA_DIR, "classifier.dill"),
                                                  os.path.join(DATA_DIR, "offline_portfolio.dill"))
@@ -138,16 +141,16 @@ We obtain the following output on stdout:
 
 ```bash
 Classifier training period: 2019-09-19 00:00:00 2019-09-20 00:00:00
-Run started on 1970-01-18 22:03:44.579999 and ended on 1970-01-18 22:06:32.819999
-Trading pair start price: 7.125e-05, Trading pair finish price: 7.208e-05
-Total number of buy/sell orders: 322
-Gained -4.912280701754468 percent from trading within timeframe of 0:02:48.240000.
-The asset price changed by 1.16491228070176 percent within timeframe of 0:02:48.240000.
-The net gains are -6.0771929824562285 percent within timeframe of 0:02:48.240000.
-Profit per order pair: -0.01887327013185164
-Profit to Loss ratio: 0.3716337522441627
+Run started on 1970-01-19 20:24:39.659999 and ended on 1970-01-19 20:26:12.779999
+Trading pair start price: 2.837e-05, Trading pair finish price: 2.84e-05
+Total number of buy/sell orders: 426
+Gained 1.903419104688104 percent from trading within timeframe of 0:01:33.120000.
+The asset price changed by 0.10574550581599583 percent within timeframe of 0:01:33.120000.
+The net gains are 1.7976735988721082 percent within timeframe of 0:01:33.120000.
+Profit per order pair: 0.004219891077164573
+Profit to Loss ratio: 1.0634547591069348
 ```
 
-![image](https://user-images.githubusercontent.com/9559946/149390834-3251b972-479b-430b-8b49-3ddf9cfa8081.png)
+![image](static/profit_loss.png)
 
-As we can see, the classifier was not successful in generating profit. We will need to tune the parameters or use a different model.
+As we can see, the classifier was somewhat successful in generating profit (+1.90% gains) in an uptrending market (+0.10% within the given timeframe).

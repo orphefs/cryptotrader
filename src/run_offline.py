@@ -3,7 +3,7 @@ import os
 from typing import Tuple
 
 from src.classification.train_classifier import run_trained_classifier
-from src.definitions import DATA_DIR
+from src.definitions import DATA_DIR, TEST_DATA_DIR
 from src.type_aliases import Path, BinanceClient
 from src.containers.trading_pair import TradingPair
 
@@ -31,9 +31,9 @@ def run_offline(trading_pair: TradingPair, trade_amount: float, path_to_stock_da
 
 
 if __name__ == '__main__':
-    path_to_portfolio, path_to_log = run_offline(TradingPair("NEO","BTC"),
+    path_to_portfolio, path_to_log = run_offline(TradingPair("XRP","BTC"),
                                                  100,
-                                                 os.path.join(DATA_DIR, "local_data_25_Nov,_2018_26_Nov,_2018_XRPBTC_0:01:00_<class_'binance.client.Client'>.dill"),
+                                                 os.path.join(TEST_DATA_DIR, "test_data_long.dill"),
                                                  os.path.join(DATA_DIR, "offline_run.log"),
                                                  os.path.join(DATA_DIR, "classifier.dill"),
                                                  os.path.join(DATA_DIR, "offline_portfolio.dill"))
