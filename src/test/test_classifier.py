@@ -9,13 +9,11 @@ from src.definitions import TEST_DATA_DIR
 from src.helpers import is_equal
 
 
-@pytest.fixture()
 def load_classifier() -> TradingClassifier:
     classifier = TradingClassifier.load_from_disk(os.path.join(TEST_DATA_DIR, "classifier.dill"))
     return classifier
 
 
-@pytest.fixture()
 def load_stock_data() -> StockData:
     stock_data = load_from_disk(os.path.join(TEST_DATA_DIR, "test_data.dill"))
     return stock_data

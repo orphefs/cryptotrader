@@ -22,7 +22,6 @@ positions = pd.Series([1000, 1000, 1000, 1000])
 prices = pd.Series(np.array([1, 1, 1, 1]) * 1e-4)
 
 
-@pytest.fixture()
 def load_candle_data() -> List[Candle]:
     stock_data = load_from_disk(os.path.join(definitions.TEST_DATA_DIR, "test_data_2.dill"))
     return stock_data.candles

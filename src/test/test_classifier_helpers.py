@@ -23,7 +23,6 @@ answers = [SignalBuy,
            SignalBuy]
 
 
-@pytest.fixture()
 def load_candle_data() -> List[Candle]:
     stock_data = load_from_disk(os.path.join(definitions.TEST_DATA_DIR, "test_data.dill"))
     return stock_data.candles
