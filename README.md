@@ -1,8 +1,10 @@
-![image](static/ct_logo.png)
+<img src="static/ct_logo.png" alt="drawing" width="200"/>
 
 # CryptoTrader
 
 This project implements an automated trading bot, which makes predictions on market movements, buys and sells cryptocurrency (or stocks) automatically, based on historical market data.
+
+<img src="static/cryptocurrencies.png" alt="drawing" width="200"/>
 
 _Disclaimer: The project is experimental and still under development._
 
