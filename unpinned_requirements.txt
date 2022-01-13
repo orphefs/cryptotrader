@@ -1,0 +1,12 @@
+pytest
+numpy
+pandas
+matplotlib
+seaborn
+jupyter
+python-binance
+requests
+scikit-learn
+dill
+simplejson
+coloredlogs
