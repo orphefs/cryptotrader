@@ -6,6 +6,21 @@ _Disclaimer: The project is experimental and still under development._
 
 _Disclaimer: This is for educational purposes only and Orfeas Kypris does not bear any responsibility for any financial losses, or otherwise, incurred due to misuse of this code. Please use responsibly and at your own risk._
 
+
+---
+## Quick summary for the lazy
+### Install
+- `make data`
+- `make virtualenv`
+- `source venv/bin/activate`
+
+### Usage
+- Train: `PYTHONPATH=. python3 src/classification/train_classifier.py`
+- Download test data: `PYTHONPATH=. python3 src/connection/download_test_data.py`
+- Run inference in backtesting mode: `PYTHONPATH=. python3 src/run_offline.py `
+- Compute statistics: `PYTHONPATH=. python3 src/analysis_tools/generate_run_statistics.py -i data/offline_portfolio.dill`
+
+
 ---
 
 ## Installation
@@ -155,8 +170,4 @@ Profit to Loss ratio: 1.0634547591069348
 
 As we can see, the classifier was somewhat successful in generating profit (+1.90% gains) in an uptrending market (+0.10% within the given timeframe).
 
-## Summary usage
-- Train: `PYTHONPATH=. python3 src/classification/train_classifier.py`
-- Download test data: `PYTHONPATH=. python3 src/connection/download_test_data.py`
-- Run inference in backtesting mode: `PYTHONPATH=. python3 src/run_offline.py `
-- Compute statistics: `PYTHONPATH=. python3 src/analysis_tools/generate_run_statistics.py -i data/offline_portfolio.dill`
+
