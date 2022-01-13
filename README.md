@@ -1,3 +1,5 @@
+![image](static/ct_logo.png)
+
 # CryptoTrader
 
 This project implements an automated trading bot, which makes predictions on market movements, buys and sells cryptocurrency (or stocks) automatically, based on historical market data.
@@ -170,4 +172,13 @@ Profit to Loss ratio: 1.0634547591069348
 
 As we can see, the classifier was somewhat successful in generating profit (+1.90% gains) in an uptrending market (+0.10% within the given timeframe).
 
+<<<<<<< HEAD
 
+=======
+## Summary usage
+
+- Train: `PYTHONPATH=. python3 src/classification/train_classifier.py`
+- Download test data: `PYTHONPATH=. python3 src/connection/download_test_data.py`
+- Run inference in backtesting mode: `PYTHONPATH=. python3 src/run_offline.py `
+- Compute statistics: `PYTHONPATH=. python3 src/analysis_tools/generate_run_statistics.py -i data/offline_portfolio.dill`
+>>>>>>> add branding
