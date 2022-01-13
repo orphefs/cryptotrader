@@ -54,7 +54,7 @@ def generate_time_windows(number_of_time_windows: int) -> List[TimeWindow]:
     min_start_date = datetime(year, 8, 1)
     max_end_date = datetime(year, 11, 20)
     for i in range(0, number_of_time_windows):
-        duration_days = randint(1, 7)
+        duration_days = randint(1, 2)
         start_day = randint(datetime_to_nth_day(min_start_date),
                             datetime_to_nth_day(max_end_date))
         end_day = start_day + duration_days
@@ -124,23 +124,42 @@ def batch_test(testing_time_windows: List[TimeWindow],
 
 def run_batch():
     clear_downloaded_stock_data()
-    trading_pair = TradingPair("ETH", "BTC")
+    trading_pair = TradingPair("XRP", "BTC")
     client = BinanceClient("", "")
     # client = CobinhoodClient()
     trade_amount = 50
-    training_time_windows = generate_time_windows(2)
-    testing_time_windows = generate_time_windows(2)
+    training_time_windows = generate_time_windows(3)
+    testing_time_windows = generate_time_windows(10)
     training_hashes = batch_train(
         training_time_windows=training_time_windows,
         trading_pair=trading_pair,
         client=client,
-        number_of_training_runs=1,
+        number_of_training_runs=2,
         technical_indicators=[
-            # AutoCorrelationTechnicalIndicator(Candle.get_volume, 4),
+            AutoCorrelationTechnicalIndicator(Candle.get_volume, 1),
+            AutoCorrelationTechnicalIndicator(Candle.get_volume, 2),
+            AutoCorrelationTechnicalIndicator(Candle.get_volume, 3),
+            AutoCorrelationTechnicalIndicator(Candle.get_volume, 4),
+            AutoCorrelationTechnicalIndicator(Candle.get_volume, 5),
+            AutoCorrelationTechnicalIndicator(Candle.get_volume, 6),
             AutoCorrelationTechnicalIndicator(Candle.get_close_price, 1),
             AutoCorrelationTechnicalIndicator(Candle.get_close_price, 2),
             AutoCorrelationTechnicalIndicator(Candle.get_close_price, 3),
             AutoCorrelationTechnicalIndicator(Candle.get_close_price, 4),
+            AutoCorrelationTechnicalIndicator(Candle.get_close_price, 5),
+            AutoCorrelationTechnicalIndicator(Candle.get_close_price, 6),
+            AutoCorrelationTechnicalIndicator(Candle.get_close_price, 7),
+            AutoCorrelationTechnicalIndicator(Candle.get_close_price, 8),
+            AutoCorrelationTechnicalIndicator(Candle.get_open_price, 1),
+            AutoCorrelationTechnicalIndicator(Candle.get_open_price, 2),
+            AutoCorrelationTechnicalIndicator(Candle.get_open_price, 3),
+            AutoCorrelationTechnicalIndicator(Candle.get_open_price, 4),
+            AutoCorrelationTechnicalIndicator(Candle.get_open_price, 5),
+            AutoCorrelationTechnicalIndicator(Candle.get_number_of_trades, 1),
+            AutoCorrelationTechnicalIndicator(Candle.get_number_of_trades, 2),
+            AutoCorrelationTechnicalIndicator(Candle.get_number_of_trades, 3),
+            AutoCorrelationTechnicalIndicator(Candle.get_number_of_trades, 4),
+            AutoCorrelationTechnicalIndicator(Candle.get_number_of_trades, 5),
             PPOTechnicalIndicator(Candle.get_close_price, 5, 1),
             PPOTechnicalIndicator(Candle.get_close_price, 10, 4),
             PPOTechnicalIndicator(Candle.get_close_price, 20, 1),
@@ -148,12 +167,13 @@ def run_batch():
             PPOTechnicalIndicator(Candle.get_close_price, 40, 20),
             PPOTechnicalIndicator(Candle.get_close_price, 50, 30),
             PPOTechnicalIndicator(Candle.get_close_price, 60, 40),
-            # PPOTechnicalIndicator(Candle.get_number_of_trades, 5, 1),
-            # PPOTechnicalIndicator(Candle.get_number_of_trades, 10, 2),
-            # PPOTechnicalIndicator(Candle.get_number_of_trades, 15, 3),
-            # PPOTechnicalIndicator(Candle.get_volume, 5, 1),
-            # PPOTechnicalIndicator(Candle.get_volume, 10, 5),
-            # PPOTechnicalIndicator(Candle.get_volume, 20, 10),
+            PPOTechnicalIndicator(Candle.get_number_of_trades, 5, 1),
+            PPOTechnicalIndicator(Candle.get_number_of_trades, 10, 2),
+            PPOTechnicalIndicator(Candle.get_number_of_trades, 15, 3),
+            PPOTechnicalIndicator(Candle.get_volume, 5, 1),
+            PPOTechnicalIndicator(Candle.get_volume, 10, 5),
+            PPOTechnicalIndicator(Candle.get_volume, 20, 10),
+            PPOTechnicalIndicator(Candle.get_volume, 30, 10),
         ])
     testing_hashes = []
     for training_hash in training_hashes:

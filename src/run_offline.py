@@ -33,7 +33,7 @@ def run_offline(trading_pair: TradingPair, trade_amount: float, path_to_stock_da
 if __name__ == '__main__':
     path_to_portfolio, path_to_log = run_offline(TradingPair("NEO","BTC"),
                                                  100,
-                                                 os.path.join(DATA_DIR, "test", "test_data.dill"),
+                                                 os.path.join(DATA_DIR, "local_data_01_Nov,_2018_03_Nov,_2018_XRPBTC_0:01:00_<class_'binance.client.Client'>.dill"),
                                                  os.path.join(DATA_DIR, "offline_run.log"),
                                                  os.path.join(DATA_DIR, "classifier.dill"),
                                                  os.path.join(DATA_DIR, "offline_portfolio.dill"))

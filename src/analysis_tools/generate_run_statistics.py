@@ -22,25 +22,26 @@ class _Gains:
 
 class TradingGains(_Gains):
     def __str__(self):
-        return "Gained {} percent from trading within timeframe of {}.".format(self.gains * 100, self.elapsed_time)
+        return "Gained {} percent from trading within timeframe of {}.".format(self.gains * 100,
+            self.elapsed_time)
 
 
 class IndexGains(_Gains):
     def __str__(self):
         return "The asset price changed by {} percent within timeframe of {}.".format(self.gains * 100,
-                                                                                      self.elapsed_time)
+            self.elapsed_time)
 
 
 class NetGains(_Gains):
     def __str__(self):
         return "The net gains are {} percent within timeframe of {}.".format(self.gains * 100,
-                                                                             self.elapsed_time)
+            self.elapsed_time)
 
     @staticmethod
     def from_index_and_trading_gains(index_gains, trading_gains):
         if index_gains.elapsed_time == trading_gains.elapsed_time:
             return NetGains(gains=trading_gains.gains - index_gains.gains,
-                            elapsed_time=index_gains.elapsed_time)
+                elapsed_time=index_gains.elapsed_time)
         else:
             raise RuntimeError("Elapsed times must be identical "
                                "in order to compute net gains.")
@@ -57,11 +58,13 @@ def load_portfolio(path_to_portfolio_df_dill: str) -> Portfolio:
 def extract_signals_from_portfolio(portfolio: Portfolio) -> List[Union[SignalBuy, SignalSell, SignalHold]]:
     return portfolio.signals
 
+
 def extract_orders_from_portfolio(portfolio: Portfolio) -> List[Union[OrderBuy, OrderSell]]:
     return portfolio.orders
 
 
-def cleanup_signals(signals: List[Union[SignalBuy, SignalSell, SignalHold]]) -> List[Union[SignalBuy, SignalSell]]:
+def cleanup_signals(signals: List[Union[SignalBuy, SignalSell, SignalHold]]) -> List[
+    Union[SignalBuy, SignalSell]]:
     return [signal for signal in signals if isinstance(signal, SignalBuy) or isinstance(signal, SignalSell)]
 
 
@@ -98,12 +101,12 @@ def plot_histograms(net: np.array):
 
 def display_timeframe(order_pairs: List[Tuple[OrderBuy, OrderSell]]) -> str:
     return "Run started on {} and ended on {}".format(order_pairs[0][1].completed_at.as_datetime(),
-                                                      order_pairs[-1][1].completed_at.as_datetime())
+        order_pairs[-1][1].completed_at.as_datetime())
 
 
 def display_start_and_finish_prices(order_pairs: List[Tuple[OrderBuy, OrderSell]]) -> str:
     return "Trading pair start price: {}, Trading pair finish price: {}".format(order_pairs[0][1].price,
-                                                                                order_pairs[-1][1].price)
+        order_pairs[-1][1].price)
 
 
 def display_total_number_of_orders(order_pairs: List[Tuple[OrderBuy, OrderSell]]):
@@ -124,18 +127,21 @@ class RunStatistics:
                  index_gains: IndexGains,
                  net_gains: NetGains,
                  classifier_time_window: TimeWindow,
-                 testing_time_window: TimeWindow):
+                 testing_time_window: TimeWindow,
+                 accuracy: float):
         self.order_pairs = order_pairs
         self.trading_gains = trading_gains
         self.index_gains = index_gains
         self.net_gains = net_gains
         self.classifier_time_window = classifier_time_window
         self.testing_time_window = testing_time_window
+        self.accuracy = accuracy
         self.number_of_orders = len(self.order_pairs) * 2
-        self.profit_per_order_pair = (self.net_gains.gains / self.number_of_orders) *100
+        self.profit_per_order_pair = (self.net_gains.gains / self.number_of_orders) * 100
 
 
-def calculate_percentage_gains(trade_amount: float, order_pairs: List[Tuple[OrderBuy, OrderSell]]) -> TradingGains:
+def calculate_percentage_gains(trade_amount: float,
+                               order_pairs: List[Tuple[OrderBuy, OrderSell]]) -> TradingGains:
     net = compute_profits_and_losses(order_pairs)
     total_profit = np.sum(net)
     initial_investment = order_pairs[0][1].price * trade_amount
@@ -151,6 +157,40 @@ def calculate_index_performance(order_pairs: List[Tuple[OrderBuy, OrderSell]]) -
                                                       order_pairs[0][1].completed_at.as_datetime())
 
 
+def convert_signals(signals: List[Union[SignalBuy, SignalSell, SignalHold]]) -> List[
+    Union[SignalBuy, SignalSell]]:
+    signals_converted = []
+    for signal in signals:
+        print(signal)
+        if isinstance(signal, SignalHold):
+            last_converted_signal = type(last_signal)(signal=last_signal.signal,
+                price_point=signal.price_point)
+            signals_converted.append(last_converted_signal)
+            last_signal = last_converted_signal
+        else:
+            last_signal = signal
+    return signals_converted
+
+
+def evaluate_correctness_of_predictions(signals_converted: List[Union[SignalBuy, SignalSell]]) -> List[str]:
+    prediction_evaluations = []
+    for current_signal, next_signal in zip(signals_converted[0:], signals_converted[1:]):
+        if isinstance(current_signal,
+                SignalSell) and next_signal.price_point.value < current_signal.price_point.value:
+            prediction_evaluations.append("prediction_correct")
+        if isinstance(current_signal,
+                SignalSell) and next_signal.price_point.value > current_signal.price_point.value:
+            prediction_evaluations.append("prediction_wrong")
+        if isinstance(current_signal,
+                SignalBuy) and next_signal.price_point.value < current_signal.price_point.value:
+            prediction_evaluations.append("prediction_wrong")
+        if isinstance(current_signal,
+                SignalBuy) and next_signal.price_point.value > current_signal.price_point.value:
+            prediction_evaluations.append("prediction_correct")
+
+    return prediction_evaluations
+
+
 def compute_all_statistics(path_to_portfolio_df_dill: str):
     portfolio = load_portfolio(path_to_portfolio_df_dill)
     # signals = extract_signals_from_portfolio(portfolio)
@@ -161,6 +201,8 @@ def compute_all_statistics(path_to_portfolio_df_dill: str):
     trading_gains = calculate_percentage_gains(portfolio.trade_amount, order_pairs)
     index_gains = calculate_index_performance(order_pairs)
     net_gains = NetGains.from_index_and_trading_gains(index_gains, trading_gains)
+    prediction_evaluations = evaluate_correctness_of_predictions(convert_signals(portfolio.signals))
+    accuracy = len([p for p in prediction_evaluations if p=="prediction_correct"]) / len(prediction_evaluations)
     try:
         classifier_time_window = portfolio.classifier.training_time_window
     except AttributeError:
@@ -174,6 +216,7 @@ def compute_all_statistics(path_to_portfolio_df_dill: str):
         net_gains=net_gains,
         classifier_time_window=classifier_time_window,
         testing_time_window=testing_time_window,
+        accuracy=accuracy
     )
 
 
@@ -195,7 +238,7 @@ def plot(run_statistics: RunStatistics):
 if __name__ == '__main__':
     parser = ArgumentParser(description="Convert metadata dill into csv")
     parser.add_argument("-i", dest="input_filename", required=False,
-                        help="input .dill", action=FullPaths)
+        help="input .dill", action=FullPaths)
     args = parser.parse_args()
     print("Input from {}".format(args.input_filename))
     run_statistics = compute_all_statistics(args.input_filename)

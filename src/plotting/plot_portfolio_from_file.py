@@ -1,15 +1,23 @@
+import copy
 from argparse import ArgumentParser
+from typing import List, Union
+import numpy as np
 
 import matplotlib.pyplot as plt
 
 from src.containers.portfolio import Portfolio
+from src.containers.signal import SignalBuy, SignalSell, SignalHold
 from src.plotting.plot_candles import custom_plot
 from src.analysis_tools.run_metadata import FullPaths
+
 
 
 def main(path_to_portfolio_dill: str):
     predicted_portfolio = Portfolio.load_from_disk(path_to_portfolio_dill)
     predicted_portfolio.compute_performance()
+
+
+
     custom_plot(portfolio=predicted_portfolio, strategy=None, title='Backtesting run portfolio_df')
     plt.show()
 

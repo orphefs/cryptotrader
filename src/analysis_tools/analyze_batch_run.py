@@ -37,6 +37,8 @@ def assemble_dataframe(paths_to_portfolios: List[Path]) -> pd.DataFrame:
         d["net_gains"].append(net_gains)
         d["net_gains_per_day"].append(net_gains / (
                 run_statistics.testing_time_window.duration.total_seconds() / (24 * 3600)))
+        d["accuracy"].append(
+                run_statistics.accuracy)
 
     return pd.DataFrame(d)
 
@@ -44,6 +46,7 @@ def assemble_dataframe(paths_to_portfolios: List[Path]) -> pd.DataFrame:
 def analyze_batch_run():
     paths_to_portfolios = scan_folder(DATA_DIR)
     df = assemble_dataframe(paths_to_portfolios)
+
     df.to_pickle(os.path.join(DATA_DIR, "batch_results.pkl"))
     print(df)
 
