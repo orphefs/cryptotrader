@@ -1,4 +1,4 @@
-**CryptoTrader**
+# CryptoTrader
 
 This project implements an automated trading bot, which makes predictions on market movements, buys and sells cryptocurrency (or stocks) automatically, based on historical market data.
 
@@ -66,13 +66,13 @@ Coming soon...
 
 ---
 
-# Typical workflow
+## Typical workflow
 
-## Train the model using historical data
+### Train the model using historical data
 
 First, we run `PYTHONPATH=. python3 src/classification/train_classifier.py` which will download historical data, train a model and serialize the model to disk.
 
-## Run inference on the time series
+### Run inference on the time series
 
 Then, we have to run the script `PYTHONPATH=. python3 src/run_offline.py `.
 
@@ -89,7 +89,7 @@ path_to_portfolio, path_to_log = run_offline(TradingPair("NEO","BTC"),
 We need to make sure we are feeding it the correct inference data (`inference_data.dill`) and the trained classifier (`classifier.dill`), and this function will return the location of the generated portfolio dataframe (`path_to_portfolio`) and the log file for debugging (`path_to_log`). 
 
 
-## Evaluate the results
+### Evaluate the results
 
 By running the script `PYTHONPATH=. python3 src/analysis_tools/generate_run_statistics.py -i data/offline_portfolio.dill`
 
