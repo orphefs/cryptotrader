@@ -154,9 +154,9 @@ class Candle(object):
 
     @staticmethod
     def from_list_of_klines(klines: List, source: Exchange):
-        if source.name is "BINANCE":
+        if source.name == "BINANCE":
             return [Candle.from_binance_kline(kline) for kline in klines]
-        elif source.name is "COBINHOOD":
+        elif source.name == "COBINHOOD":
             return [Candle.from_cobinhood_kline(kline) for kline in klines]
         else:
             raise ValueError("You need to specify the source (Exchange) from which to download the data.")

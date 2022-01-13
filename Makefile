@@ -4,6 +4,9 @@ SHELL := /bin/bash
 
 VENV := venv
 
+data: ## create data directory
+	mkdir -p data
+
 virtualenv: ## Create virtualenv
 	@if [ -d $(VENV) ]; then rm -rf $(VENV); fi
 	python3 -m venv $(VENV)

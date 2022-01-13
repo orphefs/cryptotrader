@@ -18,7 +18,7 @@ The code runs on Python 3.7. To install dependencies, run _pip install -r requir
 
 #### Creating an environment
 
-The recommended Python version for this project is Python 3.7. To create a `venv` environment and install the dependencies, run
+The recommended Python version for this project is Python 3.8. To create a `venv` environment and install the dependencies, run
 
 ```bash
 make virtualenv
@@ -31,6 +31,15 @@ source $PROJECT_DIR/venv/bin/activate
 ```
 
 where `PROJECT_DIR` contains the path to the project root folder.
+
+Next up, we run 
+
+```bash
+make data
+```
+
+to init the data directory.
+
 
 #### Updating the dependencies
 
