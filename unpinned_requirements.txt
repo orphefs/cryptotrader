@@ -10,3 +10,4 @@ scikit-learn
 dill
 simplejson
 coloredlogs
+matplotlib
