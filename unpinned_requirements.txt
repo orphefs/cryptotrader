@@ -11,3 +11,5 @@ dill
 simplejson
 coloredlogs
 matplotlib
+websocket
+python-socketio
